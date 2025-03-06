@@ -10,11 +10,11 @@ public class AddressPart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // ID(由数据库自增)
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     private Address domicileAddress; // 户籍地址
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     private Address currentAddress; // 现居地址
 

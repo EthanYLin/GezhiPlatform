@@ -14,11 +14,11 @@ public class RelativePart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // ID(由数据库自增)
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     private Parent father; // 父亲
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     private Parent mother; // 母亲
 

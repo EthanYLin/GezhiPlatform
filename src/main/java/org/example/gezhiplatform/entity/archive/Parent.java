@@ -1,10 +1,14 @@
 package org.example.gezhiplatform.entity.archive;
 
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
-@Embeddable
+@Entity
 public class Parent {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // ID(由数据库自增)
 
     @Nullable
     private String name; // 姓名
