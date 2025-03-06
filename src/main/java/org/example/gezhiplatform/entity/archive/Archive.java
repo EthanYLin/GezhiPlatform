@@ -3,8 +3,12 @@ package org.example.gezhiplatform.entity.archive;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+/**
+ * 学生档案
+ * 包括个人信息、入学信息、地址信息、亲属信息、健康信息
+ */
 @Entity
-public class ArchiveDetail {
+public class Archive {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +28,7 @@ public class ArchiveDetail {
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
-    private RelativePart relativePart; // 亲属信息
+    private FamilyPart familyPart; // 亲属信息
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)

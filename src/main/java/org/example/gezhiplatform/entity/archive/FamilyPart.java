@@ -7,8 +7,12 @@ import org.springframework.lang.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 学生档案 - 亲属信息部分
+ * 包括父母、其他亲属
+ */
 @Entity
-public class RelativePart {
+public class FamilyPart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

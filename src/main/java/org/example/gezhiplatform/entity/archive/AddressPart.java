@@ -3,6 +3,9 @@ package org.example.gezhiplatform.entity.archive;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+/**
+ * 学生档案 - 地址信息部分
+ */
 @Entity
 public class AddressPart {
 

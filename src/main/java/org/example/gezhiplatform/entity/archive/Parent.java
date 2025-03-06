@@ -3,6 +3,11 @@ package org.example.gezhiplatform.entity.archive;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+/**
+ * 双亲类(包括姓名、手机号码、工作单位)
+ * 用于：学生档案 - 亲属信息部分 - 父亲
+ * 用于：学生档案 - 亲属信息部分 - 母亲
+ */
 @Entity
 public class Parent {
 

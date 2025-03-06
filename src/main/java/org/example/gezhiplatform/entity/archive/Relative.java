@@ -6,6 +6,10 @@ import org.springframework.lang.Nullable;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * 其他亲属类(包括姓名、出生年份、工作/就学信息)
+ * 用于：用于：学生档案 - 亲属信息部分 - 其他亲属
+ */
 @Embeddable
 public class Relative {
 

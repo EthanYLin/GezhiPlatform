@@ -3,6 +3,9 @@ package org.example.gezhiplatform.entity.archive;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+/**
+ * 学生档案 - 健康信息部分
+ */
 @Entity
 public class HealthPart {
     @Id
@@ -11,10 +14,10 @@ public class HealthPart {
 
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
-    private HealthInfo physicalCondition; // 身体状况
+    private HealthCondition physicalCondition; // 身体状况
 
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
-    private HealthInfo mentalCondition; // 心理状况
+    private HealthCondition mentalCondition; // 心理状况
 
 }

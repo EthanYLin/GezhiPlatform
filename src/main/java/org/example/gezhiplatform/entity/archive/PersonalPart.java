@@ -13,6 +13,9 @@ import org.springframework.lang.Nullable;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * 学生档案 - 个人信息部分
+ */
 @Entity
 public class PersonalPart {
 

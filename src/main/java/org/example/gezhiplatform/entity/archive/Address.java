@@ -3,7 +3,11 @@ package org.example.gezhiplatform.entity.archive;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
-
+/**
+ * 地址类(包括省、市、区、详细地址、街道、居委)
+ * 用于：学生档案 - 地址信息部分 - 户籍地址
+ * 用于：学生档案 - 地址信息部分 - 居住地址
+ */
 @Entity
 public class Address {
 

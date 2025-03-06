@@ -8,6 +8,9 @@ import org.example.gezhiplatform.entity.enums.AdmissionPath;
 import org.example.gezhiplatform.entity.enums.District;
 import org.springframework.lang.Nullable;
 
+/**
+ * 学生档案 - 录取信息部分
+ */
 @Entity
 public class AdmissionPart {
 
