@@ -1,6 +1,8 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
+import org.example.gezhiplatform.entity.archive.ArchiveDetail;
+import org.example.gezhiplatform.entity.enums.Campus;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -27,12 +29,13 @@ public class Student {
     @Nullable
     private Campus campus; // 校区
 
-    @Nullable
-    private String RIN; // 居民身份证号码
-
     @Embedded
     @Nullable
     private GradeClass gradeClass; // 年级-班级
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @Nullable
+    private ArchiveDetail archiveDetail; // 具体档案信息
 
     public Long getId() {
         return id;
@@ -66,20 +69,20 @@ public class Student {
         this.campus = campus;
     }
 
-    public Optional<String> getRIN() {
-        return Optional.ofNullable(RIN);
-    }
-
-    public void setRIN(@Nullable String RIN) {
-        this.RIN = RIN;
-    }
-
     public Optional<GradeClass> getGradeClass() {
         return Optional.ofNullable(gradeClass);
     }
 
     public void setGradeClass(@Nullable GradeClass gradeClass) {
         this.gradeClass = gradeClass;
+    }
+
+    public Optional<ArchiveDetail> getArchiveDetail() {
+        return Optional.ofNullable(archiveDetail);
+    }
+
+    public void setArchiveDetail(@Nullable ArchiveDetail archiveDetail) {
+        this.archiveDetail = archiveDetail;
     }
 
     public Student() {
