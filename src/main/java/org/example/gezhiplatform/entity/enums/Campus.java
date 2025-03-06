@@ -1,7 +1,7 @@
 package org.example.gezhiplatform.entity.enums;
 
 /**
- * 校区枚举类
+ * 校区(枚举类)
  */
 public enum Campus {
     HUANGPU("黄浦校区"), FENGXIAN("奉贤校区");

@@ -1,5 +1,8 @@
 package org.example.gezhiplatform.entity.enums;
 
+/**
+ * 上海市行政区(枚举类)
+ */
 public enum District {
     HUANGPU("黄浦区"),
     XUHUI("徐汇区"),

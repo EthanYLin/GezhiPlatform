@@ -1,5 +1,8 @@
 package org.example.gezhiplatform.entity.enums;
 
+/**
+ * 民族(枚举类)
+ */
 public enum Nation {
     HAN("01", "汉族"),
     MONGOL("02","蒙古族"),

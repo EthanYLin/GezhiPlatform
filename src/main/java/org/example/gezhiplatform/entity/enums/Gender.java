@@ -1,5 +1,8 @@
 package org.example.gezhiplatform.entity.enums;
 
+/**
+ * 性别(枚举类)
+ */
 public enum Gender {
     MALE("男"),
     FEMALE("女"),

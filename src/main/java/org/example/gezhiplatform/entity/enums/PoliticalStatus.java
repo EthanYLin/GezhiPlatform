@@ -1,5 +1,8 @@
 package org.example.gezhiplatform.entity.enums;
 
+/**
+ * 政治面貌(枚举类)
+ */
 public enum PoliticalStatus {
     TUANYUAN("共青团员"),
     QUNZHONG("群众"),
