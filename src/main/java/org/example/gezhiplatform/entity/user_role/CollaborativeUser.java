@@ -36,6 +36,11 @@ public class CollaborativeUser extends Role{
         this.setLevel(DEFAULT_LEVEL);
     }
 
+    public CollaborativeUser(@NonNull List<String> stuNos) {
+        this.setLevel(DEFAULT_LEVEL);
+        this.stuNos.addAll(stuNos);
+    }
+
     @Override
     public Specification<Student> applyFilter() {
         return (root, _, _) -> {

@@ -32,6 +32,16 @@ public class User {
         this.name = name;
     }
 
+    public User(@Nullable String name, @NonNull List<Role> roles) {
+        this.name = name;
+        this.roles.addAll(roles);
+    }
+
+    public User(@Nullable String name, @NonNull Role role) {
+        this.name = name;
+        this.roles.add(role);
+    }
+
     public Long getId() {
         return id;
     }
