@@ -12,6 +12,7 @@ import java.util.List;
  * 用户实体类(校级领导、教师、生涯导师、学生、家长等）
  */
 @Entity
+@Table(name = "users")
 public class User {
 
     @Id
