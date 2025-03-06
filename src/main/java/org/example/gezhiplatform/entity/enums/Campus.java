@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity;
+package org.example.gezhiplatform.entity.enums;
 
 /**
  * 校区枚举类
