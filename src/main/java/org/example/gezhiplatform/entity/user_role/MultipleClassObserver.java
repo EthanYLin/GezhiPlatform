@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.teacher_role;
+package org.example.gezhiplatform.entity.user_role;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;

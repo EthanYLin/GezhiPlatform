@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.teacher_role;
+package org.example.gezhiplatform.entity.user_role;
 
 /**
  * Role角色类的applyFilter()过滤器设置异常

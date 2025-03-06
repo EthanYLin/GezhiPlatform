@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.teacher_role;
+package org.example.gezhiplatform.entity.user_role;
 
 import jakarta.persistence.*;
 import org.example.gezhiplatform.entity.Student;
@@ -8,6 +8,15 @@ import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
+
+/*
+ * 目前的角色有：
+ * 10级: 超级管理员
+ * 9级: 校级领导(高级管理员)
+ * 7级: 年级组长(普通管理员)
+ * 5级: 班主任
+ * 3级: 协作用户(可能包括社工、卫生室、心理老师、生涯导师)
+ */
 
 /**
  * 角色(抽象类、实体类)

@@ -1,7 +1,7 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
-import org.example.gezhiplatform.entity.teacher_role.Role;
+import org.example.gezhiplatform.entity.user_role.Role;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 教师实体类
+ * 用户实体类(校级领导、教师、生涯导师、学生、家长等）
  */
 @Entity
-public class Teacher {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 教师ID(数据库内自增)
+    private Long id; // 用户ID(数据库内自增)
 
     @Nullable
     private String name; // 姓名
@@ -25,10 +25,10 @@ public class Teacher {
     @OneToMany(cascade = CascadeType.ALL)
     private final List<Role> roles = new ArrayList<>(); // 具有的所有角色
 
-    public Teacher() {
+    public User() {
     }
 
-    public Teacher(@Nullable String name) {
+    public User(@Nullable String name) {
         this.name = name;
     }
 
@@ -54,7 +54,7 @@ public class Teacher {
 
     @Override
     public String toString() {
-        return "Teacher{" +
+        return "User{" +
                "id=" + id +
                ", name='" + name + '\'' +
                ", roles=" + roles +
