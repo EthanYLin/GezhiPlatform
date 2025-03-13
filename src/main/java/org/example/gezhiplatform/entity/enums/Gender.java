@@ -1,5 +1,7 @@
 package org.example.gezhiplatform.entity.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * 性别(枚举类)
  */
@@ -15,6 +17,7 @@ public enum Gender {
         this.name = name;
     }
 
+    @JsonValue
     public String getName() {
         return name;
     }

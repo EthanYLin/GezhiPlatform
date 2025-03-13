@@ -1,5 +1,9 @@
 package org.example.gezhiplatform.entity.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * 上海市行政区(枚举类)
  */
@@ -28,7 +32,18 @@ public enum District {
         this.name = name;
     }
 
+    @JsonValue
     public String getName() {
         return name;
+    }
+
+    @JsonCreator
+    public static @Nullable District fromName(String name) {
+        for (District district : District.values()) {
+            if (district.name.equals(name)) {
+                return district;
+            }
+        }
+        return null;
     }
 }
