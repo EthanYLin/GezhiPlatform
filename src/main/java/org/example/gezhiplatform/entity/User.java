@@ -2,7 +2,7 @@ package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
 import org.example.gezhiplatform.entity.user_role.Role;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class User {
     @Nullable
     private String name; // 姓名
 
-    @NonNull
+    @NotNull
     @OneToMany(cascade = CascadeType.ALL)
     private final List<Role> roles = new ArrayList<>(); // 具有的所有角色
 
@@ -33,12 +33,12 @@ public class User {
         this.name = name;
     }
 
-    public User(@Nullable String name, @NonNull List<Role> roles) {
+    public User(@Nullable String name, @NotNull List<Role> roles) {
         this.name = name;
         this.roles.addAll(roles);
     }
 
-    public User(@Nullable String name, @NonNull Role role) {
+    public User(@Nullable String name, @NotNull Role role) {
         this.name = name;
         this.roles.add(role);
     }
@@ -47,7 +47,7 @@ public class User {
         return id;
     }
 
-    public void setId(@NonNull Long id) {
+    public void setId(@NotNull Long id) {
         this.id = id;
     }
 
@@ -59,7 +59,7 @@ public class User {
         this.name = name;
     }
 
-    public @NonNull List<Role> getRoles() {
+    public @NotNull List<Role> getRoles() {
         return roles;
     }
 

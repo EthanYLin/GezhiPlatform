@@ -1,7 +1,7 @@
 package org.example.gezhiplatform.entity.archive;
 
 import jakarta.persistence.*;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class FamilyPart {
     private Parent mother; // 母亲
 
     @ElementCollection
-    @NonNull
+    @NotNull
     private List<Relative> otherRelatives = new ArrayList<>(); // 其他亲属
 
 }

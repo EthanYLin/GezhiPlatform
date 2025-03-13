@@ -4,8 +4,8 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class MultipleClassObserver extends Role {
 
     private static final Integer DEFAULT_LEVEL = 10; // 默认权限等级（多班级观察员=10）
 
-    @NonNull
+    @NotNull
     @ElementCollection
     private final List<GradeClass> gradeClasses = new ArrayList<>(); // 管理的年级-班级
 
@@ -29,7 +29,7 @@ public class MultipleClassObserver extends Role {
             .orElseThrow(() -> new FilterSettingException("未找到gradeClass字段"));
     }
 
-    public @NonNull List<GradeClass> getGradeClasses() {
+    public @NotNull List<GradeClass> getGradeClasses() {
         return gradeClasses;
     }
 

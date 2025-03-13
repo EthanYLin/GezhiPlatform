@@ -3,7 +3,7 @@ package org.example.gezhiplatform.entity;
 import jakarta.persistence.*;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.Campus;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Optional;
@@ -18,11 +18,11 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;  // 学生ID(数据库内自增)
 
-    @NonNull
+    @NotNull
     @Column(unique = true, nullable = false)
     private String stuNo; // 学号
 
-    @NonNull
+    @NotNull
     @Column(nullable = false)
     private String stuName; // 姓名
 
@@ -41,23 +41,23 @@ public class Student {
         return id;
     }
 
-    public void setId(@NonNull Long id) {
+    public void setId(@NotNull Long id) {
         this.id = id;
     }
 
-    public @NonNull String getStuNo() {
+    public @NotNull String getStuNo() {
         return stuNo;
     }
 
-    public void setStuNo(@NonNull String stuNo) {
+    public void setStuNo(@NotNull String stuNo) {
         this.stuNo = stuNo;
     }
 
-    public @NonNull String getStuName() {
+    public @NotNull String getStuName() {
         return stuName;
     }
 
-    public void setStuName(@NonNull String stuName) {
+    public void setStuName(@NotNull String stuName) {
         this.stuName = stuName;
     }
 
@@ -88,14 +88,14 @@ public class Student {
     public Student() {
     }
 
-    public Student(@NonNull String stuNo, @NonNull String stuName) {
+    public Student(@NotNull String stuNo, @NotNull String stuName) {
         this.stuNo = stuNo;
         this.stuName = stuName;
     }
 
     public Student(
-        @NonNull String stuNo,
-        @NonNull String stuName,
+        @NotNull String stuNo,
+        @NotNull String stuName,
         @Nullable Integer gradeNo,
         @Nullable Integer classNo,
         @Nullable Campus campus

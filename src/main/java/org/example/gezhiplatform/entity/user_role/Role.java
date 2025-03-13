@@ -2,8 +2,8 @@ package org.example.gezhiplatform.entity.user_role;
 
 import jakarta.persistence.*;
 import org.example.gezhiplatform.entity.Student;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Field;
@@ -33,7 +33,7 @@ public abstract class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 角色ID(由数据库自增)
 
-    @NonNull
+    @NotNull
     @Column(nullable = false)
     private Integer level = 0; // 等级(数字越大，权限越大，默认为0)
 
@@ -68,15 +68,15 @@ public abstract class Role {
         return id;
     }
 
-    public void setId(@NonNull Long id) {
+    public void setId(@NotNull Long id) {
         this.id = id;
     }
 
-    public @NonNull Integer getLevel() {
+    public @NotNull Integer getLevel() {
         return level;
     }
 
-    public void setLevel(@NonNull Integer level) {
+    public void setLevel(@NotNull Integer level) {
         this.level = level;
     }
 

@@ -1,7 +1,7 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.Embeddable;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -45,12 +45,12 @@ public class GradeClass {
         this.classNo = classNo;
     }
 
-    public @NonNull String toAbsoluteExpr() {
+    public @NotNull String toAbsoluteExpr() {
         return (gradeNo != null ? gradeNo.toString() : "?") + "届" +
                (classNo != null ? classNo.toString() : "?") + "班";
     }
 
-    public @NonNull String toRelativeExpr(int currentAcademicYear) {
+    public @NotNull String toRelativeExpr(int currentAcademicYear) {
         String gradeStr;
         String classStr;
 
@@ -74,7 +74,7 @@ public class GradeClass {
         return gradeStr + classStr;
     }
 
-    public @NonNull String toRelativeExpr() {
+    public @NotNull String toRelativeExpr() {
         var currentAcademicYear = LocalDateTime.now().getMonthValue() >= 9 ?
             LocalDateTime.now().getYear() :
             LocalDateTime.now().getYear() - 1;

@@ -3,8 +3,8 @@ package org.example.gezhiplatform.entity.user_role;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.Student;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +24,11 @@ public class CollaborativeUser extends Role{
             .orElseThrow(() -> new FilterSettingException("未找到学号(stuNo)字段"));
     }
 
-    @NonNull
+    @NotNull
     @ElementCollection
     private final List<String> stuNos = new ArrayList<>(); // 管理的学生(学号)
 
-    public @NonNull List<String> getStuNos() {
+    public @NotNull List<String> getStuNos() {
         return stuNos;
     }
 
@@ -36,7 +36,7 @@ public class CollaborativeUser extends Role{
         this.setLevel(DEFAULT_LEVEL);
     }
 
-    public CollaborativeUser(@NonNull List<String> stuNos) {
+    public CollaborativeUser(@NotNull List<String> stuNos) {
         this.setLevel(DEFAULT_LEVEL);
         this.stuNos.addAll(stuNos);
     }

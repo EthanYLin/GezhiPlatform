@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.Nation;
 import org.example.gezhiplatform.entity.enums.PoliticalStatus;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
@@ -49,7 +49,7 @@ public class PersonalPart {
         }
     }
 
-    public @NonNull Gender getGender() {
+    public @NotNull Gender getGender() {
         if (this.RIN == null || this.RIN.length() != 18) {
             return Gender.UNKNOWN;
         }
