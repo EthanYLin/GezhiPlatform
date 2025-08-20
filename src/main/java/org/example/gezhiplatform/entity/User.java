@@ -24,7 +24,7 @@ public class User {
 
     @NotNull
     @OneToMany(cascade = CascadeType.ALL)
-    private final List<Role> roles = new ArrayList<>(); // 具有的所有角色
+    private final List<Role> roles = new ArrayList<>(); // 具有的所有角色(角色专属于该用户, 不能被其他用户共享)
 
     public User() {
     }
