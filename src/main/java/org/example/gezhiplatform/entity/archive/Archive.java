@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive;
 
 import jakarta.persistence.*;
+import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.archive.address_part.AddressPart;
 import org.example.gezhiplatform.entity.archive.admission_part.AdmissionPart;
 import org.example.gezhiplatform.entity.archive.family_part.FamilyPart;
@@ -18,6 +19,10 @@ public class Archive {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 档案详情ID(由数据库自增)
+
+    @Nullable
+    @OneToOne(mappedBy = "archive")
+    private Student student; // 反向关联到学生
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)

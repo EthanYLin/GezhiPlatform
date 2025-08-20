@@ -33,8 +33,8 @@ public class Student {
     @Nullable
     private GradeClass gradeClass; // 年级-班级
 
-    @OneToOne(cascade = CascadeType.ALL)
     @Nullable
+    @OneToOne(cascade = CascadeType.ALL)
     private Archive archive; // 具体档案信息
 
     public Long getId() {
