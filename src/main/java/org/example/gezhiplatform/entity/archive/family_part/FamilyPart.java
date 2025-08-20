@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive.family_part;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * 包括父母、其他亲属
  */
 @Entity
+@Data
 public class FamilyPart {
 
     @Id

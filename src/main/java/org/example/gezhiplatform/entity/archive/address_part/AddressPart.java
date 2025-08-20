@@ -1,12 +1,14 @@
 package org.example.gezhiplatform.entity.archive.address_part;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.springframework.lang.Nullable;
 
 /**
  * 学生档案 - 地址信息部分
  */
 @Entity
+@Data
 public class AddressPart {
 
     @Id

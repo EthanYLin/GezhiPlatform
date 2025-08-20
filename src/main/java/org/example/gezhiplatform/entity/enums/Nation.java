@@ -2,6 +2,7 @@ package org.example.gezhiplatform.entity.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -67,16 +68,13 @@ public enum Nation {
     OTHER("57","其他"),
     FOREIGN_COUNTRY("58","外国血统中国籍人士");
 
+    @Getter
     private final String code;
     private final String desc;
 
     Nation(String code, String desc) {
         this.code = code;
         this.desc = desc;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     @JsonValue

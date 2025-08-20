@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Data;
 import org.springframework.lang.Nullable;
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.lang.Nullable;
  * 用于：学生档案 - 地址信息部分 - 居住地址
  */
 @Entity
+@Data
 public class Address {
 
     @Id

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Data;
 import org.example.gezhiplatform.entity.enums.HealthStatus;
 import org.springframework.lang.Nullable;
 
@@ -13,6 +14,7 @@ import org.springframework.lang.Nullable;
  * 用于：学生档案 - 健康信息部分 - 心理健康
  */
 @Entity
+@Data
 public class HealthCondition {
 
     @Id

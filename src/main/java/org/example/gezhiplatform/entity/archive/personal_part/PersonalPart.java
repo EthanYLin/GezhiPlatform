@@ -1,9 +1,12 @@
 package org.example.gezhiplatform.entity.archive.personal_part;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Data;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.Nation;
 import org.example.gezhiplatform.entity.enums.PoliticalStatus;
@@ -17,6 +20,7 @@ import java.util.Optional;
  * 学生档案 - 个人信息部分
  */
 @Entity
+@Data
 public class PersonalPart {
 
     @Id
@@ -24,6 +28,8 @@ public class PersonalPart {
     private Long id; // ID(由数据库自增)
 
     @Nullable
+    @JsonProperty("RIN")
+    @JsonAlias({"rin"})
     private String RIN; // 居民身份证号
 
     @Nullable

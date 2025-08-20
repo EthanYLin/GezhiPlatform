@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import java.util.Optional;
  * 学生实体类
  */
 @Entity
+@Data
 public class Student {
 
     @Id
@@ -34,55 +36,19 @@ public class Student {
     private GradeClass gradeClass; // 年级-班级
 
     @Nullable
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Archive archive; // 具体档案信息
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(@NotNull Long id) {
-        this.id = id;
-    }
-
-    public @NotNull String getStuNo() {
-        return stuNo;
-    }
-
-    public void setStuNo(@NotNull String stuNo) {
-        this.stuNo = stuNo;
-    }
-
-    public @NotNull String getStuName() {
-        return stuName;
-    }
-
-    public void setStuName(@NotNull String stuName) {
-        this.stuName = stuName;
-    }
 
     public Optional<Campus> getCampus() {
         return Optional.ofNullable(campus);
-    }
-
-    public void setCampus(@Nullable Campus campus) {
-        this.campus = campus;
     }
 
     public Optional<GradeClass> getGradeClass() {
         return Optional.ofNullable(gradeClass);
     }
 
-    public void setGradeClass(@Nullable GradeClass gradeClass) {
-        this.gradeClass = gradeClass;
-    }
-
     public Optional<Archive> getArchiveDetail() {
         return Optional.ofNullable(archive);
-    }
-
-    public void setArchiveDetail(@Nullable Archive archive) {
-        this.archive = archive;
     }
 
     public Student() {
@@ -106,13 +72,4 @@ public class Student {
         this.campus = campus;
     }
 
-    @Override
-    public String toString() {
-        return "Student{" +
-               "id=" + id +
-               ", stuNo='" + stuNo + '\'' +
-               ", stuName='" + stuName + '\'' +
-               ", gradeClass=" + gradeClass +
-               '}';
-    }
 }

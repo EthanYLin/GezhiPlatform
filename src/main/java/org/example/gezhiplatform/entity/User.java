@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.example.gezhiplatform.entity.user_role.Role;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
@@ -13,6 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
+@Data
 public class User {
 
     @Id
@@ -26,8 +28,7 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL)
     private final List<Role> roles = new ArrayList<>(); // 具有的所有角色(角色专属于该用户, 不能被其他用户共享)
 
-    public User() {
-    }
+    public User() {}
 
     public User(@Nullable String name) {
         this.name = name;
@@ -41,34 +42,5 @@ public class User {
     public User(@Nullable String name, @NotNull Role role) {
         this.name = name;
         this.roles.add(role);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(@NotNull Long id) {
-        this.id = id;
-    }
-
-    public @Nullable String getName() {
-        return name;
-    }
-
-    public void setName(@Nullable String name) {
-        this.name = name;
-    }
-
-    public @NotNull List<Role> getRoles() {
-        return roles;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", roles=" + roles +
-               '}';
     }
 }

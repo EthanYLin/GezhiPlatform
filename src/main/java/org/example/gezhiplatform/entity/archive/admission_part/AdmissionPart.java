@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Data;
 import org.example.gezhiplatform.entity.enums.AdmissionPath;
 import org.example.gezhiplatform.entity.enums.District;
 import org.springframework.lang.Nullable;
@@ -12,6 +13,7 @@ import org.springframework.lang.Nullable;
  * 学生档案 - 录取信息部分
  */
 @Entity
+@Data
 public class AdmissionPart {
 
     @Id

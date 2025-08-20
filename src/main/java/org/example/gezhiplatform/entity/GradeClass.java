@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.Embeddable;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
  * </ul>
  */
 @Embeddable
+@Data
 public class GradeClass {
 
     @Nullable
@@ -36,22 +38,6 @@ public class GradeClass {
      */
     public GradeClass(@Nullable Integer gradeNo, @Nullable Integer classNo) {
         this.gradeNo = gradeNo;
-        this.classNo = classNo;
-    }
-
-    public @Nullable Integer getGradeNo() {
-        return gradeNo;
-    }
-
-    public void setGradeNo(@Nullable Integer gradeNo) {
-        this.gradeNo = gradeNo;
-    }
-
-    public @Nullable Integer getClassNo() {
-        return classNo;
-    }
-
-    public void setClassNo(@Nullable Integer classNo) {
         this.classNo = classNo;
     }
 

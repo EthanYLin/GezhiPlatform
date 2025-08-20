@@ -1,12 +1,14 @@
 package org.example.gezhiplatform.entity.archive.health_part;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.springframework.lang.Nullable;
 
 /**
  * 学生档案 - 健康信息部分
  */
 @Entity
+@Data
 public class HealthPart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

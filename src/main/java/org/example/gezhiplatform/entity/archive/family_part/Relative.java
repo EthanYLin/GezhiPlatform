@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive.family_part;
 
 import jakarta.persistence.Embeddable;
+import lombok.Data;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.Optional;
  * 用于：用于：学生档案 - 亲属信息部分 - 其他亲属
  */
 @Embeddable
+@Data
 public class Relative {
 
     @Nullable
