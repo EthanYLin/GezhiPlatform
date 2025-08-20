@@ -7,6 +7,7 @@ import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
+import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -67,11 +68,11 @@ public class StudentService {
      * 根据学号, 获取该学号的学生信息
      * @param stuNo 学号
      * @return 学生基本信息DTO
-     * @throws CustomInvalidArgException 当学号不存在时
+     * @throws NotFoundException 当学号不存在时
      */
-    public StudentCoverResponse getStudentByStuNo(@NotNull String stuNo) throws CustomInvalidArgException {
+    public StudentCoverResponse getStudentByStuNo(@NotNull String stuNo) throws NotFoundException {
         Student student = studentRepository.findByStuNo(stuNo).orElseThrow(
-            () -> new CustomInvalidArgException("学号为: " + stuNo + " 的学生不存在")
+            () -> new NotFoundException("学号为: " + stuNo + " 的学生不存在")
         );
         return new StudentCoverResponse(student);
     }
@@ -100,10 +101,10 @@ public class StudentService {
      * @throws BadRequestException 当学号重复时
      */
     public List<StudentCoverResponse> addStudents(@NotNull List<NewStudentRequest> requests) throws BadRequestException {
-        List<String> duplicateStuNos = requests.stream()
-            .map(NewStudentRequest::stuNo)
-            .filter(studentRepository::existsByStuNo)
-            .toList();
+        List<String> duplicateStuNos = studentRepository.findByStuNoIn(
+            requests.stream().map(NewStudentRequest::stuNo).toList()
+        ).stream().map(StudentRepository.StuNoOnly::getStuNo).toList();
+
         if (!duplicateStuNos.isEmpty()) {
             throw new BadRequestException("由于学号为: " + duplicateStuNos + " 的学生已存在，本次新增操作全部取消。");
         }
@@ -122,8 +123,7 @@ public class StudentService {
         if (studentRepository.existsByStuNo(request.stuNo())) {
             throw new BadRequestException("学号为: " + request.stuNo() + " 的学生已存在");
         }
-        Student student = request.toStudent();
-        Student result = studentRepository.save(student);
+        Student result = studentRepository.save(request.toStudent());
         return new StudentCoverResponse(result);
     }
 
@@ -133,7 +133,7 @@ public class StudentService {
      * @return 删除的学生基本信息DTO列表
      */
     public List<StudentCoverResponse> deleteStudents(@NotNull List<String> studentNos) {
-        List<Student> students = studentRepository.findAllByStuNoIn(studentNos);
+        List<Student> students = studentRepository.findStudentsByStuNoIn(studentNos);
         studentRepository.deleteAll(students);
         return students.stream().map(StudentCoverResponse::new).toList();
     }
@@ -143,15 +143,15 @@ public class StudentService {
      * @param stuNo 要修改的原学生学号
      * @param request 新学生信息请求(可以修改学号)
      * @return 更新后的学生基本信息DTO
-     * @throws CustomInvalidArgException 当学号不存在时
-     * @throws BadRequestException 当学号重复时
+     * @throws NotFoundException 当原学号不存在时
+     * @throws BadRequestException 当新学号与已有学生重复时
      */
     public StudentCoverResponse updateStudent(
         @NotNull String stuNo,
         @NotNull NewStudentRequest request
-    ) throws CustomInvalidArgException, BadRequestException {
+    ) throws BadRequestException {
         Student oldStudent = studentRepository.findByStuNo(stuNo).orElseThrow(
-            () -> new CustomInvalidArgException("学号为: " + stuNo + " 的学生不存在")
+            () -> new NotFoundException("学号为: " + stuNo + " 的学生不存在")
         );
         if (studentRepository.existsByStuNo(request.stuNo())) {
             throw new BadRequestException("不能将学生的学号从 " + stuNo + " 改为: " + request.stuNo() + " , 因为该学号的学生已存在。");

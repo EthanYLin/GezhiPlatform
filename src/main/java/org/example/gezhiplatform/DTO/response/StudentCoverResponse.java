@@ -3,6 +3,8 @@ package org.example.gezhiplatform.DTO.response;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.Campus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 学生基本信息响应类
@@ -14,12 +16,11 @@ import org.example.gezhiplatform.entity.enums.Campus;
  * @param gradeClassName 年级班级(形如: 高一(01)班)
  */
 public record StudentCoverResponse(
-    String stuNo,
-    String stuName,
-    String campus,
-    String gradeClassName
+    @NotNull String stuNo,
+    @NotNull String stuName,
+    @Nullable String campus,
+    @Nullable String gradeClassName
 ){
-
     public StudentCoverResponse(Student s) {
         this(
             s.getStuNo(),

@@ -6,6 +6,7 @@ import org.example.gezhiplatform.DTO.response.StudentCoverResponse;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
+import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.service.StudentService;
 import org.junit.jupiter.api.Assertions;
@@ -209,7 +210,7 @@ public class StudentServiceTest {
         );
         // 学号不存在
         Assertions.assertThrows(
-            CustomInvalidArgException.class,
+            NotFoundException.class,
             () -> studentService.updateStudent("200101", request)
         );
         // 学号重复
@@ -232,7 +233,7 @@ public class StudentServiceTest {
         assertEquals(30, studentService.getAllStudents(null, null, PageRequest.of(0, 500)).totalElements());
         // 170101 不存在
         assertThrows(
-            CustomInvalidArgException.class,
+            NotFoundException.class,
             () -> studentService.getStudentByStuNo("170101")
         );
         // 200101 存在

@@ -31,5 +31,9 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 
     boolean existsByStuNo(@NotNull String stuNo);
 
-    List<Student> findAllByStuNoIn(@NotNull Collection<String> stuNos);
+    List<Student> findStudentsByStuNoIn(@NotNull Collection<String> stuNos);
+
+    interface StuNoOnly {@NotNull String getStuNo();}  // 仅返回学号的投影接口
+    List<StuNoOnly> findByStuNoIn(@NotNull Collection<String> stuNos);
+
 }
