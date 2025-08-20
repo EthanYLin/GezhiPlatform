@@ -3,6 +3,8 @@ package org.example.gezhiplatform.entity.user_role;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.enums.RoleType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 
@@ -14,8 +16,6 @@ import org.springframework.lang.Nullable;
 @Entity
 public class ClassAdviser extends Role{
 
-    public static final int DEFAULT_LEVEL = 5; // 默认权限等级（班主任=5）
-
     static {
         getField(Student.class, "gradeClass", GradeClass.class)
             .orElseThrow(() -> new FilterSettingException("未找到gradeClass字段"));
@@ -23,6 +23,8 @@ public class ClassAdviser extends Role{
 
     @Nullable
     private GradeClass gradeClass; // 管理的年级-班级
+
+    public ClassAdviser() {}
 
     public @Nullable GradeClass getGradeClass() {
         return gradeClass;
@@ -32,18 +34,18 @@ public class ClassAdviser extends Role{
         this.gradeClass = gradeClass;
     }
 
-    public ClassAdviser() {
-        this.setLevel(DEFAULT_LEVEL);
-    }
-
     public ClassAdviser(@Nullable GradeClass gradeClass) {
-        this.setLevel(DEFAULT_LEVEL);
         this.gradeClass = gradeClass;
     }
 
     @Override
-    public Specification<Student> applyFilter() {
+    public @NotNull Specification<Student> applyFilter() {
         return (root, _, cb) ->
             cb.equal(root.get("gradeClass"), gradeClass);
+    }
+
+    @Override
+    public @NotNull RoleType getRoleType() {
+        return RoleType.CLASS_ADVISOR;
     }
 }

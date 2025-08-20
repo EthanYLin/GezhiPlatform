@@ -3,6 +3,7 @@ package org.example.gezhiplatform.entity.user_role;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.enums.RoleType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -17,8 +18,6 @@ import java.util.List;
 @Entity
 public class CollaborativeUser extends Role{
 
-    public static final int DEFAULT_LEVEL = 3; // 默认权限等级（协作用户=3）
-
     static {
         getField(Student.class, "stuNo", String.class)
             .orElseThrow(() -> new FilterSettingException("未找到学号(stuNo)字段"));
@@ -32,20 +31,22 @@ public class CollaborativeUser extends Role{
         return stuNos;
     }
 
-    public CollaborativeUser() {
-        this.setLevel(DEFAULT_LEVEL);
-    }
+    public CollaborativeUser() {}
 
     public CollaborativeUser(@NotNull List<String> stuNos) {
-        this.setLevel(DEFAULT_LEVEL);
         this.stuNos.addAll(stuNos);
     }
 
     @Override
-    public Specification<Student> applyFilter() {
+    public @NotNull Specification<Student> applyFilter() {
         return (root, _, _) -> {
             var stuNo = root.get("stuNo");
             return stuNo.in(stuNos);
         };
+    }
+
+    @Override
+    public @NotNull RoleType getRoleType() {
+        return RoleType.COLLABORATIVE_USER;
     }
 }

@@ -3,6 +3,8 @@ package org.example.gezhiplatform.entity.user_role;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.enums.RoleType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 
@@ -14,8 +16,6 @@ import org.springframework.lang.Nullable;
 @Entity
 public class GradeDean extends Role {
 
-    public static final int DEFAULT_LEVEL = 7; // 默认权限等级（年级组长=7）
-
     @Nullable
     private Integer gradeNo; // 管理的届别
 
@@ -26,12 +26,9 @@ public class GradeDean extends Role {
             .orElseThrow(() -> new FilterSettingException("未找到gradeNo字段"));
     }
 
-    public GradeDean() {
-        this.setLevel(DEFAULT_LEVEL);
-    }
+    public GradeDean() {}
 
     public GradeDean(@Nullable Integer gradeNo) {
-        this.setLevel(DEFAULT_LEVEL);
         this.gradeNo = gradeNo;
     }
 
@@ -44,8 +41,13 @@ public class GradeDean extends Role {
     }
 
     @Override
-    public Specification<Student> applyFilter() throws FilterSettingException{
+    public @NotNull Specification<Student> applyFilter() throws FilterSettingException{
         return (root, _, cb) ->
             cb.equal(root.get("gradeClass").get("gradeNo"), gradeNo);
+    }
+
+    @Override
+    public @NotNull RoleType getRoleType() {
+        return RoleType.GRADE_DEAN;
     }
 }

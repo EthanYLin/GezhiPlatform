@@ -4,6 +4,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.enums.RoleType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -18,8 +19,6 @@ import java.util.List;
 @Entity
 public class MultipleClassObserver extends Role {
 
-    private static final Integer DEFAULT_LEVEL = 10; // 默认权限等级（多班级观察员=10）
-
     @NotNull
     @ElementCollection
     private final List<GradeClass> gradeClasses = new ArrayList<>(); // 管理的年级-班级
@@ -33,20 +32,22 @@ public class MultipleClassObserver extends Role {
         return gradeClasses;
     }
 
-    public MultipleClassObserver() {
-        this.setLevel(DEFAULT_LEVEL);
-    }
+    public MultipleClassObserver() {}
 
     public MultipleClassObserver(List<GradeClass> gradeClasses) {
-        this.setLevel(DEFAULT_LEVEL);
         this.gradeClasses.addAll(gradeClasses);
     }
 
     @Override
-    public Specification<Student> applyFilter() {
+    public @NotNull Specification<Student> applyFilter() {
         return (root, _, _) -> {
             var gradeClass = root.get("gradeClass");
             return gradeClass.in(gradeClasses);
         };
+    }
+
+    @Override
+    public @NotNull RoleType getRoleType() {
+        return RoleType.MULTIPLE_CLASS_OBSERVER;
     }
 }

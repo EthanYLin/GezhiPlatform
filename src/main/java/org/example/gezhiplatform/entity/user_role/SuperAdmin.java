@@ -1,6 +1,8 @@
 package org.example.gezhiplatform.entity.user_role;
 
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.enums.RoleType;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -9,14 +11,16 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class SuperAdmin extends Role{
 
-    public static final int DEFAULT_LEVEL = 10; // 默认权限等级（超级管理员=10）
-
     public SuperAdmin() {
-        this.setLevel(DEFAULT_LEVEL);
     }
 
     @Override
-    public Specification<Student> applyFilter() {
+    public @NotNull Specification<Student> applyFilter() {
         return (_, _, cb) -> cb.conjunction();
+    }
+
+    @Override
+    public @NotNull RoleType getRoleType() {
+        return RoleType.SUPER_ADMIN;
     }
 }
