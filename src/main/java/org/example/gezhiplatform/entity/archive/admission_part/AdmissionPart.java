@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.archive;
+package org.example.gezhiplatform.entity.archive.admission_part;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

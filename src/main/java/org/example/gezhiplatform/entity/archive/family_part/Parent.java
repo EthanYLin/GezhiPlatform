@@ -1,6 +1,9 @@
-package org.example.gezhiplatform.entity.archive;
+package org.example.gezhiplatform.entity.archive.family_part;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.springframework.lang.Nullable;
 
 /**

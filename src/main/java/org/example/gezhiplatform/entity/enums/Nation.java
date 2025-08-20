@@ -2,7 +2,7 @@ package org.example.gezhiplatform.entity.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 民族(枚举类)
@@ -84,19 +84,14 @@ public enum Nation {
         return desc;
     }
 
-    /**
-     * 通过描述获取枚举
-     * @param desc 描述
-     * @return 枚举（默认返回OTHER其他民族）
-     */
     @JsonCreator
-    public static @NotNull Nation fromDesc(String desc) {
+    public static @Nullable Nation fromDesc(String desc) {
         for (Nation nation : Nation.values()) {
             if (nation.desc.equals(desc)) {
                 return nation;
             }
         }
-        return OTHER;
+        return null;
     }
 
 }

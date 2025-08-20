@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.archive;
+package org.example.gezhiplatform.entity.archive.personal_part;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +34,8 @@ public class PersonalPart {
 
     @Nullable
     private PoliticalStatus politicalStatus; // 政治面貌
+
+    // 性别与出生日期从身份证号中解析得到
 
     public Optional<LocalDate> getBirthDate() {
         if (this.RIN == null || this.RIN.length() != 18) {

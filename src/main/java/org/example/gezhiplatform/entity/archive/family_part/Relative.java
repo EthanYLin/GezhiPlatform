@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.archive;
+package org.example.gezhiplatform.entity.archive.family_part;
 
 import jakarta.persistence.Embeddable;
 import org.springframework.lang.Nullable;

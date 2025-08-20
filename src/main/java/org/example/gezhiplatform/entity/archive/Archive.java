@@ -1,6 +1,11 @@
 package org.example.gezhiplatform.entity.archive;
 
 import jakarta.persistence.*;
+import org.example.gezhiplatform.entity.archive.address_part.AddressPart;
+import org.example.gezhiplatform.entity.archive.admission_part.AdmissionPart;
+import org.example.gezhiplatform.entity.archive.family_part.FamilyPart;
+import org.example.gezhiplatform.entity.archive.health_part.HealthPart;
+import org.example.gezhiplatform.entity.archive.personal_part.PersonalPart;
 import org.springframework.lang.Nullable;
 
 /**

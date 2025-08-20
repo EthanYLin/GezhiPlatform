@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.entity.archive;
+package org.example.gezhiplatform.entity.archive.health_part;
 
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
