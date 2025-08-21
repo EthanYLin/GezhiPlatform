@@ -21,6 +21,7 @@ import java.util.List;
  * 学生Service类
  * 只用于对基本信息(学号、姓名、校区、年级班级)进行增删改查
  * 该服务类【只面向管理员权限】
+ * 用户查询学生信息请使用 {@link StudentQueryService}
  */
 @Service
 public class StudentService {
@@ -153,7 +154,7 @@ public class StudentService {
         Student oldStudent = studentRepository.findByStuNo(stuNo).orElseThrow(
             () -> new NotFoundException("学号为: " + stuNo + " 的学生不存在")
         );
-        if (studentRepository.existsByStuNo(request.stuNo())) {
+        if (studentRepository.existsByStuNo(request.stuNo()) && !request.stuNo().equals(stuNo)) {
             throw new BadRequestException("不能将学生的学号从 " + stuNo + " 改为: " + request.stuNo() + " , 因为该学号的学生已存在。");
         }
         Student newStudent = request.toStudent();

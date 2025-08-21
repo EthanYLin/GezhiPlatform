@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.example.gezhiplatform.entity.user_role.Role;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.lang.Nullable;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,5 +43,25 @@ public class User {
     public User(@Nullable String name, @NotNull Role role) {
         this.name = name;
         this.roles.add(role);
+    }
+
+    /**
+     * 获取用户权限过滤规格
+     * <p>
+     * 根据用户拥有的所有角色，生成一个用于过滤学生数据的JPA Specification。
+     * 该方法将用户的所有角色权限进行合并，<b>使用"或"逻辑连接</b>，
+     * 即用户可以查看任意一个角色权限范围内的学生数据。
+     *
+     * @return 学生数据过滤的JPA Specification
+     *         <ul>
+     *           <li>如果用户没有任何角色，返回null（无权限过滤，查询结果为空）</li>
+     *           <li>如果用户有角色，返回所有角色权限的并集过滤条件</li>
+     *         </ul>
+     */
+    public Specification<Student> getSpec() {
+        if (roles.isEmpty()) return Specification.where(null);
+        return Specification.anyOf(
+            roles.stream().map(Role::applyFilter).toList()
+        );
     }
 }

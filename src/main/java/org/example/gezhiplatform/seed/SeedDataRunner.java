@@ -33,7 +33,7 @@ public class SeedDataRunner implements ApplicationRunner {
     private final List<SeedStudents> seedStudents = new ArrayList<>();
     @PostConstruct
     private void setSeedStudents() {
-        for (int grade = 2023; grade <= 2025; grade++) {
+        for (int grade = 2026; grade <= 2028; grade++) {
             seedStudents.addAll(List.of(
                 new SeedStudents(grade, Campus.HUANGPU, 1, 1, 5),
                 new SeedStudents(grade, Campus.HUANGPU, 2, 1, 5),
@@ -47,7 +47,7 @@ public class SeedDataRunner implements ApplicationRunner {
         seedStudents.forEach(seedStudents -> {
             IntStream.range(seedStudents.seatNoFrom(), seedStudents.seatNoTo() + 1)
                 .forEach(seatNo -> {
-                    int age = 2025 - seedStudents.gradeNo() + 15;
+                    int age = 2025 - seedStudents.gradeNo() + 18;
                     var faker = PersonalInfoFaker.builder().age(age).build();
                     Student student = StudentFaker.of(
                         faker, seedStudents.campus(), seedStudents.gradeNo(), seedStudents.classNo(), seatNo
