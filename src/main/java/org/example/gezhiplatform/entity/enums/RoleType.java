@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
  * 5级: 班主任
  * 5级: 多班级观察员(测试用)
  * 3级: 协作用户(可能包括社工、卫生室、心理老师、生涯导师)
+ * 1级: 家长用户
+ * 0级: 学生用户
  */
 public enum RoleType {
     SUPER_ADMIN("超级管理员", 10),
@@ -21,7 +23,9 @@ public enum RoleType {
     GRADE_DEAN("年级组长", 7),
     CLASS_ADVISOR("班主任", 5),
     MULTIPLE_CLASS_OBSERVER("多班级观察员", 5),
-    COLLABORATIVE_USER("协作用户", 3);
+    COLLABORATIVE_USER("协作用户", 3),
+    PARENT_USER("家长用户", 1),
+    STUDENT_USER("学生用户", 0);
 
     private final String name;
     private final int level;

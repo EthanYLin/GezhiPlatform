@@ -23,10 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -142,8 +139,11 @@ public class StudentQueryService {
                     gradeNo -> result.addAll(studentService.getGradeClassesByGrade(gradeNo))
                 );
                 case CollaborativeUser cu -> result.addAll(studentService.getGradeClassesByStuNos(cu.getStuNos()));
-                case null, default -> {
-                }
+                case StudentUser su -> result.addAll(studentService.getGradeClassesByStuNos(
+                    Optional.ofNullable(su.getStuNo()).map(List::of).orElse(List.of())
+                ));
+                case ParentUser pu -> result.addAll(studentService.getGradeClassesByStuNos(pu.getStuNos()));
+                case null, default -> {}
             }
         });
         return result.stream().sorted().toList();

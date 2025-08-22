@@ -60,7 +60,19 @@ public class StudentQueryServiceTest {
                 new GradeDean(2028),
                 new ClassAdviser(new GradeClass(2027, 3)),
                 new CollaborativeUser(List.of("260101", "260102"))
-            )))
+            ))),
+            // 家长用户 - 可以查看多个孩子(260101, 260102, 270201)
+            Map.entry("parent-multi", new User("parent-multi", 
+                                               new ParentUser(List.of("260101", "260102", "270201")))),
+            // 家长用户 - 只能查看一个孩子(280101)
+            Map.entry("parent-single", new User("parent-single", 
+                                                new ParentUser(List.of("280101")))),
+            // 学生用户 - 只能查看自己的信息(260103)
+            Map.entry("student-260103", new User("student-260103", 
+                                                 new StudentUser("260103"))),
+            // 学生用户 - 只能查看自己的信息(270101)
+            Map.entry("student-270101", new User("student-270101", 
+                                                 new StudentUser("270101")))
         );
     }
 
@@ -161,6 +173,33 @@ public class StudentQueryServiceTest {
         expected.add(new GradeClass(2027, 3));
         expected.add(new GradeClass(2026, 1));
         assertEquals(expected, new HashSet<>(multiRoleClasses));
+
+        // 测试家长用户可以访问其孩子所在的班级(多个孩子)
+        User parentMulti = testUsers.get("parent-multi");
+        List<GradeClass> parentMultiClasses = studentQueryService.getAllAccessibleClasses(parentMulti);
+        System.out.println("parent-multi:" + parentMultiClasses);
+        Set<GradeClass> expectedParentMultiClasses = Set.of(
+            new GradeClass(2026, 1), // 260101, 260102 (同班级，会去重)
+            new GradeClass(2027, 2)  // 270201
+        );
+        assertEquals(expectedParentMultiClasses, new HashSet<>(parentMultiClasses));
+
+        // 测试家长用户可以访问其孩子所在的班级(单个孩子)
+        User parentSingle = testUsers.get("parent-single");
+        List<GradeClass> parentSingleClasses = studentQueryService.getAllAccessibleClasses(parentSingle);
+        System.out.println("parent-single:" + parentSingleClasses);
+        assertEquals(Set.of(new GradeClass(2028, 1)), new HashSet<>(parentSingleClasses));
+
+        // 测试学生用户只能访问自己所在的班级
+        User student260103 = testUsers.get("student-260103");
+        List<GradeClass> student260103Classes = studentQueryService.getAllAccessibleClasses(student260103);
+        System.out.println("student-260103:" + student260103Classes);
+        assertEquals(Set.of(new GradeClass(2026, 1)), new HashSet<>(student260103Classes));
+
+        User student270101 = testUsers.get("student-270101");
+        List<GradeClass> student270101Classes = studentQueryService.getAllAccessibleClasses(student270101);
+        System.out.println("student-270101:" + student270101Classes);
+        assertEquals(Set.of(new GradeClass(2027, 1)), new HashSet<>(student270101Classes));
     }
 
     private Set<String> getStuNosFromDTO(PageResult<StudentCoverResponse> response) {
@@ -665,6 +704,220 @@ public class StudentQueryServiceTest {
         PageResult<StudentCoverResponse> cuResult = studentQueryService.searchStudents(null, null, null, cu28xx01, pageable);
         assertEquals(3, cuResult.totalElements()); // 只有3个指定学号的学生
         System.out.println("cu-28xx01无条件搜索结果数量: " + cuResult.totalElements());
+    }
+
+    @Test
+    void testParentUserPermissions() {
+        Pageable pageable = Pageable.ofSize(20);
+        var testUsers = makeUsers();
+
+        // ========== 测试多孩子家长用户的权限 ==========
+        User parentMulti = testUsers.get("parent-multi");
+        
+        // 1. 无条件搜索 - 只能看到自己的孩子们
+        Set<String> actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长无条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("260101", "260102", "270201"), actualStuNos);
+
+        // 2. 按年级搜索 - 只能看到该年级自己的孩子
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, null, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索2026届结果: " + actualStuNos);
+        assertEquals(Set.of("260101", "260102"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, null, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索2027届结果: " + actualStuNos);
+        assertEquals(Set.of("270201"), actualStuNos);
+
+        // 3. 按年级班级搜索 - 只能看到该班级自己的孩子
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, 1, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索2026届1班结果: " + actualStuNos);
+        assertEquals(Set.of("260101", "260102"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, 2, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索2027届2班结果: " + actualStuNos);
+        assertEquals(Set.of("270201"), actualStuNos);
+
+        // 4. 搜索无权限班级 - 找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2028, null, null, parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索无权限年级2028届结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 5. 按关键词搜索自己的孩子学号
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "260101", parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索孩子学号260101结果: " + actualStuNos);
+        assertEquals(Set.of("260101"), actualStuNos);
+
+        // 6. 按关键词搜索其他学生学号 - 找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "260103", parentMulti, pageable)
+        );
+        System.out.println("多孩子家长搜索其他学生学号260103结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // ========== 测试单孩子家长用户的权限 ==========
+        User parentSingle = testUsers.get("parent-single");
+        
+        // 1. 无条件搜索 - 只能看到自己的唯一孩子
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, null, parentSingle, pageable)
+        );
+        System.out.println("单孩子家长无条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("280101"), actualStuNos);
+
+        // 2. 按年级搜索 - 正确年级能找到，错误年级找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2028, null, null, parentSingle, pageable)
+        );
+        System.out.println("单孩子家长搜索正确年级2028届结果: " + actualStuNos);
+        assertEquals(Set.of("280101"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, null, null, parentSingle, pageable)
+        );
+        System.out.println("单孩子家长搜索错误年级2026届结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 3. 按年级班级搜索 - 正确班级能找到，错误班级找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2028, 1, null, parentSingle, pageable)
+        );
+        System.out.println("单孩子家长搜索正确班级2028届1班结果: " + actualStuNos);
+        assertEquals(Set.of("280101"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2028, 2, null, parentSingle, pageable)
+        );
+        System.out.println("单孩子家长搜索错误班级2028届2班结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 4. 按关键词搜索自己的孩子
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "280101", parentSingle, pageable)
+        );
+        System.out.println("单孩子家长搜索孩子学号280101结果: " + actualStuNos);
+        assertEquals(Set.of("280101"), actualStuNos);
+
+        // 5. 组合条件搜索
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2028, 1, "280101", parentSingle, pageable)
+        );
+        System.out.println("单孩子家长组合条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("280101"), actualStuNos);
+    }
+
+    @Test
+    void testStudentUserPermissions() {
+        Pageable pageable = Pageable.ofSize(20);
+        var testUsers = makeUsers();
+
+        // ========== 测试学生用户260103的权限 ==========
+        User student260103 = testUsers.get("student-260103");
+        
+        // 1. 无条件搜索 - 只能看到自己
+        Set<String> actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, null, student260103, pageable)
+        );
+        System.out.println("学生260103无条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("260103"), actualStuNos);
+
+        // 2. 按年级搜索 - 正确年级能找到自己，错误年级找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, null, null, student260103, pageable)
+        );
+        System.out.println("学生260103搜索正确年级2026届结果: " + actualStuNos);
+        assertEquals(Set.of("260103"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, null, null, student260103, pageable)
+        );
+        System.out.println("学生260103搜索错误年级2027届结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 3. 按年级班级搜索 - 正确班级能找到自己，错误班级找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, 1, null, student260103, pageable)
+        );
+        System.out.println("学生260103搜索正确班级2026届1班结果: " + actualStuNos);
+        assertEquals(Set.of("260103"), actualStuNos);
+
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2026, 2, null, student260103, pageable)
+        );
+        System.out.println("学生260103搜索错误班级2026届2班结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 4. 按关键词搜索自己的学号
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "260103", student260103, pageable)
+        );
+        System.out.println("学生260103搜索自己学号结果: " + actualStuNos);
+        assertEquals(Set.of("260103"), actualStuNos);
+
+        // 5. 按关键词搜索其他学生学号 - 找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "260101", student260103, pageable)
+        );
+        System.out.println("学生260103搜索其他学生学号260101结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // 6. 按关键词搜索同班其他学生 - 找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, "260104", student260103, pageable)
+        );
+        System.out.println("学生260103搜索同班其他学生260104结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
+
+        // ========== 测试学生用户270101的权限 ==========
+        User student270101 = testUsers.get("student-270101");
+        
+        // 1. 无条件搜索 - 只能看到自己
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(null, null, null, student270101, pageable)
+        );
+        System.out.println("学生270101无条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("270101"), actualStuNos);
+
+        // 2. 按年级搜索 - 正确年级能找到自己
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, null, null, student270101, pageable)
+        );
+        System.out.println("学生270101搜索正确年级2027届结果: " + actualStuNos);
+        assertEquals(Set.of("270101"), actualStuNos);
+
+        // 3. 按年级班级搜索 - 正确班级能找到自己
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, 1, null, student270101, pageable)
+        );
+        System.out.println("学生270101搜索正确班级2027届1班结果: " + actualStuNos);
+        assertEquals(Set.of("270101"), actualStuNos);
+
+        // 4. 组合条件搜索 - 所有条件都正确时能找到自己
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, 1, "270101", student270101, pageable)
+        );
+        System.out.println("学生270101组合条件搜索结果: " + actualStuNos);
+        assertEquals(Set.of("270101"), actualStuNos);
+
+        // 5. 组合条件搜索 - 任何条件不匹配都找不到
+        actualStuNos = getStuNosFromDTO(
+            studentQueryService.searchStudents(2027, 1, "270102", student270101, pageable)
+        );
+        System.out.println("学生270101错误关键词组合搜索结果: " + actualStuNos);
+        assertEquals(Set.of(), actualStuNos);
     }
 
 
