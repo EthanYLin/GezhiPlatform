@@ -16,6 +16,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 学生Service类
@@ -89,10 +90,33 @@ public class StudentService {
     /**
      * 获取指定年级的所有班级
      * @param gradeNo 年级
-     * @return 班级列表
+     * @return 班级列表(整数形式, 如: 1, 2, 3)
      */
     public List<Integer> getClassesByGrade(@NotNull Integer gradeNo) {
         return studentRepository.findClassesByGrade(gradeNo);
+    }
+
+    /**
+     * 根据年级获取该年级的所有班级
+     * @param gradeNo 年级
+     * @return 年级班级列表(GradeClass对象)
+     */
+    public List<GradeClass> getGradeClassesByGrade(@NotNull Integer gradeNo) {
+        return this.getClassesByGrade(gradeNo).stream().map(classNo -> new GradeClass(gradeNo, classNo)).toList();
+    }
+
+    /**
+     * 根据学生学号列表获取对应的年级班级列表
+     * 如传入学号列表 ["260101", "260102", "270201"]
+     * 返回年级班级列表 [GradeClass(2026, 1), GradeClass(2027, 2)]
+     * @param stuNos 学生学号列表
+     * @return 传入学号所在的年级班级列表(GradeClass对象)
+     */
+    public List<GradeClass> getGradeClassesByStuNos(@NotNull List<String> stuNos) {
+        return studentRepository.findStudentsByStuNoIn(stuNos).stream()
+                                .map(Student::getGradeClass)
+                                .flatMap(Optional::stream)
+                                .distinct().sorted().toList();
     }
 
     /**

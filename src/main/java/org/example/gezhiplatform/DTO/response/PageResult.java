@@ -36,4 +36,8 @@ public record PageResult<T> (
     public @NotNull Iterator<T> iterator() {
         return content.iterator();
     }
+
+    public static <T> PageResult<T> of(Page<T> page) {
+        return new PageResult<>(page);
+    }
 }

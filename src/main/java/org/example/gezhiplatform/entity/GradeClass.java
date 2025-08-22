@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Embeddable
 @Data
-public class GradeClass {
+public class GradeClass implements Comparable<GradeClass> {
 
     @Nullable
     private Integer gradeNo; // 届(Integer)
@@ -104,6 +104,21 @@ public class GradeClass {
     @Override
     public String toString() {
         return this.toAbsoluteExpr();
+    }
+
+    @Override
+    public int compareTo(@NotNull GradeClass o) {
+        int gradeComparison = Integer.compare(
+            o.gradeNo != null ? o.gradeNo : 0,
+            this.gradeNo != null ? this.gradeNo : 0
+        );
+        if (gradeComparison != 0) {
+            return gradeComparison;
+        }
+        return Integer.compare(
+            this.classNo != null ? this.classNo : 0,
+            o.classNo != null ? o.classNo : 0
+        );
     }
 }
 
