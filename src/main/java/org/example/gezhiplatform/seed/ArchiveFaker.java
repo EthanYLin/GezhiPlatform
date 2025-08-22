@@ -14,6 +14,7 @@ import org.example.gezhiplatform.entity.enums.AdmissionPath;
 import org.example.gezhiplatform.entity.enums.District;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.HealthStatus;
+import org.example.gezhiplatform.utils.RandomUtils;
 
 import java.util.List;
 

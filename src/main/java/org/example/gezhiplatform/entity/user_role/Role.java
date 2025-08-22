@@ -1,14 +1,12 @@
 package org.example.gezhiplatform.entity.user_role;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
-
-import java.lang.reflect.Field;
-import java.util.Optional;
 
 /*
  * 目前的角色有：
@@ -27,6 +25,7 @@ import java.util.Optional;
  * 依赖：applyFilter()的返回值依赖学生(Student)类
  */
 @Entity
+@Data
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Role {
 
@@ -36,24 +35,6 @@ public abstract class Role {
 
     @Nullable
     private String remark; // 角色备注
-
-    /**
-     * 按名称和类型从指定的类检索字段。
-     *
-     * @param clazz 要搜索字段的类
-     * @param fieldName 要查找的字段的名称
-     * @param fieldType 要查找的字段类型
-     * @return 如果找到该字段，则返回Optional<该字段>，否则返回空Optional
-     */
-    protected static Optional<Field> getField(Class<?> clazz, String fieldName, Class<?> fieldType) {
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (field.getName().equals(fieldName) && field.getType().equals(fieldType)) {
-                return Optional.of(field);
-            }
-        }
-        return Optional.empty();
-    }
 
     /**
      * 过滤学生的方法
@@ -68,19 +49,4 @@ public abstract class Role {
      */
     public abstract @NotNull RoleType getRoleType();
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(@NotNull Long id) {
-        this.id = id;
-    }
-
-    public @Nullable String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(@Nullable String remark) {
-        this.remark = remark;
-    }
 }

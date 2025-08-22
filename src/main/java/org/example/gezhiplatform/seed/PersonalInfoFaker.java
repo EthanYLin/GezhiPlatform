@@ -9,6 +9,7 @@ import org.example.gezhiplatform.entity.archive.address_part.Address;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.Nation;
 import org.example.gezhiplatform.entity.enums.PoliticalStatus;
+import org.example.gezhiplatform.utils.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

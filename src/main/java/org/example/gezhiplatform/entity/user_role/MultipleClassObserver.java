@@ -5,11 +5,14 @@ import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.RoleType;
+import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
 /**
  * 多班级观察员(角色类的实现类, 主要用于测试)
@@ -25,7 +28,7 @@ public class MultipleClassObserver extends Role {
 
     static {
         getField(Student.class, "gradeClass", GradeClass.class)
-            .orElseThrow(() -> new FilterSettingException("未找到gradeClass字段"));
+            .orElseThrow(() -> new FieldNotFoundException("MultipleClassObserver 角色需要依照班级(gradeClass)进行筛选, 但未在Student类中找到GradeClass类型的gradeClass字段。"));
     }
 
     public @NotNull List<GradeClass> getGradeClasses() {

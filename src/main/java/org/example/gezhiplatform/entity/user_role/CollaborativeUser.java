@@ -4,11 +4,14 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.RoleType;
+import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
 /**
  * 协作用户(可能包括社工、卫生室、心理老师、生涯导师)(默认权限等级为3, 角色类的实现类)
@@ -16,11 +19,11 @@ import java.util.List;
  * 构造函数：规定能够管理哪些学生(学号)
  */
 @Entity
-public class CollaborativeUser extends Role{
+public class CollaborativeUser extends Role {
 
     static {
         getField(Student.class, "stuNo", String.class)
-            .orElseThrow(() -> new FilterSettingException("未找到学号(stuNo)字段"));
+            .orElseThrow(() -> new FieldNotFoundException("CollaborativeUser 角色需要依照学号(stuNo)进行筛选, 但未在Student类中找到String类型的stuNo字段。"));
     }
 
     @NotNull

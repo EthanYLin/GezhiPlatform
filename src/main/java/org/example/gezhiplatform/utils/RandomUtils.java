@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.seed;
+package org.example.gezhiplatform.utils;
 
 import java.util.List;
 import java.util.Random;

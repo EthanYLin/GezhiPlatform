@@ -4,9 +4,12 @@ import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.RoleType;
+import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
+
+import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
 /**
  * 年级组长(默认权限等级为7, 角色类的实现类)
@@ -21,9 +24,9 @@ public class GradeDean extends Role {
 
     static {
         getField(Student.class, "gradeClass", GradeClass.class)
-            .orElseThrow(() -> new FilterSettingException("未找到gradeClass字段"));
+            .orElseThrow(() -> new FieldNotFoundException("GradeDean 角色需要依照班级(gradeClass)进行筛选, 但未在Student类中找到GradeClass类型的gradeClass字段。"));
         getField(GradeClass.class, "gradeNo", Integer.class)
-            .orElseThrow(() -> new FilterSettingException("未找到gradeNo字段"));
+            .orElseThrow(() -> new FieldNotFoundException("GradeDean 角色需要依照年级号(gradeNo)进行筛选, 但未在GradeClass类中找到Integer类型的gradeNo字段。"));
     }
 
     public GradeDean() {}
@@ -41,7 +44,7 @@ public class GradeDean extends Role {
     }
 
     @Override
-    public @NotNull Specification<Student> applyFilter() throws FilterSettingException{
+    public @NotNull Specification<Student> applyFilter() {
         return (root, _, cb) ->
             cb.equal(root.get("gradeClass").get("gradeNo"), gradeNo);
     }

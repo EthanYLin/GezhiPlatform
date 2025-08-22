@@ -4,9 +4,12 @@ import jakarta.persistence.Entity;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.enums.RoleType;
+import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
+
+import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
 /**
  * 班主任(默认权限等级为5, 角色类的实现类)
@@ -18,7 +21,7 @@ public class ClassAdviser extends Role{
 
     static {
         getField(Student.class, "gradeClass", GradeClass.class)
-            .orElseThrow(() -> new FilterSettingException("未找到gradeClass字段"));
+            .orElseThrow(() -> new FieldNotFoundException("ClassAdviser 角色需要依照班级(gradeClass)进行筛选, 但未在Student类中找到GradeClass类型的gradeClass字段。"));
     }
 
     @Nullable
