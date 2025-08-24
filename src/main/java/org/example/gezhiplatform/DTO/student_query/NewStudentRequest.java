@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.DTO.request;
+package org.example.gezhiplatform.DTO.student_query;
 
 import jakarta.validation.constraints.*;
 import org.example.gezhiplatform.entity.Student;

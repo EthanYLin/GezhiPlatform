@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.DTO.response;
+package org.example.gezhiplatform.DTO;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;

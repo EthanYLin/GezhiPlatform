@@ -1,8 +1,8 @@
 package org.example.gezhiplatform;
 
 import jakarta.transaction.Transactional;
-import org.example.gezhiplatform.DTO.request.NewStudentRequest;
-import org.example.gezhiplatform.DTO.response.StudentCoverResponse;
+import org.example.gezhiplatform.DTO.student_query.NewStudentRequest;
+import org.example.gezhiplatform.DTO.student_query.StudentCoverResponse;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;

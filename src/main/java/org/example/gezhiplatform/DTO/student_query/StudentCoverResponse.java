@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.DTO.response;
+package org.example.gezhiplatform.DTO.student_query;
 
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;

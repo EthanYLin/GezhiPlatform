@@ -1,8 +1,8 @@
 package org.example.gezhiplatform.service;
 
-import org.example.gezhiplatform.DTO.request.NewStudentRequest;
-import org.example.gezhiplatform.DTO.response.PageResult;
-import org.example.gezhiplatform.DTO.response.StudentCoverResponse;
+import org.example.gezhiplatform.DTO.PageResult;
+import org.example.gezhiplatform.DTO.student_query.NewStudentRequest;
+import org.example.gezhiplatform.DTO.student_query.StudentCoverResponse;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.exception.BadRequestException;
