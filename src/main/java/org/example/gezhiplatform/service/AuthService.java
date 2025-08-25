@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
  * 认证与授权服务
  * <p>
  * 负责用户身份认证相关的核心业务逻辑，包括用户登录、注销、密码修改功能。
+ * <b>同时还提供获取当前用户信息的方法，供其他模块使用。</b>
  * </p>
  * <p>
  * 管理员查看或维护用户信息，请使用 {@link UserManagementService}。
@@ -151,10 +152,33 @@ public class AuthService {
      * @return 用户信息响应体，包含用户基本信息和当前访问令牌
      * @throws NotFoundException 当指定用户ID不存在时抛出
      */
-    public MeResponse getCurrentUserInfo(@NotNull Long userId) {
+    public MeResponse getCurrentUserInfo(@NotNull Long userId) throws NotFoundException {
         User user = userRepository.findById(userId).orElseThrow(
             () -> new NotFoundException("用户(" + userId + ")不存在")
         );
         return MeResponse.of(user, StpUtil.getTokenValue());
+    }
+
+    /**
+     * 根据用户ID获取用户实体, 便于其他模块调用用户信息。
+     *
+     * @param userId 用户ID
+     * @return 用户实体
+     * @throws NotFoundException 当指定用户ID不存在时抛出
+     */
+    public User getUserById(@NotNull Long userId) throws NotFoundException {
+        return userRepository.findById(userId).orElseThrow(
+            () -> new NotFoundException("用户(" + userId + ")不存在")
+        );
+    }
+
+    /**
+     * 获取当前登录用户实体, 便于其他模块调用用户信息。
+     *
+     * @return 当前登录用户实体
+     * @throws NotFoundException 当当前登录用户ID不存在时抛出
+     */
+    public User getCurrentUser() throws NotFoundException {
+        return getUserById(StpUtil.getLoginIdAsLong());
     }
 }
