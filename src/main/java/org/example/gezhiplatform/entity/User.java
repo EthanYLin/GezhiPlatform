@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +30,21 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL)
     private final List<Role> roles = new ArrayList<>(); // 具有的所有角色(角色专属于该用户, 不能被其他用户共享)
 
-    public User() {}
+    @Nullable
+    private String username; // 用户名(登录用)
 
-    public User(@Nullable String name) {
-        this.name = name;
-    }
+    @Nullable
+    private String encryptedPassword; // 加密后的密码(登录用)
+
+    private boolean isLocked = false; // 是否被锁定
+
+    private boolean isEnabled = false; // 是否启用(如果当前密码是默认的初始密码, 则不启用, 只能进行修改密码功能)
+
+    @Nullable
+    private LocalDateTime lastLoginTime; // 上次登录时间
+
+
+    public User() {}
 
     public User(@Nullable String name, @NotNull List<Role> roles) {
         this.name = name;
