@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import static org.example.gezhiplatform.utils.ReflectionUtils.getIllegalSortProperties;
 
 /**
  * 学生Service类
@@ -51,6 +54,10 @@ public class StudentService {
     ) throws CustomInvalidArgException {
         if (gradeNo == null && classNo != null) {
             throw new CustomInvalidArgException("在班级不为空时, 年级不能为空。");
+        }
+        Set<String> illegalSortProperties = getIllegalSortProperties(Student.class, pageable);
+        if (!illegalSortProperties.isEmpty()) {
+            throw new BadRequestException("分页排序参数中包含无效的字段: " + String.join(", ", illegalSortProperties));
         }
         Page<StudentCoverResponse> result;
         if (gradeNo == null) {

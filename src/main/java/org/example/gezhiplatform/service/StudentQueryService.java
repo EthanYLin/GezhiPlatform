@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
+import static org.example.gezhiplatform.utils.ReflectionUtils.getIllegalSortProperties;
 
 /**
  * 学生查询服务类
@@ -179,11 +180,15 @@ public class StudentQueryService {
         if (pageable.getPageSize() > 1000) {
             throw new BadRequestException("分页的最大页大小为1000条记录。");
         }
+        Set<String> illegalSortProperties = getIllegalSortProperties(Student.class, pageable);
+        if (!illegalSortProperties.isEmpty()) {
+            throw new BadRequestException("分页排序参数中包含无效的字段: " + String.join(", ", illegalSortProperties));
+        }
         Specification<Student> userSpec = user.getSpec();
         Specification<Student> combinedSpec = Specification.where(condition).and(userSpec);
         return new PageResult<>(
             studentRepository
-                .findBy(combinedSpec, q -> q.page(pageable))
+                .findBy(combinedSpec, q -> q.sortBy(pageable.getSort()).page(pageable))
                 .map(StudentCoverResponse::new)
         );
     }
