@@ -1,9 +1,6 @@
 package org.example.gezhiplatform.exception;
 
-import cn.dev33.satoken.exception.DisableServiceException;
-import cn.dev33.satoken.exception.NotLoginException;
-import cn.dev33.satoken.exception.NotPermissionException;
-import cn.dev33.satoken.exception.SaTokenException;
+import cn.dev33.satoken.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +43,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(NotPermissionException.class)
-    public ResponseEntity<ErrorResponse> handleNotPermissionException(NotPermissionException ex) {
+    @ExceptionHandler({NotPermissionException.class, NotRoleException.class})
+    public ResponseEntity<ErrorResponse> handleNotPermissionException(SaTokenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
             new ErrorResponse(HttpStatus.FORBIDDEN.value(), "无权限进行该操作，如有需要请联系管理员。（" + ex.getCode() + "）")
         );

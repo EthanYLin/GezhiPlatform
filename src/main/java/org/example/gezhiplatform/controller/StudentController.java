@@ -1,5 +1,6 @@
 package org.example.gezhiplatform.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import java.util.List;
  * 该接口仅面向【系统管理员】权限。
  * </p>
  */
+@SaCheckRole("SUPER_ADMIN") // 仅超级管理员可访问
 @RestController
 @RequestMapping("/admin")
 @Tag(name = "学生维护(面向管理员)", description = "学生基本信息的增删改查接口")
