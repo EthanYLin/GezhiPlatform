@@ -53,4 +53,9 @@ public class GradeDean extends Role {
     public @NotNull RoleType getRoleType() {
         return RoleType.GRADE_DEAN;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "年级组长: " + (gradeNo != null ? gradeNo + "届" : "未指定年级");
+    }
 }

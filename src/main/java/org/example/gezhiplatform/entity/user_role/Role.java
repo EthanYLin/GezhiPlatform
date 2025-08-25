@@ -49,4 +49,11 @@ public abstract class Role {
      */
     public abstract @NotNull RoleType getRoleType();
 
+    /**
+     * 获取角色及其作用范围的字符串表示
+     * 例如: "班主任: 高一(03)班、年级组长: 2027届"
+     * @return 角色及其作用范围的字符串
+     */
+    public abstract @NotNull String getRoleAndScope();
+
 }

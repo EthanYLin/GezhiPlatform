@@ -52,4 +52,10 @@ public class ParentUser extends Role {
     public @NotNull RoleType getRoleType() {
         return RoleType.PARENT_USER;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "家长用户 - 孩子学号: " +
+               (stuNos.isEmpty() ? "暂未绑定" : String.join(", ", stuNos));
+    }
 }

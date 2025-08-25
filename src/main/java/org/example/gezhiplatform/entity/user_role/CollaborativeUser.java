@@ -52,4 +52,10 @@ public class CollaborativeUser extends Role {
     public @NotNull RoleType getRoleType() {
         return RoleType.COLLABORATIVE_USER;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "协作用户 - 允许查看学生范围: " +
+               (stuNos.isEmpty() ? "无" : String.join(", ", stuNos));
+    }
 }

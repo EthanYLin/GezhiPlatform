@@ -27,17 +27,17 @@ public enum RoleType {
     PARENT_USER("家长用户", 1),
     STUDENT_USER("学生用户", 0);
 
-    private final String name;
+    private final String desc;
     private final int level;
 
-    RoleType(String name, int level) {
-        this.name = name;
+    RoleType(String desc, int level) {
+        this.desc = desc;
         this.level = level;
     }
 
     @JsonValue
-    public String getName() {
-        return name;
+    public String getDesc() {
+        return desc;
     }
 
     @JsonValue
@@ -53,9 +53,9 @@ public enum RoleType {
      * @throws CustomInvalidArgException 如果角色名称无效
      */
     @JsonCreator
-    public static @NotNull RoleType fromName(String name) {
+    public static @NotNull RoleType fromDesc(String name) {
         for (RoleType role : RoleType.values()) {
-            if (role.name.equals(name)) {
+            if (role.desc.equals(name)) {
                 return role;
             }
         }

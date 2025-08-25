@@ -51,4 +51,9 @@ public class ClassAdviser extends Role{
     public @NotNull RoleType getRoleType() {
         return RoleType.CLASS_ADVISOR;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "班主任: " + (gradeClass != null ? gradeClass.toRelativeExpr() : "未指定班级");
+    }
 }

@@ -53,4 +53,9 @@ public class MultipleClassObserver extends Role {
     public @NotNull RoleType getRoleType() {
         return RoleType.MULTIPLE_CLASS_OBSERVER;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "多班级观察员: " + gradeClasses.stream().map(GradeClass::toRelativeExpr).toList();
+    }
 }

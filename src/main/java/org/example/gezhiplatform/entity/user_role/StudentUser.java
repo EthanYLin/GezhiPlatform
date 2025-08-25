@@ -43,4 +43,9 @@ public class StudentUser extends Role {
     public @NotNull RoleType getRoleType() {
         return RoleType.STUDENT_USER;
     }
+
+    @Override
+    public @NotNull String getRoleAndScope() {
+        return "学生用户: 学号 " + (stuNo != null ? stuNo : "暂未绑定");
+    }
 }
