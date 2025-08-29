@@ -20,8 +20,11 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     @Query("SELECT DISTINCT s.gradeClass.gradeNo FROM Student s WHERE s.gradeClass.gradeNo IS NOT NULL")
     List<Integer> findAllGrades(); // 查询所有年级
 
-    @Query("SELECT DISTINCT s.gradeClass.classNo FROM Student s WHERE s.gradeClass.gradeNo = :gradeNo AND s.gradeClass.classNo IS NOT NULL")
-    List<Integer> findClassesByGrade(@NotNull @Param("gradeNo") Integer gradeNo); // 查询指定年级的所有班级
+    @Query("SELECT DISTINCT s.gradeClass FROM Student s WHERE s.gradeClass.gradeNo = :gradeNo AND s.gradeClass.classNo IS NOT NULL")
+    List<GradeClass> findGradeClassesByGrade(@NotNull @Param("gradeNo") Integer gradeNo); // 查询指定年级的所有班级
+
+    @Query("SELECT DISTINCT s.gradeClass FROM Student s WHERE s.gradeClass IS NOT NULL")
+    List<GradeClass> findAllGradeClasses(); // 查询所有年级-班级
 
     Optional<Student> findByStuNo(@NotNull String stuNo);
 

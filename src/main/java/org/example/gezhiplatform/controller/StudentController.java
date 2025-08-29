@@ -7,9 +7,11 @@ import jakarta.validation.Valid;
 import org.example.gezhiplatform.DTO.PageResult;
 import org.example.gezhiplatform.DTO.student_query.NewStudentRequest;
 import org.example.gezhiplatform.DTO.student_query.StudentCoverResponse;
+import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.example.gezhiplatform.exception.NotFoundException;
+import org.example.gezhiplatform.service.GradeClassService;
 import org.example.gezhiplatform.service.StudentService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +36,11 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+    private final GradeClassService gradeClassService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, GradeClassService gradeClassService) {
         this.studentService = studentService;
+        this.gradeClassService = gradeClassService;
     }
 
     // =========================== 年级与班级查询 ===========================
@@ -50,25 +54,25 @@ public class StudentController {
     @Operation(summary = "获取所有年级")
     @GetMapping("/grades")
     public List<Integer> getAllGrades() {
-        return studentService.getAllGrades();
+        return gradeClassService.getAllGrades();
     }
 
     /**
      * 获取指定年级的所有班级列表
      * <p>
-     * 根据提供的年级(如2023)，返回该年级下所有班级列表(如1,2,3)。
+     * 根据提供的年级(如2023)，返回该年级下所有年级-班级列表(如2023级1班、2023级2班等)。
      * </p>
      *
      * @param gradeNo 年级
-     * @return 班级列表
+     * @return 年级-班级列表
      * @apiNote GET /admin/grades/{gradeNo}/classes
      */
     @Operation(summary = "获取指定年级的所有班级")
     @GetMapping("/grades/{gradeNo}/classes")
-    public List<Integer> getClassesByGrade(
+    public List<GradeClass> getClassesByGrade(
         @PathVariable @NotNull Integer gradeNo
     ) {
-        return studentService.getClassesByGrade(gradeNo);
+        return gradeClassService.getGradeClassesByGrade(gradeNo);
     }
 
     // =========================== 学生查询 ===========================

@@ -39,11 +39,11 @@ import static org.example.gezhiplatform.utils.ReflectionUtils.getIllegalSortProp
 @Service
 public class StudentQueryService {
 
-    private final StudentService studentService;
+    private final GradeClassService gradeClassService;
     private final StudentRepository studentRepository;
 
-    public StudentQueryService(StudentService studentService, StudentRepository studentRepository) {
-        this.studentService = studentService;
+    public StudentQueryService(GradeClassService gradeClassService, StudentRepository studentRepository) {
+        this.gradeClassService = gradeClassService;
         this.studentRepository = studentRepository;
     }
 
@@ -135,16 +135,14 @@ public class StudentQueryService {
                 case GradeDean dean -> {
                     Integer gradeNo = dean.getGradeNo();
                     if (gradeNo == null) return;
-                    result.addAll(studentService.getGradeClassesByGrade(gradeNo));
+                    result.addAll(gradeClassService.getGradeClassesByGrade(gradeNo));
                 }
-                case SuperAdmin _, Principal _ -> studentService.getAllGrades().forEach(
-                    gradeNo -> result.addAll(studentService.getGradeClassesByGrade(gradeNo))
-                );
-                case CollaborativeUser cu -> result.addAll(studentService.getGradeClassesByStuNos(cu.getStuNos()));
-                case StudentUser su -> result.addAll(studentService.getGradeClassesByStuNos(
+                case SuperAdmin _, Principal _ -> result.addAll(gradeClassService.getAllGradeClasses());
+                case CollaborativeUser cu -> result.addAll(gradeClassService.getGradeClassesByStuNos(cu.getStuNos()));
+                case StudentUser su -> result.addAll(gradeClassService.getGradeClassesByStuNos(
                     Optional.ofNullable(su.getStuNo()).map(List::of).orElse(List.of())
                 ));
-                case ParentUser pu -> result.addAll(studentService.getGradeClassesByStuNos(pu.getStuNos()));
+                case ParentUser pu -> result.addAll(gradeClassService.getGradeClassesByStuNos(pu.getStuNos()));
                 case null, default -> {}
             }
         });
