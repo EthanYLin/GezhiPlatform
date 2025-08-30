@@ -3,11 +3,13 @@ package org.example.gezhiplatform;
 import jakarta.transaction.Transactional;
 import org.example.gezhiplatform.DTO.student_query.NewStudentRequest;
 import org.example.gezhiplatform.DTO.student_query.StudentCoverResponse;
+import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
+import org.example.gezhiplatform.service.GradeClassService;
 import org.example.gezhiplatform.service.StudentService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,8 @@ public class StudentServiceTest {
     private StudentService studentService;
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private GradeClassService gradeClassService;
 
     @BeforeEach
     void addStudents() {
@@ -137,17 +141,34 @@ public class StudentServiceTest {
     @Test
     void getAllGradesAndClasses() {
         // 获取所有年级
-        var result = studentService.getAllGrades();
+        var result = gradeClassService.getAllGrades();
         System.out.println(result);
         assertEquals(Set.of(2017, 2018), Set.copyOf(result));
         // 获取2017年级的所有班级(1~3)
-        var resultClasses = studentService.getClassesByGrade(2017);
+        var resultClasses = gradeClassService.getGradeClassesByGrade(2017);
         System.out.println(resultClasses);
-        assertEquals(Set.of(1, 2, 3), Set.copyOf(resultClasses));
+        var expectedGradeClasses = List.of(
+            new GradeClass(2017, 1),
+            new GradeClass(2017, 2),
+            new GradeClass(2017, 3)
+        );
+        assertEquals(expectedGradeClasses, resultClasses);
         // 获取2020年级的所有班级(无)
-        var resultClasses2020 = studentService.getClassesByGrade(2020);
+        var resultClasses2020 = gradeClassService.getGradeClassesByGrade(2020);
         System.out.println(resultClasses2020);
         assertEquals(0, resultClasses2020.size());
+        // 获取所有班级
+        var resultAllClasses = gradeClassService.getAllGradeClasses();
+        System.out.println(resultAllClasses);
+        expectedGradeClasses = List.of(
+            new GradeClass(2017, 1),
+            new GradeClass(2017, 2),
+            new GradeClass(2017, 3),
+            new GradeClass(2018, 1),
+            new GradeClass(2018, 2),
+            new GradeClass(2018, 3)
+        );
+        assertEquals(expectedGradeClasses, resultAllClasses);
     }
 
     @Test
