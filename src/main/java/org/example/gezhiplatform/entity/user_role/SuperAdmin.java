@@ -30,4 +30,9 @@ public class SuperAdmin extends Role{
     public @NotNull String getRoleAndScope() {
         return "超级管理员";
     }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return true;
+    }
 }

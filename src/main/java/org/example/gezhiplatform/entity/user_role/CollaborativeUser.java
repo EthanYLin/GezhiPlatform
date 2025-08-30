@@ -8,8 +8,9 @@ import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -28,24 +29,22 @@ public class CollaborativeUser extends Role {
 
     @NotNull
     @ElementCollection
-    private final List<String> stuNos = new ArrayList<>(); // 管理的学生(学号)
+    private final Set<String> stuNos = new HashSet<>(); // 管理的学生(学号)
 
-    public @NotNull List<String> getStuNos() {
+    public @NotNull Set<String> getStuNos() {
         return stuNos;
     }
 
     public CollaborativeUser() {}
 
-    public CollaborativeUser(@NotNull List<String> stuNos) {
+    public CollaborativeUser(@NotNull Collection<String> stuNos) {
         this.stuNos.addAll(stuNos);
     }
 
     @Override
     public @NotNull Specification<Student> applyFilter() {
-        return (root, _, _) -> {
-            var stuNo = root.get("stuNo");
-            return stuNo.in(stuNos);
-        };
+        return (root, _, _) ->
+            root.get("stuNo").in(stuNos);
     }
 
     @Override
@@ -57,5 +56,10 @@ public class CollaborativeUser extends Role {
     public @NotNull String getRoleAndScope() {
         return "协作用户 - 允许查看学生范围: " +
                (stuNos.isEmpty() ? "无" : String.join(", ", stuNos));
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return stuNos.contains(student.getStuNo());
     }
 }

@@ -9,8 +9,9 @@ import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -24,29 +25,27 @@ public class MultipleClassObserver extends Role {
 
     @NotNull
     @ElementCollection
-    private final List<GradeClass> gradeClasses = new ArrayList<>(); // 管理的年级-班级
+    private final Set<GradeClass> gradeClasses = new HashSet<>(); // 管理的年级-班级
 
     static {
         getField(Student.class, "gradeClass", GradeClass.class)
             .orElseThrow(() -> new FieldNotFoundException("MultipleClassObserver 角色需要依照班级(gradeClass)进行筛选, 但未在Student类中找到GradeClass类型的gradeClass字段。"));
     }
 
-    public @NotNull List<GradeClass> getGradeClasses() {
+    public @NotNull Set<GradeClass> getGradeClasses() {
         return gradeClasses;
     }
 
     public MultipleClassObserver() {}
 
-    public MultipleClassObserver(List<GradeClass> gradeClasses) {
+    public MultipleClassObserver(Collection<GradeClass> gradeClasses) {
         this.gradeClasses.addAll(gradeClasses);
     }
 
     @Override
     public @NotNull Specification<Student> applyFilter() {
-        return (root, _, _) -> {
-            var gradeClass = root.get("gradeClass");
-            return gradeClass.in(gradeClasses);
-        };
+        return (root, _, _) ->
+            root.get("gradeClass").in(gradeClasses);
     }
 
     @Override
@@ -57,5 +56,10 @@ public class MultipleClassObserver extends Role {
     @Override
     public @NotNull String getRoleAndScope() {
         return "多班级观察员: " + gradeClasses.stream().map(GradeClass::toRelativeExpr).toList();
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return student.getGradeClass().map(gradeClasses::contains).orElse(false);
     }
 }

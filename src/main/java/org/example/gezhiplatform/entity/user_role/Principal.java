@@ -13,8 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 @Entity
 public class Principal extends Role{
 
-    public Principal() {
-    }
+    public Principal() {}
 
     @Override
     public @NotNull Specification<Student> applyFilter() {
@@ -29,5 +28,10 @@ public class Principal extends Role{
     @Override
     public @NotNull String getRoleAndScope() {
         return "校级领导";
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return true;
     }
 }

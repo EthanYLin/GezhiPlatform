@@ -36,7 +36,10 @@ public class StudentUser extends Role {
 
     @Override
     public @NotNull Specification<Student> applyFilter() {
-        return (root, _, cb) -> cb.equal(root.get("stuNo"), stuNo);
+        return (root, _, cb) ->
+            stuNo == null
+                ? cb.disjunction()
+                : cb.equal(root.get("stuNo"), stuNo);
     }
 
     @Override
@@ -47,5 +50,10 @@ public class StudentUser extends Role {
     @Override
     public @NotNull String getRoleAndScope() {
         return "学生用户: 学号 " + (stuNo != null ? stuNo : "暂未绑定");
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return stuNo != null && stuNo.equals(student.getStuNo());
     }
 }

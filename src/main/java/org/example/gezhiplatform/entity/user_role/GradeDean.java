@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 
+import java.util.Objects;
+
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
 /**
@@ -46,7 +48,9 @@ public class GradeDean extends Role {
     @Override
     public @NotNull Specification<Student> applyFilter() {
         return (root, _, cb) ->
-            cb.equal(root.get("gradeClass").get("gradeNo"), gradeNo);
+            gradeNo == null
+                ? cb.disjunction()
+                : cb.equal(root.get("gradeClass").get("gradeNo"), gradeNo);
     }
 
     @Override
@@ -57,5 +61,11 @@ public class GradeDean extends Role {
     @Override
     public @NotNull String getRoleAndScope() {
         return "年级组长: " + (gradeNo != null ? gradeNo + "届" : "未指定年级");
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return gradeNo != null &&
+               student.getGradeClass().map(gradeClass -> Objects.equals(gradeClass.getGradeNo(), gradeNo)).orElse(false);
     }
 }

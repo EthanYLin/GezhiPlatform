@@ -8,8 +8,9 @@ import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -28,24 +29,22 @@ public class ParentUser extends Role {
 
     @NotNull
     @ElementCollection
-    private final List<String> stuNos = new ArrayList<>(); // 能够查看的学生(学号)
+    private final Set<String> stuNos = new HashSet<>(); // 能够查看的学生(学号)
 
-    public @NotNull List<String> getStuNos() {
+    public @NotNull Set<String> getStuNos() {
         return stuNos;
     }
 
     public ParentUser() {}
 
-    public ParentUser(@NotNull List<String> stuNos) {
+    public ParentUser(@NotNull Collection<String> stuNos) {
         this.stuNos.addAll(stuNos);
     }
 
     @Override
     public @NotNull Specification<Student> applyFilter() {
-        return (root, _, _) -> {
-            var stuNo = root.get("stuNo");
-            return stuNo.in(stuNos);
-        };
+        return (root, _, _) ->
+            root.get("stuNo").in(stuNos);
     }
 
     @Override
@@ -57,5 +56,10 @@ public class ParentUser extends Role {
     public @NotNull String getRoleAndScope() {
         return "家长用户 - 孩子学号: " +
                (stuNos.isEmpty() ? "暂未绑定" : String.join(", ", stuNos));
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return stuNos.contains(student.getStuNo());
     }
 }

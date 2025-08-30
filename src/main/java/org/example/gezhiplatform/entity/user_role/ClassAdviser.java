@@ -44,7 +44,9 @@ public class ClassAdviser extends Role{
     @Override
     public @NotNull Specification<Student> applyFilter() {
         return (root, _, cb) ->
-            cb.equal(root.get("gradeClass"), gradeClass);
+            gradeClass == null
+                ? cb.disjunction()
+                : cb.equal(root.get("gradeClass"), gradeClass);
     }
 
     @Override
@@ -55,5 +57,11 @@ public class ClassAdviser extends Role{
     @Override
     public @NotNull String getRoleAndScope() {
         return "班主任: " + (gradeClass != null ? gradeClass.toRelativeExpr() : "未指定班级");
+    }
+
+    @Override
+    public boolean canAccessStudent(@NotNull Student student) {
+        return gradeClass != null
+            && student.getGradeClass().map(gradeClass::equals).orElse(false);
     }
 }
