@@ -3,6 +3,7 @@ package org.example.gezhiplatform.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.example.gezhiplatform.entity.user_role.Role;
+import org.example.gezhiplatform.utils.PasswordEncryptUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,6 +32,7 @@ public class User {
     private final List<Role> roles = new ArrayList<>(); // 具有的所有角色(角色专属于该用户, 不能被其他用户共享)
 
     @Nullable
+    @Column(unique = true)
     private String username; // 用户名(登录用)
 
     @Nullable
@@ -46,14 +48,38 @@ public class User {
 
     public User() {}
 
+    /**
+     * 创建[未设置用户名和密码]的不可登录用户，只设置姓名与角色。
+     * @param name 用户姓名
+     * @param roles 用户角色列表
+     */
     public User(@Nullable String name, @NotNull List<Role> roles) {
         this.name = name;
         this.roles.addAll(roles);
     }
 
+    /**
+     * 创建[未设置用户名和密码]的不可登录用户，只设置姓名与角色。
+     * @param name 用户姓名
+     * @param role 用户角色
+     */
     public User(@Nullable String name, @NotNull Role role) {
+        this(name, List.of(role));
+    }
+
+    /**
+     * 创建用户的同时设置用户名及密码(可选)
+     * @param name 用户姓名(可选)
+     * @param username 用户名(可选)
+     * @param rawDefaultPassword 初始密码(明文)(可选)
+     * @param roles 用户角色列表
+     */
+    public User(@Nullable String name, @Nullable String username, @Nullable String rawDefaultPassword, @NotNull List<Role> roles) {
         this.name = name;
-        this.roles.add(role);
+        this.username = username;
+        if (rawDefaultPassword != null)
+            this.encryptedPassword = PasswordEncryptUtils.encode(rawDefaultPassword);
+        this.roles.addAll(roles);
     }
 
     /**
@@ -65,12 +91,12 @@ public class User {
      *
      * @return 学生数据过滤的JPA Specification
      *         <ul>
-     *           <li>如果用户没有任何角色，返回null（无权限过滤，查询结果为空）</li>
+     *           <li>如果用户没有任何角色，无权限过滤，查询结果为空</li>
      *           <li>如果用户有角色，返回所有角色权限的并集过滤条件</li>
-     *         </ul>
+     *         </ul> 
      */
     public Specification<Student> getSpec() {
-        if (roles.isEmpty()) return Specification.where(null);
+        if (roles.isEmpty()) return (_, _, criteriaBuilder) -> criteriaBuilder.disjunction();
         return Specification.anyOf(
             roles.stream().map(Role::applyFilter).toList()
         );

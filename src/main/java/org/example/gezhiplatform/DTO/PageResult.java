@@ -1,5 +1,6 @@
 package org.example.gezhiplatform.DTO;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 
@@ -39,5 +40,15 @@ public record PageResult<T> (
 
     public static <T> PageResult<T> of(Page<T> page) {
         return new PageResult<>(page);
+    }
+
+    @JsonIgnore
+    public boolean isFirst() {
+        return pageNo == 0;
+    }
+
+    @JsonIgnore
+    public boolean isLast() {
+        return pageNo == totalPages - 1;
     }
 }
