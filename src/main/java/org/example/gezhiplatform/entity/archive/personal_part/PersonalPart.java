@@ -1,12 +1,15 @@
 package org.example.gezhiplatform.entity.archive.personal_part;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.example.gezhiplatform.annotation.JsonIncludeMethod;
+import org.example.gezhiplatform.annotation.JsonTitle;
+import org.example.gezhiplatform.annotation.RIN;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.Nation;
 import org.example.gezhiplatform.entity.enums.PoliticalStatus;
@@ -21,23 +24,32 @@ import java.util.Optional;
  */
 @Entity
 @Data
+@JsonPropertyOrder({"mobile", "nation", "RIN", "gender", "birthDate", "politicalStatus"})
 public class PersonalPart {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // ID(由数据库自增)
 
+    @RIN
     @Nullable
     @JsonProperty("RIN")
     @JsonAlias({"rin"})
+    @JsonTitle("身份证号")
+    @JsonPropertyDescription("若最后一位为X，X需要大写。")
     private String RIN; // 居民身份证号
 
+    @JsonTitle("手机号码")
+    @Pattern(regexp = "^1\\d{10}$", message = "手机号格式不正确(仅支持中国大陆手机号)")
     @Nullable
     private String mobile; // 手机号码
 
+    @JsonTitle("民族")
     @Nullable
     private Nation nation; // 民族
 
+    @JsonTitle("政治面貌")
     @Nullable
     private PoliticalStatus politicalStatus; // 政治面貌
 
@@ -57,6 +69,16 @@ public class PersonalPart {
         }
     }
 
+    @JsonProperty(value = "birthDate", access = JsonProperty.Access.READ_ONLY)
+    @JsonTitle("出生日期")
+    @JsonIncludeMethod
+    public @Nullable String getBirthDateStr() {
+        return this.getBirthDate().map(LocalDate::toString).orElse(null);
+    }
+
+    @JsonProperty(value = "gender", access = JsonProperty.Access.READ_ONLY)
+    @JsonTitle("性别")
+    @JsonIncludeMethod
     public @NotNull Gender getGender() {
         if (this.RIN == null || this.RIN.length() != 18) {
             return Gender.UNKNOWN;
@@ -68,8 +90,5 @@ public class PersonalPart {
             return Gender.UNKNOWN;
         }
     }
-
-
-
 
 }
