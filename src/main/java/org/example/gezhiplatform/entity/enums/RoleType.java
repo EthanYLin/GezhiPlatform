@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.example.gezhiplatform.entity.user_role.*;
@@ -35,7 +36,7 @@ public enum RoleType {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String desc;
+    @JsonValue private final String desc;
     private final int level;
     private final Class<? extends Role> entityClass;
 
