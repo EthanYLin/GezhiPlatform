@@ -3,14 +3,18 @@ package org.example.gezhiplatform.seed;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gezhiplatform.DTO.permission.PermissionGroupRequest;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.example.gezhiplatform.entity.user_role.*;
+import org.example.gezhiplatform.repository.PermissionGroupRepository;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.repository.UserRepository;
+import org.example.gezhiplatform.service.ArchiveMetadataService;
+import org.example.gezhiplatform.service.ArchivePermissionGroupService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,7 +25,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.IntStream;
+
+import static org.example.gezhiplatform.seed.PermissionGroupFaker.*;
 
 @Slf4j
 @Component
@@ -33,6 +40,9 @@ public class SeedDataRunner implements ApplicationRunner {
     private final Scanner scanner = new Scanner(System.in);
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final ArchiveMetadataService archiveMetadataService;
+    private final ArchivePermissionGroupService archivePermissionGroupService;
+    private final PermissionGroupRepository permissionGroupRepository;
 
     // ================ 模拟学生及档案数据 ================
     // 2026级-2028级, 黄浦校区1-3班, 奉贤校区9班, 每班01~05号学生
@@ -122,12 +132,62 @@ public class SeedDataRunner implements ApplicationRunner {
         userRepository.saveAll(seedUsers);
     }
 
+
+    // ================ 模拟权限组数据 ================
+    private List<PermissionGroupRequest> makePermissionGroupRequests() {
+        var faker = new PermissionGroupFaker(archiveMetadataService.getFieldMetadata());
+        return List.of(
+            new PermissionGroupRequest(
+                "个人信息(Level-0)", whichLevelGe(0),
+                faker.pathsBeginWith(PERSONAL_PART).except(PERSONAL_PART + ".RIN").get(),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "入学信息(Level-5)", whichLevelGe(5),
+                faker.pathsBeginWith(ADMISSION_PART).get(),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "家庭信息(Level-5)", whichLevelGe(5),
+                Set.of(FAMILY_PART + ".father.name", FAMILY_PART + ".mother.name", FAMILY_PART + ".father.mobile", FAMILY_PART + ".mother.mobile"),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "地址信息(Level-9)", whichLevelGe(9),
+                faker.pathsBeginWith(ADDRESS_PART).get(),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "健康信息(Level-9)", whichLevelGe(9),
+                faker.pathsBeginWith(HEALTH_PART).get(),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "敏感信息(Level-9)", whichLevelGe(9),
+                faker.pathsBeginWith(FAMILY_PART + ".other").and(PERSONAL_PART + ".RIN")
+                    .and(FAMILY_PART + ".father.workUnit").and(FAMILY_PART + ".mother.workUnit").get(),
+                Set.of()
+            ),
+            new PermissionGroupRequest(
+                "管理员(AllAccess)", whichLevelGe(10),
+                faker.pathsBeginWith("$").get(),
+                faker.pathsBeginWith("$").get()
+            )
+        );
+    }
+
+    private void generatePermissionGroups() {
+        List<PermissionGroupRequest> permissionGroups = makePermissionGroupRequests();
+        permissionGroups.forEach(archivePermissionGroupService::addPermissionGroup);
+    }
+
     @Override
     public void run(ApplicationArguments args) {
         log.warn("你正在准备进行模拟数据生成...");
 
         boolean isGenerateStudents = studentRepository.count() == 0;
         boolean isGenerateUsers = userRepository.count() == 0;
+        boolean isGeneratePermissionGroup = permissionGroupRepository.count() == 0;
         log.warn("1. 生成以下学生及档案");
         log.warn(isGenerateStudents ? seedStudents.toString() : "跳过(已存在学生数据)");
         log.warn("2. 生成以下用户(初始密码均为: {} )", UserFaker.defaultPassword);
@@ -136,6 +196,11 @@ public class SeedDataRunner implements ApplicationRunner {
                 su -> log.warn("{} -> {}", su.name(), su.roles().stream().map(Role::getRoleAndScope).toList()));
         else
             log.warn("跳过(已存在用户数据)");
+        log.warn("3. 生成以下权限组");
+        if (isGeneratePermissionGroup)
+            makePermissionGroupRequests().forEach(pg -> log.warn(pg.toString()));
+        else
+            log.warn("跳过(已存在权限组数据)");
 
         System.out.println("请确认要生成的数据是否正确, 并输入[Y/y]继续...");
         if (!scanner.nextLine().matches("[Yy]")) {
@@ -145,6 +210,7 @@ public class SeedDataRunner implements ApplicationRunner {
 
         if (isGenerateStudents) generateStudentAndArchive();
         if (isGenerateUsers) generateUsers();
+        if (isGeneratePermissionGroup) generatePermissionGroups();
 
         System.exit(SpringApplication.exit(ctx));
     }
