@@ -34,7 +34,7 @@ import java.util.Set;
 @Service
 public class ArchiveMetadataService {
 
-    private final Map<String, XJsonPathAugmentUtils.FieldMeta> fieldMetadata = new HashMap<>();
+    @Getter private final Map<String, XJsonPathAugmentUtils.FieldMeta> fieldMetadata = new HashMap<>();
     private final Set<String> allFieldPaths = new HashSet<>();
     @Getter private ObjectNode schema;
 
@@ -75,6 +75,19 @@ public class ArchiveMetadataService {
         Set<String> complement = new HashSet<>(allFieldPaths);
         complement.removeAll(paths);
         return complement;
+    }
+
+    /**
+     * 获取字段路径的交集
+     * 返回所有已知字段路径中与输入路径集合的交集部分。
+     *
+     * @param paths 输入的字段路径集合
+     * @return 交集，即所有已知字段路径中与输入集合共有的路径
+     */
+    public Set<String> getIntersectSet(Set<String> paths) {
+        Set<String> intersect = new HashSet<>(allFieldPaths);
+        intersect.retainAll(paths);
+        return intersect;
     }
 
 
