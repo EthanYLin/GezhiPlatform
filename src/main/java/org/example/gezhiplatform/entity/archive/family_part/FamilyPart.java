@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 学生档案 - 亲属信息部分
- * 包括父母、其他亲属
+ * 包括父母、直系亲属
  */
 @Entity
 @Data
@@ -37,7 +37,7 @@ public class FamilyPart {
 
     @ElementCollection
     @NotNull
-    @JsonTitle("其他亲属")
-    private List<Relative> otherRelatives = new ArrayList<>(); // 其他亲属
+    @JsonTitle("直系亲属")
+    private List<Relative> otherRelatives = new ArrayList<>(); // 直系亲属
 
 }

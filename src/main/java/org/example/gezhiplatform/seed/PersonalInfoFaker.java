@@ -5,7 +5,8 @@ import io.github.yindz.random.RandomSource;
 import io.github.yindz.random.constant.Province;
 import io.github.yindz.random.source.PersonInfoSource;
 import lombok.Builder;
-import org.example.gezhiplatform.entity.archive.address_part.Address;
+import org.example.gezhiplatform.entity.archive.address_part.CurrentAddress;
+import org.example.gezhiplatform.entity.archive.address_part.DomicileAddress;
 import org.example.gezhiplatform.entity.enums.Gender;
 import org.example.gezhiplatform.entity.enums.Nation;
 import org.example.gezhiplatform.entity.enums.PoliticalStatus;
@@ -76,14 +77,14 @@ public class PersonalInfoFaker {
         }
     }
 
-    public static Address shanghaiAddress() {
+    public static CurrentAddress shanghaiCurrentAddress() {
         String fullAddress = RandomSource.areaSource().randomAddress(Province.SH);
         fullAddress = fullAddress.replaceFirst("上海市", "");
         String district = fullAddress.split("区")[0] + "区";
         String detail = fullAddress.replaceFirst(district, "").trim();
         String street = detail.split("路")[0] + "路街道";
         String committee = RandomSource.languageSource().randomChinese(2) + "居委会";
-        return new Address(
+        return new CurrentAddress(
             null,
             "上海市",
             "上海市",
@@ -91,6 +92,17 @@ public class PersonalInfoFaker {
             detail,
             street,
             committee
+        );
+    }
+
+    public static DomicileAddress shanghaiDomicileAddress() {
+        CurrentAddress currentAddress = shanghaiCurrentAddress();
+        return new DomicileAddress(
+            null,
+            "上海市",
+            "上海市",
+            currentAddress.getDistrict(),
+            currentAddress.getDetail()
         );
     }
 

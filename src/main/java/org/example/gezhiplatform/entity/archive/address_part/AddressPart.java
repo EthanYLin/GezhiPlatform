@@ -23,11 +23,11 @@ public class AddressPart {
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     @JsonTitle("户籍地址")
-    private Address domicileAddress; // 户籍地址
+    private DomicileAddress domicileAddress; // 户籍地址
 
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
     @JsonTitle("现居地址")
-    private Address currentAddress; // 现居地址
+    private CurrentAddress currentAddress; // 现居地址
 
 }

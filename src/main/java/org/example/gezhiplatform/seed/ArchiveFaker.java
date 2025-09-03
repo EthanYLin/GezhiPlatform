@@ -41,8 +41,8 @@ public class ArchiveFaker {
 
     public static AddressPart addressPart() {
         var addressPart = new AddressPart();
-        addressPart.setDomicileAddress(PersonalInfoFaker.shanghaiAddress());
-        addressPart.setCurrentAddress(PersonalInfoFaker.shanghaiAddress());
+        addressPart.setDomicileAddress(PersonalInfoFaker.shanghaiDomicileAddress());
+        addressPart.setCurrentAddress(PersonalInfoFaker.shanghaiCurrentAddress());
         return addressPart;
     }
 

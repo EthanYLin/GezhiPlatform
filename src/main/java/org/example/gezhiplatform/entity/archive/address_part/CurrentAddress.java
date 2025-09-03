@@ -14,8 +14,7 @@ import org.example.gezhiplatform.annotation.JsonTitle;
 import org.springframework.lang.Nullable;
 
 /**
- * 地址类(包括省、市、区、详细地址、街道、居委)
- * 用于：学生档案 - 地址信息部分 - 户籍地址
+ * 居住地址类(包括省、市、区、详细地址、街道、居委)
  * 用于：学生档案 - 地址信息部分 - 居住地址
  */
 @Entity
@@ -23,7 +22,7 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonPropertyOrder({"province", "city", "district", "detail", "street", "committee"})
-public class Address {
+public class CurrentAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

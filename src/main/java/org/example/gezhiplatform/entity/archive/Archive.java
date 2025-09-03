@@ -16,7 +16,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * 学生档案
- * 包括个人信息、入学信息、地址信息、亲属信息、健康信息
+ * 包括个人信息、入学信息、地址信息、家庭成员、健康申明部分
  */
 @Entity
 @Data
@@ -51,12 +51,12 @@ public class Archive {
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
-    @JsonTitle("亲属信息")
-    private FamilyPart familyPart; // 亲属信息
+    @JsonTitle("家庭成员")
+    private FamilyPart familyPart; // 家庭成员
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
-    @JsonTitle("健康信息")
-    private HealthPart healthPart; // 健康信息
+    @JsonTitle("健康申明")
+    private HealthPart healthPart; // 健康申明
 
 }
