@@ -2,6 +2,7 @@ package org.example.gezhiplatform.repository;
 
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.archive.Archive;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,4 +40,6 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     interface StuNoOnly {@NotNull String getStuNo();}  // 仅返回学号的投影接口
     List<StuNoOnly> findByStuNoIn(@NotNull Collection<String> stuNos);
 
+    interface ArchiveOnly { Archive getArchive(); }
+    Optional<ArchiveOnly> findArchiveByStuNo(String stuNo);
 }
