@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ParseContext;
 import jakarta.transaction.Transactional;
+import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.entity.archive.Archive;
+import org.example.gezhiplatform.entity.enums.AuditOperationType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
+import org.example.gezhiplatform.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +38,11 @@ import static com.jayway.jsonpath.Option.SUPPRESS_EXCEPTIONS;
 @Service
 public class ArchiveQueryService {
 
+    private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final ArchiveMetadataService archiveMetadataService;
     private final ArchiveAccessControlService archiveAccessControlService;
+    private final AuditService auditService;
 
     private final ParseContext jsonParser = JsonPath.using(defaultConfiguration().setOptions(SUPPRESS_EXCEPTIONS));
     private final ObjectMapper objectMapper;
@@ -46,12 +51,16 @@ public class ArchiveQueryService {
         StudentRepository studentRepository,
         ArchiveMetadataService archiveMetadataService,
         ObjectMapper objectMapper,
-        ArchiveAccessControlService archiveAccessControlService
+        ArchiveAccessControlService archiveAccessControlService,
+        AuditService auditService,
+        UserRepository userRepository
     ) {
         this.studentRepository = studentRepository;
         this.archiveMetadataService = archiveMetadataService;
         this.objectMapper = objectMapper;
         this.archiveAccessControlService = archiveAccessControlService;
+        this.auditService = auditService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -69,12 +78,12 @@ public class ArchiveQueryService {
      *   <li>返回过滤后的档案JSON数据</li>
      * </ol>
      * </p>
-     * 
+     *
      * @param currentUserId 当前用户ID
      * @param stuNoForQuery 要查询的学生学号
      * @return 经过权限过滤的学生档案JSON字符串
      * @throws BadRequestException 当档案序列化失败时抛出
-     * @throws NotFoundException 当学生不存在时抛出
+     * @throws NotFoundException   当学生不存在时抛出
      */
     @Transactional
     public String queryByStuNo(
@@ -82,9 +91,13 @@ public class ArchiveQueryService {
         @NotNull String stuNoForQuery
     ) throws BadRequestException {
         // 查询学生档案
+        User user = userRepository.findById(currentUserId).orElseThrow(
+            () -> new NotFoundException("当前操作用户不存在 (ID:" + currentUserId + ")")
+        );
         Archive archive = studentRepository.findArchiveByStuNo(stuNoForQuery).orElseThrow(
             () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")不存在")
         ).getArchive();
+
         // 将档案数据经由String转换为JaywayDocument
         String archiveJson;
         try {
@@ -93,13 +106,24 @@ public class ArchiveQueryService {
             throw new BadRequestException("无法序列化档案数据(追踪点:AQS01) :" + e.getMessage());
         }
         var archiveJayway = jsonParser.parse(archiveJson);
+
         // 获取用户具有的可读权限
         var allowedReadablePaths = archiveAccessControlService
             .getMergedPermissions(currentUserId, stuNoForQuery)
             .allowedJsonPaths().readableJsonPaths();
         var deniedReadablePaths = archiveMetadataService.getComplementSet(allowedReadablePaths);
+
         // 根据可读权限裁剪档案数据并返回
         deniedReadablePaths.forEach(archiveJayway::delete);
+
+        // 在审计日志中记录
+        var stuNo = archive.getStudent() == null ? "未知" : archive.getStudent().getStuNo();
+        var stuName = archive.getStudent() == null ? "未知" : archive.getStudent().getStuName();
+        auditService.log(
+            user, AuditOperationType.ARCHIVE_QUERY,
+            String.format("查询学生档案(学号:%s, 姓名: %s)", stuNo, stuName)
+        );
+
         return archiveJayway.jsonString();
     }
 
