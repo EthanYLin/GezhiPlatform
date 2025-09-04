@@ -35,7 +35,7 @@ import java.util.List;
  * <p>
  * <ul>
  *   <li>系统管理员维护学生信息请使用 {@link StudentController}</li>
- *   <li>查询学生具体档案信息请使用 {@link ArchiveQueryController}</li>
+ *   <li>查询学生具体档案信息请使用 {@link ArchiveQueryAndUpdateController}</li>
  * </ul>
  * </p>
  * 
