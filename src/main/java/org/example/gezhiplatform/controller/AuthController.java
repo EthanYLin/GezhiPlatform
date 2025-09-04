@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import org.example.gezhiplatform.DTO.auth.ChangePasswordRequest;
 import org.example.gezhiplatform.DTO.auth.LoginRequest;
 import org.example.gezhiplatform.DTO.auth.MeResponse;
-import org.example.gezhiplatform.service.AuthService;
+import org.example.gezhiplatform.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

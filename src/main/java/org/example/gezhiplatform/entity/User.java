@@ -2,7 +2,7 @@ package org.example.gezhiplatform.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.example.gezhiplatform.entity.user_role.Role;
+import org.example.gezhiplatform.entity.role.Role;
 import org.example.gezhiplatform.utils.PasswordEncryptUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

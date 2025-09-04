@@ -11,7 +11,7 @@ import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.example.gezhiplatform.exception.NotFoundException;
-import org.example.gezhiplatform.service.UserManagementService;
+import org.example.gezhiplatform.service.user.UserManagementService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Pageable;

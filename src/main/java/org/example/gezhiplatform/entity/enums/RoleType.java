@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
-import org.example.gezhiplatform.entity.user_role.*;
+import org.example.gezhiplatform.entity.role.*;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.jetbrains.annotations.NotNull;
 

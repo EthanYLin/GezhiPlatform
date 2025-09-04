@@ -3,7 +3,7 @@ package org.example.gezhiplatform.DTO.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
 import org.example.gezhiplatform.entity.enums.RoleType;
-import org.example.gezhiplatform.entity.user_role.Role;
+import org.example.gezhiplatform.entity.role.Role;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 
 import java.util.Collection;

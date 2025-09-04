@@ -3,7 +3,7 @@ package org.example.gezhiplatform.seed;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.example.gezhiplatform.entity.User;
-import org.example.gezhiplatform.entity.user_role.Role;
+import org.example.gezhiplatform.entity.role.Role;
 import org.example.gezhiplatform.utils.PasswordEncryptUtils;
 import org.jetbrains.annotations.Nullable;
 

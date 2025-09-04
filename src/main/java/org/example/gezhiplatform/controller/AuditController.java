@@ -9,7 +9,7 @@ import org.example.gezhiplatform.DTO.PageResult;
 import org.example.gezhiplatform.DTO.audit.AuditRecordResponse;
 import org.example.gezhiplatform.entity.enums.AuditOperationType;
 import org.example.gezhiplatform.exception.BadRequestException;
-import org.example.gezhiplatform.service.AuditService;
+import org.example.gezhiplatform.service.audit.AuditService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;

@@ -1,6 +1,6 @@
 package org.example.gezhiplatform.repository;
 
-import org.example.gezhiplatform.entity.permission.PermissionGroup;
+import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

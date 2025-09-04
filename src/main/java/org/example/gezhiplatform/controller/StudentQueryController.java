@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import org.example.gezhiplatform.DTO.PageResult;
-import org.example.gezhiplatform.DTO.student_query.StudentCoverResponse;
+import org.example.gezhiplatform.DTO.student.StudentCoverResponse;
 import org.example.gezhiplatform.entity.GradeClass;
-import org.example.gezhiplatform.service.AuthService;
-import org.example.gezhiplatform.service.StudentQueryService;
+import org.example.gezhiplatform.service.auth.AuthService;
+import org.example.gezhiplatform.service.student.StudentQueryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +34,7 @@ import java.util.List;
  * </p>
  * <p>
  * <ul>
- *   <li>系统管理员维护学生信息请使用 {@link StudentController}</li>
+ *   <li>系统管理员维护学生信息请使用 {@link StudentManagementController}</li>
  *   <li>查询学生具体档案信息请使用 {@link ArchiveQueryAndUpdateController}</li>
  * </ul>
  * </p>

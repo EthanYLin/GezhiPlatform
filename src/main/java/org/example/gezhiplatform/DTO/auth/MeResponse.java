@@ -2,7 +2,7 @@ package org.example.gezhiplatform.DTO.auth;
 
 import jakarta.validation.constraints.NotNull;
 import org.example.gezhiplatform.entity.User;
-import org.example.gezhiplatform.entity.user_role.Role;
+import org.example.gezhiplatform.entity.role.Role;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

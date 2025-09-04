@@ -6,7 +6,7 @@ import jakarta.validation.Validator;
 import org.example.gezhiplatform.DTO.user.UserRoleDetailsDTO;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.User;
-import org.example.gezhiplatform.entity.user_role.*;
+import org.example.gezhiplatform.entity.role.*;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
