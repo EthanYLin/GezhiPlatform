@@ -1,6 +1,9 @@
 package org.example.gezhiplatform.entity.archive.personal_part;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,7 +38,7 @@ public class PersonalPart {
     @RIN
     @Nullable
     @JsonProperty("RIN")
-    @JsonAlias({"rin"})
+//    @JsonAlias({"rin"})
     @JsonTitle("身份证号")
     @JsonPropertyDescription("若最后一位为X，X需要大写。")
     private String RIN; // 居民身份证号
