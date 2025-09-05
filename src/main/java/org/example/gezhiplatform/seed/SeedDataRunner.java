@@ -149,7 +149,11 @@ public class SeedDataRunner implements ApplicationRunner {
             ),
             new PermissionGroupRequest(
                 "家庭信息(Level-5)", whichLevelGe(5),
-                Set.of(FAMILY_PART + ".father.name", FAMILY_PART + ".mother.name", FAMILY_PART + ".father.mobile", FAMILY_PART + ".mother.mobile"),
+                Set.of(FAMILY_PART,
+                       FAMILY_PART + ".father", FAMILY_PART + ".mother",
+                       FAMILY_PART + ".father.name", FAMILY_PART + ".mother.name",
+                       FAMILY_PART + ".father.mobile", FAMILY_PART + ".mother.mobile"
+                ),
                 Set.of()
             ),
             new PermissionGroupRequest(
@@ -164,8 +168,12 @@ public class SeedDataRunner implements ApplicationRunner {
             ),
             new PermissionGroupRequest(
                 "敏感信息(Level-9)", whichLevelGe(9),
-                faker.pathsBeginWith(FAMILY_PART + ".other").and(PERSONAL_PART + ".RIN")
-                    .and(FAMILY_PART + ".father.workUnit").and(FAMILY_PART + ".mother.workUnit").get(),
+                faker.pathsBeginWith(FAMILY_PART + ".other")
+                     .and(PERSONAL_PART).and(FAMILY_PART)
+                     .and(PERSONAL_PART + ".RIN")
+                     .and(FAMILY_PART + ".father").and(FAMILY_PART + ".mother")
+                     .and(FAMILY_PART + ".father.workUnit")
+                     .and(FAMILY_PART + ".mother.workUnit").get(),
                 Set.of()
             ),
             new PermissionGroupRequest(
