@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.example.gezhiplatform.annotation.JsonTitle;
 import org.example.gezhiplatform.entity.Student;
@@ -12,6 +13,7 @@ import org.example.gezhiplatform.entity.archive.admission_part.AdmissionPart;
 import org.example.gezhiplatform.entity.archive.family_part.FamilyPart;
 import org.example.gezhiplatform.entity.archive.health_part.HealthPart;
 import org.example.gezhiplatform.entity.archive.personal_part.PersonalPart;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 /**
@@ -20,6 +22,7 @@ import org.springframework.lang.Nullable;
  */
 @Entity
 @Data
+@NoArgsConstructor
 @JsonPropertyOrder({"personalPart", "admissionPart", "addressPart", "familyPart", "healthPart"})
 public class Archive {
 
@@ -28,10 +31,10 @@ public class Archive {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 档案详情ID(由数据库自增)
 
-    @Nullable
+    @NotNull
     @JsonIgnore
     @ToString.Exclude
-    @OneToOne(mappedBy = "archive")
+    @OneToOne(mappedBy = "archive", optional = false)
     private Student student; // 反向关联到学生
 
     @Nullable

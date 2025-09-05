@@ -101,4 +101,18 @@ public class User {
             roles.stream().map(Role::applyFilter).toList()
         );
     }
+
+    @Override
+    public String toString() {
+        if (username != null && name != null) {
+            return name + "(" + username + ")";
+        } else if (username != null) {
+            return username;
+        } else //noinspection ReplaceNullCheck
+            if (name != null) {
+            return name;
+        } else {
+            return "用户(ID:" + id + ")";
+        }
+    }
 }
