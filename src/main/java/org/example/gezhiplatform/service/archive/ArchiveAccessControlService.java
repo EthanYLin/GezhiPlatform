@@ -8,8 +8,6 @@ import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.role.Role;
 import org.example.gezhiplatform.exception.NotFoundException;
-import org.example.gezhiplatform.repository.StudentRepository;
-import org.example.gezhiplatform.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -39,18 +37,11 @@ import java.util.stream.Collectors;
 @Service
 public class ArchiveAccessControlService {
 
-
-    private final StudentRepository studentRepository;
-    private final UserRepository userRepository;
     private final ArchivePermissionGroupService archivePermissionGroupService;
 
     public ArchiveAccessControlService(
-        StudentRepository studentRepository,
-        UserRepository userRepository,
         ArchivePermissionGroupService archivePermissionGroupService
     ) {
-        this.studentRepository = studentRepository;
-        this.userRepository = userRepository;
         this.archivePermissionGroupService = archivePermissionGroupService;
     }
 
@@ -73,26 +64,19 @@ public class ArchiveAccessControlService {
      * </ol>
      * </p>
      * 
-     * @param currentUserId 当前用户ID
-     * @param stuNoForQuery 要查询的学生学号
+     * @param currentUser 当前用户
+     * @param studentForQuery 要查询的学生
      * @return 档案权限详情，包含角色范围、权限组和允许访问的JSON Path
      * @throws NotFoundException 当用户或学生不存在时抛出
      */
     @Transactional
     public ArchivePermissionDetails getMergedPermissions(
-        @NotNull Long currentUserId,
-        @NotNull String stuNoForQuery
+        @NotNull User currentUser,
+        @NotNull Student studentForQuery
     ) throws NotFoundException {
-        Student student = studentRepository.findByStuNo(stuNoForQuery).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")不存在")
-        );
-        User user = userRepository.findById(currentUserId).orElseThrow(
-            () -> new NotFoundException("当前用户(ID:" + currentUserId + ")不存在")
-        );
-
         // 获取该用户中, 能访问该学生的所有角色&角色类型
         // 例如用户(2027届年级组长、2027届1班班主任)访问270201, 只拥有年级组长的权限
-        var grantedRoles = user.getRoles().stream().filter(role -> role.canAccessStudent(student)).collect(
+        var grantedRoles = currentUser.getRoles().stream().filter(role -> role.canAccessStudent(studentForQuery)).collect(
             Collectors.toSet());
         var grantedRoleTypes = grantedRoles.stream().map(Role::getRoleType).collect(Collectors.toSet());
         // 获取包含该角色类型的所有权限组

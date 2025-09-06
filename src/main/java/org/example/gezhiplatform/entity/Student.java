@@ -1,7 +1,9 @@
 package org.example.gezhiplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.Campus;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +39,8 @@ public class Student {
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ToString.Exclude
     private Archive archive; // 具体档案信息
 
     public Optional<Campus> getCampus() {
