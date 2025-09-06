@@ -1,5 +1,6 @@
 package org.example.gezhiplatform.DTO.archive;
 
+import com.jayway.jsonpath.DocumentContext;
 import jakarta.validation.constraints.NotNull;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
@@ -24,7 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 将档案数据导出为Excel文件时，会先将 {@link Archive} 转换为该类。
+ * 将档案数据导出为Excel文件时，会先将 {@link Archive} 或 Jayway JSON 格式的 Archive 转换为该类。
  * 再用该类的数据填充到Excel文件。
  * <b>注意：本类中的字段名必须与Excel导出模板中的一致</b>
  */
@@ -70,6 +71,74 @@ public record ArchiveExportResponse(
     @Nullable String physicalTreatment, // 身体治疗情况
     @Nullable String mentalTreatment // 心理治疗情况
 ) {
+
+    public static ArchiveExportResponse of(DocumentContext document, Student student, String exporter) {
+        
+        // 地址信息部分
+        String currentAddressProvince = document.read("$.addressPart.currentAddress.province", String.class);
+        String currentAddressCity = document.read("$.addressPart.currentAddress.city", String.class);
+        String currentAddressDistrict = document.read("$.addressPart.currentAddress.district", String.class);
+        String currentAddressDetail = document.read("$.addressPart.currentAddress.detail", String.class);
+        String currentAddressStr = buildAddressString(currentAddressProvince, currentAddressCity, currentAddressDistrict, currentAddressDetail);
+        
+        String domicileAddressProvince = document.read("$.addressPart.domicileAddress.province", String.class);
+        String domicileAddressCity = document.read("$.addressPart.domicileAddress.city", String.class);
+        String domicileAddressDistrict = document.read("$.addressPart.domicileAddress.district", String.class);
+        String domicileAddressDetail = document.read("$.addressPart.domicileAddress.detail", String.class);
+        String domicileAddressStr = buildAddressString(domicileAddressProvince, domicileAddressCity, domicileAddressDistrict, domicileAddressDetail);
+        
+        // 其他直系亲属信息（数组）
+        @Nullable List<?> otherRelatives = document.read("$.familyPart.otherRelatives", List.class);
+        String remainRelativeTips =
+            otherRelatives != null && otherRelatives.size() > 2
+                ? "剩余 " + (otherRelatives.size() - 2) + " 位直系亲属未显示，请登录系统查看。"
+                : null;
+        
+        return new ArchiveExportResponse(
+            exporter,
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+            student.getStuNo(),
+            student.getStuName(),
+            student.getGradeClass().map(GradeClass::toRelativeExpr).orElse(null),
+            student.getCampus().map(Campus::getName).orElse(null),
+            document.read("$.personalPart.gender", String.class),
+            document.read("$.personalPart.birthDate", String.class),
+            document.read("$.personalPart.nation", String.class),
+            document.read("$.personalPart.politicalStatus", String.class),
+            document.read("$.personalPart.mobile", String.class),
+            document.read("$.personalPart.rin", String.class),
+            document.read("$.admissionPart.juniorHighSchoolDistrict", String.class),
+            document.read("$.admissionPart.admissionPath", String.class),
+            document.read("$.admissionPart.juniorHighSchoolName", String.class),
+            currentAddressStr,
+            document.read("$.addressPart.currentAddress.street", String.class),
+            document.read("$.addressPart.currentAddress.committee", String.class),
+            domicileAddressStr,
+            document.read("$.familyPart.father.name", String.class),
+            document.read("$.familyPart.mother.name", String.class),
+            document.read("$.familyPart.father.mobile", String.class),
+            document.read("$.familyPart.mother.mobile", String.class),
+            document.read("$.familyPart.father.workUnit", String.class),
+            document.read("$.familyPart.mother.workUnit", String.class),
+            document.read("$.familyPart.otherRelatives[0].name", String.class),
+            document.read("$.familyPart.otherRelatives[0].age", Integer.class),
+            document.read("$.familyPart.otherRelatives[1].name", String.class),
+            document.read("$.familyPart.otherRelatives[1].age", Integer.class),
+            document.read("$.familyPart.otherRelatives[0].info", String.class),
+            document.read("$.familyPart.otherRelatives[1].info", String.class),
+            remainRelativeTips,
+            document.read("$.healthPart.physicalCondition.healthStatus", String.class),
+            document.read("$.healthPart.mentalCondition.healthStatus", String.class),
+            document.read("$.healthPart.physicalCondition.healthIssue", String.class),
+            document.read("$.healthPart.mentalCondition.healthIssue", String.class),
+            document.read("$.healthPart.physicalCondition.medicationUse", String.class),
+            document.read("$.healthPart.mentalCondition.medicationUse", String.class),
+            document.read("$.healthPart.physicalCondition.ongoingTreatment", String.class),
+            document.read("$.healthPart.mentalCondition.ongoingTreatment", String.class)
+        );
+    }
+
+
     public static ArchiveExportResponse of(Archive archive, Student student, String exporter) {
 
         PersonalPart personalPart = archive.getPersonalPart();

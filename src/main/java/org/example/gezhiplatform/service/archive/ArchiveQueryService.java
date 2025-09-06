@@ -139,9 +139,9 @@ public class ArchiveQueryService {
      * <p>
      * 导出和权限过滤流程：
      * <ol>
-     *   <li>根据学号查找学生档案数据</li>
-     *   <li>记录审计日志</li>
+     *   <li>根据学号查找学生和档案数据</li>
      *   <li>调用{@link #filterArchivedData(Archive, User, Student)}方法过滤档案数据</li>
+     *   <li>记录审计日志</li>
      *   <li>将过滤后的数据转换为ArchiveExportResponse对象</li>
      *   <li>使用Excel模板生成文件并输出到指定流</li>
      * </ol>
@@ -177,18 +177,11 @@ public class ArchiveQueryService {
             String.format("导出学生档案(学号:%s, 姓名: %s)", student.getStuNo(), student.getStuName())
         );
 
-
-        String trimmedArchiveJson = filterArchivedData(archive, user, student).jsonString();
-        Archive trimmedArchive;
-
-        try {
-            trimmedArchive = objectMapper.readValue(trimmedArchiveJson, Archive.class);
-        } catch (JsonProcessingException e) {
-            throw new BadRequestException("无法反序列化档案数据(追踪点:AQS02) :" + e.getMessage());
-        }
-
-        ArchiveExportResponse data = ArchiveExportResponse.of(trimmedArchive, student, user.toString());
+        // 转换为Map类型
+        DocumentContext filteredDocumentContext = filterArchivedData(archive, user, student);
+        ArchiveExportResponse data = ArchiveExportResponse.of(filteredDocumentContext, student, user.toString());
         Map<?, ?> dataMap = objectMapper.convertValue(data, Map.class);
+
         try (InputStream templateStream = archiveExportTemplate.getInputStream()) {
             FastExcel.write(outputStream)
                      .withTemplate(templateStream)
