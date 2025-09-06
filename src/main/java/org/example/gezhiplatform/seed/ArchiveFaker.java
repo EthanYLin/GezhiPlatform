@@ -22,7 +22,7 @@ public class ArchiveFaker {
 
     public static PersonalPart personalPart(PersonalInfoFaker faker) {
         var personalPart = new PersonalPart();
-        personalPart.setRIN(faker.rin());
+        personalPart.setRin(faker.rin());
         personalPart.setMobile(faker.mobile());
         personalPart.setNation(faker.nation());
         personalPart.setPoliticalStatus(faker.politicalStatus());

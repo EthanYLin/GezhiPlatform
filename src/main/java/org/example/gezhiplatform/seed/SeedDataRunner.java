@@ -139,7 +139,7 @@ public class SeedDataRunner implements ApplicationRunner {
         return List.of(
             new PermissionGroupRequest(
                 "个人信息(Level-0)", whichLevelGe(0),
-                faker.pathsBeginWith(PERSONAL_PART).except(PERSONAL_PART + ".RIN").get(),
+                faker.pathsBeginWith(PERSONAL_PART).except(PERSONAL_PART + ".rin").get(),
                 Set.of()
             ),
             new PermissionGroupRequest(
@@ -170,7 +170,7 @@ public class SeedDataRunner implements ApplicationRunner {
                 "敏感信息(Level-9)", whichLevelGe(9),
                 faker.pathsBeginWith(FAMILY_PART + ".other")
                      .and(PERSONAL_PART).and(FAMILY_PART)
-                     .and(PERSONAL_PART + ".RIN")
+                     .and(PERSONAL_PART + ".rin")
                      .and(FAMILY_PART + ".father").and(FAMILY_PART + ".mother")
                      .and(FAMILY_PART + ".father.workUnit")
                      .and(FAMILY_PART + ".mother.workUnit").get(),

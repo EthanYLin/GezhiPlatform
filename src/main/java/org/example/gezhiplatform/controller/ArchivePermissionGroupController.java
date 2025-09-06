@@ -80,7 +80,7 @@ public class ArchivePermissionGroupController {
      *   <li>查找所有班主任权限组：keyword=null, roleType=班主任, readableJsonPath=null, writableJsonPath=null</li>
      *   <li>查找名称包含"学生"的权限组：keyword="学生", roleType=null, readableJsonPath=null, writableJsonPath=null</li>
      *   <li>查找可读取个人信息的权限组：keyword=null, roleType=null, readableJsonPath="$.personalPart", writableJsonPath=null</li>
-     *   <li>查找可编辑身份证号的班主任权限组：keyword=null, roleType=班主任, readableJsonPath=null, writableJsonPath="$.personalPart.RIN"</li>
+     *   <li>查找可编辑身份证号的班主任权限组：keyword=null, roleType=班主任, readableJsonPath=null, writableJsonPath="$.personalPart.rin"</li>
      * </ul>
      * </p>
      *

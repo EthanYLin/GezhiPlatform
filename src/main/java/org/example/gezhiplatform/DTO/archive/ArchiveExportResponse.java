@@ -40,7 +40,7 @@ public record ArchiveExportResponse(
     @Nullable String nation, // 民族
     @Nullable String politicalStatus, // 政治面貌
     @Nullable String mobile, // 手机号码
-    @Nullable String RIN, // 身份证号
+    @Nullable String rin, // 身份证号
     @Nullable String juniorHighSchoolDistrict, // 生源地
     @Nullable String admissionPath, // 录取方式
     @Nullable String juniorHighSchoolName, // 初中学校
@@ -110,7 +110,7 @@ public record ArchiveExportResponse(
             Optional.ofNullable(personalPart).map(PersonalPart::getNation).map(Nation::getDesc).orElse(null),
             Optional.ofNullable(personalPart).map(PersonalPart::getPoliticalStatus).map(PoliticalStatus::getName).orElse(null),
             Optional.ofNullable(personalPart).map(PersonalPart::getMobile).orElse(null),
-            Optional.ofNullable(personalPart).map(PersonalPart::getRIN).orElse(null),
+            Optional.ofNullable(personalPart).map(PersonalPart::getRin).orElse(null),
             Optional.ofNullable(admissionPart).map(AdmissionPart::getJuniorHighSchoolDistrict).map(District::getName).orElse(null),
             Optional.ofNullable(admissionPart).map(AdmissionPart::getAdmissionPath).map(AdmissionPath::getName).orElse(null),
             Optional.ofNullable(admissionPart).map(AdmissionPart::getJuniorHighSchoolName).orElse(null),
