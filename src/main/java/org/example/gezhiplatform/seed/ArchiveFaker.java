@@ -110,35 +110,39 @@ public class ArchiveFaker {
         new HealthConditionSample("贫血", "口服铁剂", "营养补充与定期复查血常规")
     );
 
+    public static HealthCondition physicalHealthCondition() {
+        var physicianCondition = RandomUtils.pickOneFrom(physicianHealthConditionSamples);
+        return new HealthCondition(
+            null,
+            HealthStatus.ATTENTION,
+            physicianCondition.healthIssue(),
+            physicianCondition.medicationUse(),
+            physicianCondition.ongoingTreatment()
+        );
+    }
+
+    public static HealthCondition mentalHealthCondition() {
+        var mentalCondition = RandomUtils.pickOneFrom(mentalHealthConditionSamples);
+        return new HealthCondition(
+            null,
+            HealthStatus.ATTENTION,
+            mentalCondition.healthIssue(),
+            mentalCondition.medicationUse(),
+            mentalCondition.ongoingTreatment()
+        );
+    }
+
     public static HealthPart healthPart() {
         var healthPart = new HealthPart();
-        var mentalCondition = RandomUtils.pickOneFrom(mentalHealthConditionSamples);
-        var physicianCondition = RandomUtils.pickOneFrom(physicianHealthConditionSamples);
         if (RandomUtils.roll(15)) {
-            healthPart.setMentalCondition(
-                new HealthCondition(
-                    null,
-                    HealthStatus.ATTENTION,
-                    mentalCondition.healthIssue(),
-                    mentalCondition.medicationUse(),
-                    mentalCondition.ongoingTreatment()
-                )
-            );
+            healthPart.setMentalCondition(mentalHealthCondition());
         } else {
             healthPart.setMentalCondition(
                 new HealthCondition(null, HealthStatus.HEALTHY, null, null, null)
             );
         }
         if (RandomUtils.roll(15)) {
-            healthPart.setPhysicalCondition(
-                new HealthCondition(
-                    null,
-                    HealthStatus.ATTENTION,
-                    physicianCondition.healthIssue(),
-                    physicianCondition.medicationUse(),
-                    physicianCondition.ongoingTreatment()
-                )
-            );
+            healthPart.setPhysicalCondition(physicalHealthCondition());
         } else {
             healthPart.setPhysicalCondition(
                 new HealthCondition(null, HealthStatus.HEALTHY, null, null, null)
