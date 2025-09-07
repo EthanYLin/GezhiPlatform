@@ -3,7 +3,6 @@ package org.example.gezhiplatform.entity.archive.family_part;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.gezhiplatform.annotation.JsonIncludeMethod;
@@ -28,7 +27,6 @@ public class Relative {
 
     @Nullable
     @JsonTitle("出生年份")
-    @Past(message = "出生年份不能大于当前年份")
     private Integer birthYear; // 出生年份
 
     @Nullable

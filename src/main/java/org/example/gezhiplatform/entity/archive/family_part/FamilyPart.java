@@ -1,8 +1,10 @@
 package org.example.gezhiplatform.entity.archive.family_part;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.Data;
 import org.example.gezhiplatform.annotation.JsonTitle;
 import org.jetbrains.annotations.NotNull;
@@ -27,16 +29,21 @@ public class FamilyPart {
 
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
+    @Valid
+    @JsonMerge
     @JsonTitle("父亲")
     private Parent father; // 父亲
 
     @OneToOne(cascade = CascadeType.ALL)
     @Nullable
+    @Valid
+    @JsonMerge
     @JsonTitle("母亲")
     private Parent mother; // 母亲
 
     @ElementCollection
     @NotNull
+    @Valid
     @JsonTitle("直系亲属")
     private List<Relative> otherRelatives = new ArrayList<>(); // 直系亲属
 
