@@ -16,8 +16,6 @@ import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.AuditOperationType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
-import org.example.gezhiplatform.repository.StudentRepository;
-import org.example.gezhiplatform.repository.UserRepository;
 import org.example.gezhiplatform.service.audit.AuditService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +27,6 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.jayway.jsonpath.Configuration.defaultConfiguration;
 import static com.jayway.jsonpath.Option.SUPPRESS_EXCEPTIONS;
@@ -54,8 +51,6 @@ import static com.jayway.jsonpath.Option.SUPPRESS_EXCEPTIONS;
 @Service
 public class ArchiveQueryService {
 
-    private final UserRepository userRepository;
-    private final StudentRepository studentRepository;
     private final ArchiveMetadataService archiveMetadataService;
     private final ArchiveAccessControlService archiveAccessControlService;
     private final AuditService auditService;
@@ -67,19 +62,15 @@ public class ArchiveQueryService {
     private Resource archiveExportTemplate;
 
     public ArchiveQueryService(
-        StudentRepository studentRepository,
         ArchiveMetadataService archiveMetadataService,
         ObjectMapper objectMapper,
         ArchiveAccessControlService archiveAccessControlService,
-        AuditService auditService,
-        UserRepository userRepository
+        AuditService auditService
     ) {
-        this.studentRepository = studentRepository;
         this.archiveMetadataService = archiveMetadataService;
         this.objectMapper = objectMapper;
         this.archiveAccessControlService = archiveAccessControlService;
         this.auditService = auditService;
-        this.userRepository = userRepository;
     }
 
     /**
@@ -109,22 +100,13 @@ public class ArchiveQueryService {
         @NotNull String stuNoForQuery
     ) throws BadRequestException {
         // 查询学生档案
-        User user = userRepository.findById(currentUserId).orElseThrow(
-            () -> new NotFoundException("当前操作用户不存在 (ID:" + currentUserId + ")")
-        );
-        Student student = studentRepository.findByStuNo(stuNoForQuery).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")不存在")
-        );
-        Archive archive = Optional.ofNullable(student.getArchive()).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")尚无档案")
-        );
-
-        var archiveJayway = filterArchivedData(archive, user, student);
+        var context = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery);
+        var archiveJayway = filterArchivedData(context.archive(), context.user(), context.student());
 
         // 在审计日志中记录
         auditService.log(
-            user, AuditOperationType.ARCHIVE_QUERY,
-            String.format("查询学生档案(学号:%s, 姓名: %s)", student.getStuNo(), student.getStuName())
+            context.user(), AuditOperationType.ARCHIVE_QUERY,
+            String.format("查询学生档案(学号:%s, 姓名: %s)", context.student().getStuNo(), context.student().getStuName())
         );
 
         return archiveJayway.jsonString();
@@ -149,7 +131,7 @@ public class ArchiveQueryService {
      *
      * @param currentUserId 当前用户ID
      * @param stuNoForQuery 要导出的学生学号
-     * @param outputStream 用于输出Excel文件的输出流
+     * @param outputStream  用于输出Excel文件的输出流
      * @throws BadRequestException 当档案序列化失败、IO错误或Excel处理错误时抛出
      * @throws NotFoundException   当用户或学生不存在，或学生无档案时抛出
      */
@@ -161,25 +143,21 @@ public class ArchiveQueryService {
     ) throws BadRequestException {
 
         // 查询学生档案
-        User user = userRepository.findById(currentUserId).orElseThrow(
-            () -> new NotFoundException("当前操作用户不存在 (ID:" + currentUserId + ")")
-        );
-        Student student = studentRepository.findByStuNo(stuNoForQuery).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")不存在")
-        );
-        Archive archive = Optional.ofNullable(student.getArchive()).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")尚无档案")
-        );
+        var context = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery);
 
         // 在审计日志中记录
         auditService.log(
-            user, AuditOperationType.ARCHIVE_EXPORT,
-            String.format("导出学生档案(学号:%s, 姓名: %s)", student.getStuNo(), student.getStuName())
+            context.user(), AuditOperationType.ARCHIVE_EXPORT,
+            String.format("导出学生档案(学号:%s, 姓名: %s)", context.student().getStuNo(), context.student().getStuName())
         );
 
         // 转换为Map类型
-        DocumentContext filteredDocumentContext = filterArchivedData(archive, user, student);
-        ArchiveExportResponse data = ArchiveExportResponse.of(filteredDocumentContext, student, user.toString());
+        DocumentContext filteredDocumentContext = filterArchivedData(
+            context.archive(), context.user(), context.student()
+        );
+        ArchiveExportResponse data = ArchiveExportResponse.of(
+            filteredDocumentContext, context.student(), context.user().toString()
+        );
         Map<?, ?> dataMap = objectMapper.convertValue(data, Map.class);
 
         try (InputStream templateStream = archiveExportTemplate.getInputStream()) {
@@ -202,14 +180,13 @@ public class ArchiveQueryService {
      * 文件名格式为：{学生姓名}({学号})学生档案-{时间戳}
      * </p>
      *
+     * @param currentUserId 当前用户ID
      * @param stuNoForQuery 要导出的学生学号
      * @return 格式化的导出文件名
      * @throws NotFoundException 当学生不存在时抛出
      */
-    public String getExportFileName(@NotNull String stuNoForQuery) {
-        Student student = studentRepository.findByStuNo(stuNoForQuery).orElseThrow(
-            () -> new NotFoundException("要查询的学生(学号:" + stuNoForQuery + ")不存在")
-        );
+    public String getExportFileName(@NotNull Long currentUserId, @NotNull String stuNoForQuery) {
+        Student student = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery).student();
         return String.format(
             "%s(%s)学生档案-%s",
             student.getStuName(),
@@ -237,12 +214,14 @@ public class ArchiveQueryService {
      * </p>
      *
      * @param archive 要过滤的档案对象
-     * @param user 当前用户
+     * @param user    当前用户
      * @param student 目标学生
      * @return 经过权限过滤的DocumentContext对象，可调用jsonString()方法获取JSON字符串
      * @throws BadRequestException 当档案序列化失败时抛出
      */
-    private @NotNull DocumentContext filterArchivedData(@NotNull Archive archive, @NotNull User user, @NotNull Student student) {
+    private @NotNull DocumentContext filterArchivedData(
+        @NotNull Archive archive, @NotNull User user, @NotNull Student student
+    ) {
         // 将档案数据经由String转换为JaywayDocument
         String archiveJson;
         try {

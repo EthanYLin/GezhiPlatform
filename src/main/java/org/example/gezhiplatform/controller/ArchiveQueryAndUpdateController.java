@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.service.archive.ArchiveQueryService;
+import org.example.gezhiplatform.service.archive.ArchiveUpdateService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +41,14 @@ import java.nio.charset.StandardCharsets;
 public class ArchiveQueryAndUpdateController {
 
     private final ArchiveQueryService archiveQueryService;
+    private final ArchiveUpdateService archiveUpdateService;
 
-    public ArchiveQueryAndUpdateController(ArchiveQueryService archiveQueryService) {
+    public ArchiveQueryAndUpdateController(
+        ArchiveQueryService archiveQueryService,
+        ArchiveUpdateService archiveUpdateService
+    ) {
         this.archiveQueryService = archiveQueryService;
+        this.archiveUpdateService = archiveUpdateService;
     }
 
     /**
@@ -90,7 +96,7 @@ public class ArchiveQueryAndUpdateController {
      * 每次档案导出操作都会在系统审计日志中记录，包括操作用户、导出的学生信息等。
      * </p>
      *
-     * @param stuNo 要导出的学生学号
+     * @param stuNo    要导出的学生学号
      * @param response HTTP响应对象，用于设置响应头和获取输出流
      * @throws NotFoundException   当指定学号的学生不存在时抛出
      * @throws BadRequestException 当档案序列化失败、IO错误或Excel处理错误时抛出
@@ -102,9 +108,9 @@ public class ArchiveQueryAndUpdateController {
         @Parameter(description = "要查询的学生学号", required = true, example = "260101")
         @PathVariable @NotNull String stuNo,
         HttpServletResponse response
-    ) throws BadRequestException{
+    ) throws BadRequestException {
         Long currentUserId = StpUtil.getLoginIdAsLong();
-        String fileName = archiveQueryService.getExportFileName(stuNo);
+        String fileName = archiveQueryService.getExportFileName(currentUserId, stuNo);
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + encodedFileName + ".xlsx");
@@ -115,6 +121,39 @@ public class ArchiveQueryAndUpdateController {
             throw new BadRequestException("在导出时发生错误(追踪点:AQC01):" + e.getMessage());
         }
         archiveQueryService.exportByStuNo(currentUserId, stuNo, outputStream);
+    }
+
+    /**
+     * 更新指定学号学生的档案
+     * <p>
+     * 根据提供的学号和JSON数据更新学生的档案信息。
+     * </p>
+     * <p>
+     * <b>权限控制：</b>
+     * <ul>
+     *   <li>只有当前用户能够访问该学生时才能执行更新操作。</li>
+     *   <li>更新操作会根据当前用户的权限进行字段级别的过滤，只有用户具备写入权限的字段才会被实际更新，无权修改的字段将被忽略。</li>
+     *   <li>若用户传入某字段为null，则会将该字段设置为null；用户没有传入的字段将不更新。</li>
+     *   <li>请求体中不在档案元数据中的额外字段将被忽略。</li>
+     *   <li>更新后的档案数据会进行合法性校验(例如手机号与身份证号)。</li>
+     * </ul>
+     * </p>
+     *
+     * @param stuNo         要更新的学生学号
+     * @param jsonForUpdate 包含更新数据的JSON字符串
+     * @throws NotFoundException   当指定学号的学生不存在或当前用户无权访问时抛出
+     * @throws BadRequestException 当JSON数据格式错误、权限不足或数据校验失败时抛出
+     * @apiNote PUT /archive/students/{stuNo}
+     */
+    @PutMapping("/{stuNo}")
+    @Transactional
+    public void updateArchive(
+        @Parameter(description = "要更新的学生学号", required = true, example = "260101")
+        @PathVariable @NotNull String stuNo,
+        @RequestBody @NotNull String jsonForUpdate
+    ) {
+        Long currentUserId = StpUtil.getLoginIdAsLong();
+        archiveUpdateService.updateArchive(jsonForUpdate, currentUserId, stuNo);
     }
 
 }
