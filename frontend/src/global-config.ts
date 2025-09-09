@@ -34,7 +34,7 @@ export type ConfigValue = {
 export const CONFIG: ConfigValue = {
   appName: 'Minimal UI',
   appVersion: packageJson.version,
-  serverUrl: process.env.NEXT_PUBLIC_SERVER_URL ?? '',
+  serverUrl: process.env.NEXT_PUBLIC_SERVER_URL ?? '/api',
   assetsDir: process.env.NEXT_PUBLIC_ASSETS_DIR ?? '',
   isStaticExport: JSON.parse(process.env.BUILD_STATIC_EXPORT ?? 'false'),
   /**
