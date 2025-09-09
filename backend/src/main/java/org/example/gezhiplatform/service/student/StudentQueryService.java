@@ -184,7 +184,7 @@ public class StudentQueryService {
             throw new BadRequestException("分页排序参数中包含无效的字段: " + String.join(", ", illegalSortProperties));
         }
         Specification<Student> userSpec = user.getSpec();
-        Specification<Student> combinedSpec = Specification.where(condition).and(userSpec);
+        Specification<Student> combinedSpec = condition.and(userSpec);
         return new PageResult<>(
             studentRepository
                 .findBy(combinedSpec, q -> q.sortBy(pageable.getSort()).page(pageable))

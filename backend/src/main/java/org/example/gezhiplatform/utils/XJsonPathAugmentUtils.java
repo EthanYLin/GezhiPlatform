@@ -106,8 +106,7 @@ public class XJsonPathAugmentUtils {
         if (hasType(node, "object")) {
             ObjectNode props = obj(node.get("properties"));
             if (props != null) {
-                for (var it = props.fields(); it.hasNext(); ) {
-                    Map.Entry<String, JsonNode> e = it.next();
+                for (var e : props.properties()) {
                     String key = e.getKey();
                     ObjectNode child = obj(e.getValue());
                     if (child == null) continue;
