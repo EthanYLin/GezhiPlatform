@@ -154,21 +154,21 @@ jobs:
           echo "Backend image: $BACKEND_IMG"
           echo "Frontend image: $FRONTEND_IMG"
 
-    deploy:
-      name: Deploy to Server
-      runs-on: ubuntu-latest
-      needs: [backend, frontend]
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      steps:
-        - name: Deploy via SSH
-          uses: appleboy/ssh-action@v0.1.10
-          with:
-            host: ${{ secrets.SSH_HOST }}
-            username: ${{ secrets.SSH_USER }}
-            key: ${{ secrets.SSH_KEY }}
-            port: 22
-            script: |
-              cd /root/gezhi-platform
-              docker compose down
-              docker compose pull
-              docker compose up -d
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /root/gezhi-platform
+            docker compose down
+            docker compose pull
+            docker compose up -d
