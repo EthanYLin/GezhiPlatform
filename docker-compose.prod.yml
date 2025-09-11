@@ -1,0 +1,54 @@
+services:
+
+  frontend:
+    image: ghcr.io/ethanylin/gezhiplatform-frontend:latest
+    container_name: gezhi-platform-frontend
+    restart: unless-stopped
+    ports:
+      - "7011:3000"
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - internal
+    depends_on:
+      - backend
+
+  backend:
+    image: ghcr.io/ethanylin/gezhiplatform-backend:latest
+    container_name: gezhi-platform-backend
+    restart: unless-stopped
+    ports:
+      - "7012:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/db
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD}
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Shanghai
+    depends_on:
+      - db
+    networks:
+      - internal
+
+  db:
+    image: mysql:8
+    container_name: gezhi-platform-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_DATABASE=db
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+      - TZ=Asia/Shanghai
+    ports:
+      - "7013:3306"
+    volumes:
+      - database-data:/var/lib/mysql
+    networks:
+      - internal
+
+volumes:
+  database-data:
+
+networks:
+  internal:
+    driver: bridge
