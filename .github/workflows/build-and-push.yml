@@ -1,0 +1,155 @@
+name: Build & Push Images (GHCR)
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/build-and-push.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  OWNER_LC: ${{ github.repository_owner }}
+  BACKEND_IMG: ghcr.io/${{ github.repository_owner }}/gezhiplatform-backend
+  FRONTEND_IMG: ghcr.io/${{ github.repository_owner }}/gezhiplatform-frontend
+
+jobs:
+  backend:
+    name: Backend Image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract Maven version
+        id: mvn_ver
+        run: |
+          VER=$(./mvnw -q -Dexec.skip -DskipTests -Dspotless.apply.skip help:evaluate -Dexpression=project.version -DforceStdout || true)
+          echo "version=${VER}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta (backend)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BACKEND_IMG }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+            type=ref,event=tag
+            type=raw,value=${{ steps.mvn_ver.outputs.version }},enable=${{ steps.mvn_ver.outputs.version != '' && github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.title=Gezhi Platform Backend
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.mvn_ver.outputs.version }}
+
+      - name: Build & (conditionally) Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          provenance: true
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  frontend:
+    name: Frontend Image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read package.json version
+        id: pkg_ver
+        run: |
+          VER=$(jq -r '.version' package.json 2>/dev/null || echo '')
+          echo "version=${VER}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta (frontend)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.FRONTEND_IMG }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+            type=ref,event=tag
+            type=raw,value=${{ steps.pkg_ver.outputs.version }},enable=${{ steps.pkg_ver.outputs.version != '' && github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.title=Gezhi Platform Frontend
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.pkg_ver.outputs.version }}
+
+      - name: Build & (conditionally) Push
+        uses: docker/build-push-action@v6
+        with:
+            context: ./frontend
+            file: ./frontend/Dockerfile
+            push: ${{ github.event_name != 'pull_request' }}
+            provenance: true
+            sbom: true
+            tags: ${{ steps.meta.outputs.tags }}
+            labels: ${{ steps.meta.outputs.labels }}
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+
+  summary:
+    name: Summary
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report
+        run: |
+          echo "Backend image: $BACKEND_IMG"
+          echo "Frontend image: $FRONTEND_IMG"

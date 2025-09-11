@@ -1,9 +1,7 @@
 # ------------------------------------
-# 构建阶段：使用 Maven + JDK 23
+# 构建阶段 BUILD
 # ------------------------------------
-FROM maven:3.9.9-amazoncorretto-23 AS build
-
-# 设置工作目录
+FROM maven:3.9.9-eclipse-temurin-23 AS build
 WORKDIR /app
 
 # 使用阿里云 Maven 源替换默认 central
@@ -24,27 +22,28 @@ RUN echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" \
 </settings>' > /root/.m2/settings.xml
 
 # 预下载依赖，形成缓存层（只要 pom.xml 不变，这层不变）
-RUN mvn dependency:go-offline
+RUN mvn -B -q dependency:go-offline
 
-# 复制项目其他文件
-COPY . .
+# 复制源代码
+COPY src ./src
 
-# 构建应用
-RUN mvn clean package -DskipTests
+# 构建应用 Boot 3.x 会生成分层 JAR
+RUN mvn -B -q clean package -DskipTests
+
+# 抽取分层（dependencies/、spring-boot-loader/、application/ ...）
+RUN set -eux; \
+    ls -lah target; \
+    cp -v "$(ls -1 target/*.jar | grep -v '\-original\.jar$' | head -n1)" /app/app.jar; \
+    test -f /app/app.jar
 
 # ------------------------------------
-# 运行阶段：精简运行镜像（OpenJDK 23）
+# 运行阶段 RUN
 # ------------------------------------
-FROM openjdk:23-jdk
-
-# 设置工作目录
+FROM eclipse-temurin:23-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache ca-certificates tzdata
 
-# 拷贝 jar 包到运行镜像中
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/app.jar /app/app.jar
 
-# 显示容器内部端口（Spring Boot 默认是 8080）
 EXPOSE 8080
-
-# 启动 Spring Boot 应用
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
