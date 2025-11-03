@@ -1,5 +1,8 @@
 .idea
 .vscode
+.DS_Store
+reference-library
+frontend-old
 
 ### Environment ###
 *.env
