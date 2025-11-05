@@ -7,8 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
+import org.example.gezhiplatform.service.archive.ArchiveAccessControlService;
 import org.example.gezhiplatform.service.archive.ArchiveQueryService;
 import org.example.gezhiplatform.service.archive.ArchiveUpdateService;
 import org.jetbrains.annotations.NotNull;
@@ -42,13 +44,16 @@ public class ArchiveQueryAndUpdateController {
 
     private final ArchiveQueryService archiveQueryService;
     private final ArchiveUpdateService archiveUpdateService;
+    private final ArchiveAccessControlService archiveAccessControlService;
 
     public ArchiveQueryAndUpdateController(
         ArchiveQueryService archiveQueryService,
-        ArchiveUpdateService archiveUpdateService
+        ArchiveUpdateService archiveUpdateService,
+        ArchiveAccessControlService archiveAccessControlService
     ) {
         this.archiveQueryService = archiveQueryService;
         this.archiveUpdateService = archiveUpdateService;
+        this.archiveAccessControlService = archiveAccessControlService;
     }
 
     /**
@@ -76,6 +81,33 @@ public class ArchiveQueryAndUpdateController {
     ) throws NotFoundException, BadRequestException {
         Long currentUserId = StpUtil.getLoginIdAsLong();
         return archiveQueryService.queryByStuNo(currentUserId, stuNo);
+    }
+
+    /**
+     * 查询对指定学号学生的档案权限
+     * <p>
+     * 根据提供的学号查询当前用户对该学生档案的完整访问权限，
+     * 返回结果包括：<br>
+     * (a) 当前用户拥有的且可访问该学生的角色范围<br>
+     * (b) 当前用户拥有的且可访问该学生的权限组<br>
+     * (c) 可读的 JSON Path<br>
+     * (d) 可写的 JSON Path<br>
+     * </p>
+     *
+     * @param stuNo 要查询的学生学号
+     * @return 学生档案权限详情
+     * @throws NotFoundException   当指定学号的学生不存在时抛出
+     * @throws BadRequestException 当权限计算失败时抛出
+     * @apiNote GET /archive/students/{stuNo}/permission
+     */
+    @GetMapping(value = "/{stuNo}/permission", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
+    public ArchivePermissionDetails queryArchivePermissionByStuNo(
+        @Parameter(description = "要查询的学生学号", required = true, example = "260101")
+        @PathVariable @NotNull String stuNo
+    ) throws NotFoundException, BadRequestException {
+        Long currentUserId = StpUtil.getLoginIdAsLong();
+        return archiveAccessControlService.getArchivePermissions(currentUserId, stuNo);
     }
 
     /**

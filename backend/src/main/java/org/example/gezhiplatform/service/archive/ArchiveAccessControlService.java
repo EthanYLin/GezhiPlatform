@@ -66,6 +66,30 @@ public class ArchiveAccessControlService {
      * <p>
      * 该方法在返回权限时会合并用户具有的所有角色以及权限组。
      * </p>
+     *
+     * @param userId 用户ID
+     * @param stuNo  学生学号
+     * @return 档案权限详情，包含角色范围、权限组和允许访问的JSON Path
+     * @throws NotFoundException   当用户或学生不存在时抛出
+     * @throws BadRequestException 当用户无权访问指定学生时抛出
+     */
+    @Transactional
+    public ArchivePermissionDetails getArchivePermissions(
+        @NotNull Long userId, @NotNull String stuNo
+    ) throws BadRequestException {
+        var context = this.getUserStudentArchive(userId, stuNo);
+        return this.getMergedPermissions(context.user(), context.student());
+    }
+
+    /**
+     * 获取用户对指定学生档案的权限详情
+     * <p>
+     * 该方法用于计算并返回当前用户对指定学生档案的完整访问权限，
+     * 包括：拥有的且可访问该学生的角色范围、拥有的且可访问该学生的权限组 以及 允许访问可读/可写的JSON Path。
+     * </p>
+     * <p>
+     * 该方法在返回权限时会合并用户具有的所有角色以及权限组。
+     * </p>
      * <p>
      * 权限计算流程：
      * <ol>
@@ -159,7 +183,7 @@ public class ArchiveAccessControlService {
             () -> new NotFoundException("当前操作用户不存在 (ID:" + userId + ")")
         );
         Student student = studentRepository.findByStuNo(stuNo).orElseThrow(
-            () -> new NotFoundException("当前用户无权访问该学生(学号:" + stuNo + ")档案")
+            () -> new BadRequestException("当前用户无权访问该学生(学号:" + stuNo + ")档案")
         );
         // 检查该用户是否能够访问该学生
         if (user.getRoles().stream().noneMatch(role -> role.canAccessStudent(student))) {
