@@ -1,4 +1,9 @@
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "格致中学应急事件处置协同平台",
+};
 
 export default function Home() {
   return (
