@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { get, put } from "@/lib/api-client";
 import { clearAuthToken, isAuthenticated, setAuthToken } from "@/lib/auth";
+import { useUser } from "@/contexts/user-context";
 import { toast } from "sonner";
 import {
   Card,
@@ -24,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertCircle, Check } from "lucide-react";
+import { Navbar } from "@/components/navbar";
 
 interface UserProfile {
   token: string;
@@ -37,6 +39,7 @@ interface UserProfile {
 
 export default function MePage() {
   const router = useRouter();
+  const { refreshProfile: refreshUserContext } = useUser();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,13 +75,7 @@ export default function MePage() {
 
     if (response.error) {
       setError(response.error);
-      // 如果是 401 错误，清除 token 并跳转到登录页
-      if (response.status === 401) {
-        clearAuthToken();
-        setTimeout(() => {
-          router.push("/auth/login");
-        }, 2000);
-      }
+      // 401/403 错误已由 api-client 统一处理，会自动跳转到 /auth/unauthorized
     } else if (response.data) {
       setProfile(response.data);
     }
@@ -105,6 +102,9 @@ export default function MePage() {
     setPasswordLoading(true);
     setPasswordError(null);
 
+    // 记录修改前的启用状态
+    const wasNotEnabled = profile && !profile.isEnabled;
+
     // 只发送 oldPassword 和 newPassword 到后端
     const response = await put<UserProfile>("/auth/password", {
       oldPassword: passwordForm.oldPassword,
@@ -117,13 +117,25 @@ export default function MePage() {
     } else if (response.data) {
       // 修改密码成功，保存新的 token
       setAuthToken(response.data.token);
+      // 刷新全局用户信息到 Context
+      await refreshUserContext();
       // 关闭 Dialog
       setIsDialogOpen(false);
       setPasswordLoading(false);
       // 显示成功提示
       toast.success("密码修改成功");
-      // 刷新用户信息
-      fetchProfile();
+      
+      // 检查账户是否从未启用变为已启用
+      if (wasNotEnabled && response.data.isEnabled) {
+        // 账户已成功启用，跳转到工作台
+        toast.success("账户已成功启用，正在跳转到工作台...");
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
+      } else {
+        // 刷新页面本地用户信息
+        fetchProfile();
+      }
     }
   };
 
@@ -162,31 +174,32 @@ export default function MePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg font-medium">加载中...</div>
+      <>
+        <Navbar />
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-medium">加载中...</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">加载失败</CardTitle>
-            <CardDescription className="text-destructive">
-              {error}
-            </CardDescription>
-          </CardHeader>
-          {error.includes("401") && (
-            <CardContent className="text-center text-sm text-muted-foreground">
-              正在跳转到登录页...
-            </CardContent>
-          )}
-        </Card>
-      </div>
+      <>
+        <Navbar />
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">加载失败</CardTitle>
+              <CardDescription className="text-destructive">
+                {error}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </>
     );
   }
 
@@ -195,7 +208,9 @@ export default function MePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <>
+      <Navbar />
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-6">
         {/* 账户状态提示 */}
         {profile.isLocked && (
@@ -440,7 +455,8 @@ export default function MePage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </>
   );
 }
 

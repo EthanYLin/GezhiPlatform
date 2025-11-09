@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // 不需要登录即可访问的路径
-const PUBLIC_PATHS = ["/", "/health", "/auth/login"];
+const PUBLIC_PATHS = ["/", "/health", "/auth/login", "/auth/unauthorized", "/auth/forbidden"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

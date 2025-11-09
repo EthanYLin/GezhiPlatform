@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { post } from "@/lib/api-client";
 import { setAuthToken, isAuthenticated } from "@/lib/auth";
+import { useUser } from "@/contexts/user-context";
 import {
   Card,
   CardContent,
@@ -34,6 +35,7 @@ interface LoginResponse {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshProfile } = useUser();
   const [formData, setFormData] = useState<LoginRequest>({
     username: "",
     password: "",
@@ -67,6 +69,9 @@ function LoginForm() {
     } else if (response.data) {
       // 保存 token
       setAuthToken(response.data.token);
+
+      // 刷新用户信息到 Context
+      await refreshProfile();
 
       // 获取重定向 URL
       const redirect = searchParams.get("redirect");

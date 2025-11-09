@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface HealthResponse {
   message: string;
@@ -136,12 +138,17 @@ export default function HealthPage() {
 
         {status !== "loading" && (
           <CardContent>
-            <button
-              onClick={checkHealth}
-              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              重新检测
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={checkHealth}
+                className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                重新检测
+              </button>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/">前往首页</Link>
+              </Button>
+            </div>
           </CardContent>
         )}
       </Card>
