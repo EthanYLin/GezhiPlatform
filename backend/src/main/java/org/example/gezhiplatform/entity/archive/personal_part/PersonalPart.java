@@ -38,6 +38,7 @@ public class PersonalPart {
     @RIN
     @Nullable
     @JsonTitle("身份证号")
+    @Pattern(regexp = "^[1-9]\\d{5}(19\\d{2}|20\\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dX]$", message = "18位身份证号格式不正确(若最后一位为X，X需要大写)")
     @JsonPropertyDescription("若最后一位为X，X需要大写。")
     private String rin; // 居民身份证号
 
