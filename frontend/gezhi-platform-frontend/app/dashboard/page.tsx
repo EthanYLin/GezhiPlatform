@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { useUser } from "@/contexts/user-context";
 import { get } from "@/lib/api-client";
@@ -35,6 +36,7 @@ interface GradeClass {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { profile } = useUser();
   const [loading, setLoading] = useState(true);
   const [studentCount, setStudentCount] = useState<number>(0);
@@ -43,6 +45,7 @@ export default function DashboardPage() {
     stuNo: string;
     stuName: string;
   } | null>(null);
+  const [quickSearchKeyword, setQuickSearchKeyword] = useState("");
 
   const isSuperAdmin = profile?.roles.includes("超级管理员");
 
@@ -77,6 +80,16 @@ export default function DashboardPage() {
     }
 
     setLoading(false);
+  };
+
+  // 处理快速查询
+  const handleQuickSearch = () => {
+    const keyword = quickSearchKeyword.trim();
+    if (keyword) {
+      router.push(`/records?keyword=${encodeURIComponent(keyword)}`);
+    } else {
+      router.push("/records");
+    }
   };
 
   // 欢迎卡片（始终显示）
@@ -205,14 +218,28 @@ export default function DashboardPage() {
                       <Input
                         placeholder="学号、姓名、手机号、父母姓名、父母手机号"
                         className="pl-9 lg:hidden"
+                        value={quickSearchKeyword}
+                        onChange={(e) => setQuickSearchKeyword(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleQuickSearch();
+                          }
+                        }}
                       />
                       {/* 大屏幕显示完整文本 */}
                       <Input
                         placeholder="支持通过学号、姓名、手机号、父母姓名、父母手机号搜索"
                         className="pl-9 hidden lg:block"
+                        value={quickSearchKeyword}
+                        onChange={(e) => setQuickSearchKeyword(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleQuickSearch();
+                          }
+                        }}
                       />
                     </div>
-                    <Button>查询</Button>
+                    <Button onClick={handleQuickSearch}>查询</Button>
                   </div>
                 </CardContent>
               </Card>
