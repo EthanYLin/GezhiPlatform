@@ -16,6 +16,7 @@ import org.example.gezhiplatform.entity.archive.personal_part.PersonalPart;
 import org.example.gezhiplatform.entity.role.*;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.FieldNotFoundException;
+import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.service.archive.ArchiveQueryService;
 import org.jetbrains.annotations.NotNull;
@@ -189,6 +190,27 @@ public class StudentQueryService {
             studentRepository
                 .findBy(combinedSpec, q -> q.sortBy(pageable.getSort()).page(pageable))
                 .map(StudentCoverResponse::new)
+        );
+    }
+
+    /**
+     * 根据学号和用户权限获取单个学生信息
+     *
+     * @param stuNo 学号
+     * @param user  当前用户，用于应用权限过滤
+     * @return 学生基本信息
+     * @throws NotFoundException 当学生不存在或当前用户无权访问时抛出
+     * @see #searchStudents(Specification, User, Pageable) 底层通用搜索方法
+     */
+    public StudentCoverResponse getStudentByStuNo(
+        @NotNull String stuNo,
+        @NotNull User user
+    ) throws NotFoundException {
+        Specification<Student> spec = (root, _, cb) ->
+            cb.equal(root.get("stuNo"), stuNo);
+        PageResult<StudentCoverResponse> pageResult = searchStudents(spec, user, Pageable.ofSize(1));
+        return pageResult.content().stream().findFirst().orElseThrow(
+            () -> new NotFoundException("该学生(学号:" + stuNo + ")不存在或当前用户无权访问。")
         );
     }
 

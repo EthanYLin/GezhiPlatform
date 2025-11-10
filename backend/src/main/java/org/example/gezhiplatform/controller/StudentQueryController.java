@@ -10,12 +10,10 @@ import org.example.gezhiplatform.DTO.student.StudentCoverResponse;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.service.auth.AuthService;
 import org.example.gezhiplatform.service.student.StudentQueryService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -138,5 +136,29 @@ public class StudentQueryController {
         @PageableDefault(size = 20) Pageable pageable
     ) {
         return studentQueryService.searchStudents(gradeNo, classNo, keyword, authService.getCurrentUser(), pageable);
+    }
+
+    /**
+     * 根据学号查询学生
+     * <p>
+     * 精确匹配学号，返回对应学生的基本信息。
+     * </p>
+     * <p>
+     * <b>权限控制</b>：
+     * 查询结果会受到用户权限的限制，只有当用户有权查看该学生时，才会返回学生信息，否则将返回404。
+     * </p>
+     *
+     * @param stuNo 学号，例如：260101
+     * @return 学号对应的学生基本信息
+     * @apiNote GET /students/{stuNo}
+     */
+    @GetMapping("/{stuNo}")
+    @Transactional
+    @Operation(summary = "根据学号查询学生", description = "根据学号精确查询学生信息")
+    public StudentCoverResponse getStudentByStuNo(
+        @Parameter(description = "学生学号", required = true, example = "260101")
+        @PathVariable @NotNull String stuNo
+    ) {
+        return studentQueryService.getStudentByStuNo(stuNo, authService.getCurrentUser());
     }
 }
