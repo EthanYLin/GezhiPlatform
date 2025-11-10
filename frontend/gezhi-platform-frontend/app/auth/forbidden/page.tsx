@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShieldX } from "lucide-react";
+import { ShieldX, User } from "lucide-react";
 
 function ForbiddenContent() {
   const searchParams = useSearchParams();
@@ -38,7 +38,10 @@ function ForbiddenContent() {
 
         <CardContent>
           <Button asChild className="w-full">
-            <Link href="/auth/me">前往个人中心</Link>
+            <Link href="/auth/me">
+              <User className="mr-2 h-4 w-4" />
+              前往个人中心
+            </Link>
           </Button>
         </CardContent>
       </Card>

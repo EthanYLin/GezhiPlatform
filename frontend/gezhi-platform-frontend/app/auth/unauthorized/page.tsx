@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, LogIn, Home } from "lucide-react";
 
 function UnauthorizedContent() {
   const router = useRouter();
@@ -50,10 +50,14 @@ function UnauthorizedContent() {
         <CardContent>
           <div className="flex flex-col gap-3">
             <Button onClick={handleLogin} className="w-full">
+              <LogIn className="mr-2 h-4 w-4" />
               重新登录
             </Button>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/">返回首页</Link>
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                返回首页
+              </Link>
             </Button>
           </div>
         </CardContent>

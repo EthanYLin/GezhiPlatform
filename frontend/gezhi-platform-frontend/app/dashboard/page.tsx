@@ -93,7 +93,7 @@ export default function DashboardPage() {
   };
 
   // 欢迎卡片（始终显示）
-  const WelcomeCard = ({ count }: { count: number }) => (
+  const WelcomeCard = ({ count, student }: { count: number; student: { stuNo: string; stuName: string } | null }) => (
     <Card
       className={
         `row-span-2 bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl flex flex-col justify-center ` +
@@ -118,10 +118,10 @@ export default function DashboardPage() {
             </Link>
           </Button>
         )}
-        {count === 1 && (
+        {count === 1 && student && (
           <Button asChild variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
-            <Link href="/records">
-              <span className="font-bold text-md">维护我的档案</span>
+            <Link href={`/archives/${student.stuNo}`}>
+              <span className="font-bold text-md">维护我的档案({student.stuNo} {student.stuName})</span>
             </Link>
           </Button>
         )}
@@ -152,7 +152,7 @@ export default function DashboardPage() {
           {/* 档案数为 0 的布局 */}
           {studentCount === 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
-              <WelcomeCard count={studentCount} />
+              <WelcomeCard count={0} student={null} />
               
               {/* 无权限提示卡片 */}
               <Card className="col-span-2 lg:col-span-1 row-span-2 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow">
@@ -170,14 +170,14 @@ export default function DashboardPage() {
           {/* 档案数为 1 的布局 */}
           {studentCount === 1 && singleStudent && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
-              <WelcomeCard count={studentCount} />
+              <WelcomeCard count={1} student={singleStudent} />
             </div>
           )}
 
           {/* 档案数大于 1 的布局 */}
           {studentCount > 1 && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
-              <WelcomeCard count={studentCount} />
+              <WelcomeCard count={studentCount} student={null} />
               
               {/* 可查看的班级数 */}
               <Card className="col-span-1 hover:shadow-lg transition-shadow">
