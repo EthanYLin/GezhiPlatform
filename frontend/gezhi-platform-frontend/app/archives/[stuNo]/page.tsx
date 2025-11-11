@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Navbar } from "@/components/navbar";
-import { get } from "@/lib/api-client";
+import { get, put } from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, ArrowLeft, Download, Save } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, ArrowLeft, Download, Save, AlertCircle } from "lucide-react";
 
 interface JsonSchemaProperty {
   type: string | string[];
@@ -64,11 +73,18 @@ export default function StudentArchivePage() {
   const stuNo = params.stuNo as string;
 
   const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [schema, setSchema] = useState<JsonSchema | null>(null);
   const [formData, setFormData] = useState<FormData>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [permissions, setPermissions] = useState<PermissionData | null>(null);
   const [studentInfo, setStudentInfo] = useState<StudentBasicInfo | null>(null);
+  
+  // 错误对话框状态
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorDialogTitle, setErrorDialogTitle] = useState("");
+  const [errorDialogMessage, setErrorDialogMessage] = useState("");
 
   useEffect(() => {
     document.title = `学生档案 ${stuNo} - 应急协同平台`;
@@ -128,8 +144,154 @@ export default function StudentArchivePage() {
     }
   };
 
+  // 显示错误对话框
+  const showErrorDialog = (title: string, message: string) => {
+    setErrorDialogTitle(title);
+    setErrorDialogMessage(message);
+    setErrorDialogOpen(true);
+  };
+
   const handleGoBack = () => {
     router.back();
+  };
+
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+      const token = localStorage.getItem("authToken");
+      
+      const response = await fetch(`${API_BASE_URL}/archive/students/${stuNo}/export`, {
+        method: "POST",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "导出失败");
+      }
+
+      // 获取文件名，如果响应头中没有，使用默认值
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `学生档案_${stuNo}.xlsx`;
+      if (contentDisposition) {
+        // 优先尝试 filename*= (RFC 5987 格式)
+        const filenameStarMatch = contentDisposition.match(/filename\*=([^']+)'([^']*)'(.+)/);
+        if (filenameStarMatch && filenameStarMatch[3]) {
+          // filename*= 格式: charset'lang'encoded-value
+          filename = decodeURIComponent(filenameStarMatch[3]);
+        } else {
+          // 回退到 filename=
+          const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1].replace(/['"]/g, '');
+            // 解码 URL 编码的文件名
+            filename = decodeURIComponent(filename);
+          }
+        }
+      }
+
+      // 下载文件
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      console.error("导出失败:", error);
+      showErrorDialog("导出失败", error.message || "未知错误");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    // 先验证所有字段
+    if (!schema) {
+      showErrorDialog("无法保存", "表单结构未加载，请刷新页面后重试");
+      return;
+    }
+
+    // 收集所有验证错误
+    const errors: Record<string, string> = {};
+    const validateAllFields = (properties: Record<string, JsonSchemaProperty>, parentPath: string = "") => {
+      Object.entries(properties).forEach(([key, fieldSchema]) => {
+        const fieldPath = parentPath ? `${parentPath}.${key}` : key;
+        
+        // 只验证可写字段
+        if (!isFieldWritable(fieldSchema)) {
+          return;
+        }
+
+        const value = getFieldValue(fieldPath);
+
+        // 如果字段可空且值为空，跳过验证
+        if (isFieldNullable(fieldSchema) && (value === null || value === undefined || value === "")) {
+          return;
+        }
+
+        // Pattern 验证
+        if (fieldSchema.pattern && value) {
+          const regex = new RegExp(fieldSchema.pattern);
+          if (!regex.test(value)) {
+            errors[fieldPath] = `格式不正确`;
+          }
+        }
+
+        // MaxLength 验证
+        if (fieldSchema.maxLength && value && String(value).length > fieldSchema.maxLength) {
+          errors[fieldPath] = `超过最大长度 ${fieldSchema.maxLength}`;
+        }
+
+        // 递归验证对象字段
+        if (fieldSchema.type === "object" && fieldSchema.properties) {
+          validateAllFields(fieldSchema.properties, fieldPath);
+        }
+
+        // 验证数组字段
+        if (fieldSchema.type === "array" && fieldSchema.items?.properties) {
+          const arrayData = getArrayData(fieldPath);
+          arrayData.forEach((_, index) => {
+            const itemPath = `${fieldPath}[${index}]`;
+            validateAllFields(fieldSchema.items!.properties!, itemPath);
+          });
+        }
+      });
+    };
+
+    validateAllFields(schema.properties);
+
+    // 如果有验证错误，显示第一个错误并停止保存
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      const firstError = Object.values(errors)[0];
+      showErrorDialog("表单验证失败", `请修正表单错误后再保存：${firstError}`);
+      return;
+    }
+
+    // 执行保存
+    setSaveLoading(true);
+    try {
+      const response = await put(`/archive/students/${stuNo}`, formData);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      toast.success("保存成功！");
+      // 重新加载档案数据
+      await fetchArchiveData();
+    } catch (error: any) {
+      showErrorDialog("保存失败", error.message || "未知错误");
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   // ==================== 自动填充规则系统 ====================
@@ -980,16 +1142,36 @@ export default function StudentArchivePage() {
             </Button>
             <Button
               variant="outline"
-              disabled
+              onClick={handleExport}
+              disabled={exportLoading}
             >
-              <Download className="h-4 w-4 mr-2" />
-              导出
+              {exportLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  导出中...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  导出
+                </>
+              )}
             </Button>
             <Button
-              disabled
+              onClick={handleSave}
+              disabled={saveLoading}
             >
-              <Save className="h-4 w-4 mr-2" />
-              保存修改
+              {saveLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  保存中...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  保存修改
+                </>
+              )}
             </Button>
           </div>
 
@@ -1071,6 +1253,26 @@ export default function StudentArchivePage() {
           )}
         </div>
       </div>
+
+      {/* 错误对话框 */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              </div>
+              <DialogTitle>{errorDialogTitle}</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription className="pt-2">
+            {errorDialogMessage}
+          </DialogDescription>
+          <DialogFooter>
+            <Button onClick={() => setErrorDialogOpen(false)}>确定</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
