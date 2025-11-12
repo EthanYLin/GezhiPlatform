@@ -11,8 +11,6 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.transaction.Transactional;
 import org.example.gezhiplatform.DTO.archive.ArchiveExportResponse;
 import org.example.gezhiplatform.entity.Student;
-import org.example.gezhiplatform.entity.User;
-import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.enums.AuditOperationType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
@@ -51,7 +49,6 @@ import static com.jayway.jsonpath.Option.SUPPRESS_EXCEPTIONS;
 @Service
 public class ArchiveQueryService {
 
-    private final ArchiveMetadataService archiveMetadataService;
     private final ArchiveAccessControlService archiveAccessControlService;
     private final AuditService auditService;
 
@@ -62,12 +59,10 @@ public class ArchiveQueryService {
     private Resource archiveExportTemplate;
 
     public ArchiveQueryService(
-        ArchiveMetadataService archiveMetadataService,
         ObjectMapper objectMapper,
         ArchiveAccessControlService archiveAccessControlService,
         AuditService auditService
     ) {
-        this.archiveMetadataService = archiveMetadataService;
         this.objectMapper = objectMapper;
         this.archiveAccessControlService = archiveAccessControlService;
         this.auditService = auditService;
@@ -83,7 +78,7 @@ public class ArchiveQueryService {
      * 查询和权限过滤流程：
      * <ol>
      *   <li>根据学号查找学生档案数据</li>
-     *   <li>调用{@link #filterArchivedData(Archive, User, Student)}方法过滤档案数据</li>
+     *   <li>调用{@link #filterArchivedData(ArchiveAccessControlService.UserStudentArchive)}方法过滤档案数据</li>
      *   <li>返回过滤后的档案JSON数据</li>
      * </ol>
      * </p>
@@ -100,8 +95,8 @@ public class ArchiveQueryService {
         @NotNull String stuNoForQuery
     ) throws BadRequestException {
         // 查询学生档案
-        var context = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery);
-        var archiveJayway = filterArchivedData(context.archive(), context.user(), context.student());
+        var context = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery);
+        var archiveJayway = filterArchivedData(context);
 
         // 在审计日志中记录
         auditService.log(
@@ -122,7 +117,7 @@ public class ArchiveQueryService {
      * 导出和权限过滤流程：
      * <ol>
      *   <li>根据学号查找学生和档案数据</li>
-     *   <li>调用{@link #filterArchivedData(Archive, User, Student)}方法过滤档案数据</li>
+     *   <li>调用{@link #filterArchivedData(ArchiveAccessControlService.UserStudentArchive)}方法过滤档案数据</li>
      *   <li>记录审计日志</li>
      *   <li>将过滤后的数据转换为ArchiveExportResponse对象</li>
      *   <li>使用Excel模板生成文件并输出到指定流</li>
@@ -143,7 +138,7 @@ public class ArchiveQueryService {
     ) throws BadRequestException {
 
         // 查询学生档案
-        var context = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery);
+        var context = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery);
 
         // 在审计日志中记录
         auditService.log(
@@ -152,9 +147,7 @@ public class ArchiveQueryService {
         );
 
         // 转换为Map类型
-        DocumentContext filteredDocumentContext = filterArchivedData(
-            context.archive(), context.user(), context.student()
-        );
+        DocumentContext filteredDocumentContext = filterArchivedData(context);
         ArchiveExportResponse data = ArchiveExportResponse.of(
             filteredDocumentContext, context.student(), context.user().toString()
         );
@@ -186,7 +179,7 @@ public class ArchiveQueryService {
      * @throws NotFoundException 当学生不存在时抛出
      */
     public String getExportFileName(@NotNull Long currentUserId, @NotNull String stuNoForQuery) {
-        Student student = archiveAccessControlService.getUserStudentArchive(currentUserId, stuNoForQuery).student();
+        Student student = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery).student();
         return String.format(
             "%s(%s)学生档案-%s",
             student.getStuName(),
@@ -196,11 +189,7 @@ public class ArchiveQueryService {
     }
 
     /**
-     * 根据用户权限过滤档案数据
-     * <p>
-     * 该私有方法负责根据当前用户对指定学生的访问权限来过滤档案数据。
-     * 它会获取用户的可读权限路径，计算出不允许访问的路径，然后从档案JSON中删除这些路径对应的数据。
-     * </p>
+     * 根据用户-学生-档案上下文中用户对学生的权限过滤档案数据
      * <p>
      * 过滤流程：
      * <ol>
@@ -213,32 +202,24 @@ public class ArchiveQueryService {
      * </ol>
      * </p>
      *
-     * @param archive 要过滤的档案对象
-     * @param user    当前用户
-     * @param student 目标学生
+     * @param context 要过滤的档案对象
      * @return 经过权限过滤的DocumentContext对象，可调用jsonString()方法获取JSON字符串
      * @throws BadRequestException 当档案序列化失败时抛出
      */
     private @NotNull DocumentContext filterArchivedData(
-        @NotNull Archive archive, @NotNull User user, @NotNull Student student
+        @NotNull ArchiveAccessControlService.UserStudentArchive context
     ) {
         // 将档案数据经由String转换为JaywayDocument
         String archiveJson;
         try {
-            archiveJson = objectMapper.writeValueAsString(archive);
+            archiveJson = objectMapper.writeValueAsString(context.archive());
         } catch (JsonProcessingException e) {
             throw new BadRequestException("无法序列化档案数据(追踪点:AQS01) :" + e.getMessage());
         }
         var archiveJayway = jsonParser.parse(archiveJson);
 
-        // 获取用户具有的可读权限
-        var allowedReadablePaths = archiveAccessControlService
-            .getMergedPermissions(user, student)
-            .allowedJsonPaths().readableJsonPaths();
-        var deniedReadablePaths = archiveMetadataService.getComplementSet(allowedReadablePaths);
-
-        // 根据可读权限裁剪档案数据并返回
-        deniedReadablePaths.forEach(archiveJayway::delete);
+        // 根据用户的不可读路径裁剪档案数据并返回
+        context.deniedReadableJsonPaths().forEach(archiveJayway::delete);
         return archiveJayway;
     }
 

@@ -7,8 +7,6 @@ import com.jayway.jsonpath.ParseContext;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.example.gezhiplatform.entity.Student;
-import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.jetbrains.annotations.NotNull;
@@ -41,19 +39,16 @@ public class ArchiveUpdateService {
     private final Validator validator;
     private final ParseContext jaywayParser = JsonPath.using(defaultConfiguration().setOptions(SUPPRESS_EXCEPTIONS));
     private final ArchiveAccessControlService archiveAccessControlService;
-    private final ArchiveMetadataService archiveMetadataService;
     private final StudentRepository studentRepository;
 
     public ArchiveUpdateService(
         ObjectMapper objectMapper,
         Validator validator,
         ArchiveAccessControlService archiveAccessControlService,
-        ArchiveMetadataService archiveMetadataService,
         StudentRepository studentRepository
     ) {
         this.objectMapper = objectMapper;
         this.archiveAccessControlService = archiveAccessControlService;
-        this.archiveMetadataService = archiveMetadataService;
         this.validator = validator;
         this.studentRepository = studentRepository;
     }
@@ -90,9 +85,9 @@ public class ArchiveUpdateService {
         @NotNull String jsonForUpdate, @NotNull Long userId, @NotNull String stuNo
     ) throws BadRequestException {
         // 获取用户、学生、档案
-        var context = archiveAccessControlService.getUserStudentArchive(userId, stuNo);
+        var context = archiveAccessControlService.new UserStudentArchive(userId, stuNo);
         // 对请求体进行过滤
-        String filteredJson = filterUpdateData(jsonForUpdate, context.user(), context.student());
+        String filteredJson = filterUpdateData(jsonForUpdate, context);
         // 应用更新
         try {
             objectMapper.readerForUpdating(context.archive()).readValue(filteredJson);
@@ -119,24 +114,18 @@ public class ArchiveUpdateService {
      * </p>
      *
      * @param json    原始的更新数据JSON字符串
-     * @param user    当前操作用户
-     * @param student 目标学生
+     * @param context 用户-学生-档案上下文，包含当前操作的用户和学生信息
      * @return 经过权限过滤的JSON字符串，只包含用户有权修改的字段
      * @throws BadRequestException 当JSON解析失败时抛出
      */
     private @NotNull String filterUpdateData(
-        @NotNull String json, @NotNull User user, @NotNull Student student
+        @NotNull String json, @NotNull ArchiveAccessControlService.UserStudentArchive context
     ) throws BadRequestException {
-        // 获取用户具有的可写权限
-        var allowedWriteablePaths = archiveAccessControlService
-            .getMergedPermissions(user, student)
-            .allowedJsonPaths().writableJsonPaths();
-        var deniedWriteablePaths = archiveMetadataService.getComplementSet(allowedWriteablePaths);
 
-        // 根据可写权限裁剪请求体并返回
+        // 根据用户的不可写权限，裁剪请求体并返回
         try {
             var jaywayUpdateData = jaywayParser.parse(json);
-            deniedWriteablePaths.forEach(jaywayUpdateData::delete);
+            context.deniedWritableJsonPaths().forEach(jaywayUpdateData::delete);
             return jaywayUpdateData.jsonString();
         } catch (Exception e) {
             throw new BadRequestException("无法解析档案更新数据(AUS01): " + e.getMessage());

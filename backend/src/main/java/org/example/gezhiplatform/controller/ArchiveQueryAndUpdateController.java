@@ -107,7 +107,7 @@ public class ArchiveQueryAndUpdateController {
         @PathVariable @NotNull String stuNo
     ) throws NotFoundException, BadRequestException {
         Long currentUserId = StpUtil.getLoginIdAsLong();
-        return archiveAccessControlService.getArchivePermissions(currentUserId, stuNo);
+        return archiveAccessControlService.new UserStudentArchive(currentUserId, stuNo).permissionDetails();
     }
 
     /**
