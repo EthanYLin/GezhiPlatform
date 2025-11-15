@@ -2,7 +2,10 @@ package org.example.gezhiplatform.entity.archive.family_part;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.gezhiplatform.annotation.JsonIncludeMethod;
@@ -15,10 +18,14 @@ import java.util.Optional;
  * 其他亲属类(包括姓名、出生年份、工作/就学信息)
  * 用于：用于：学生档案 - 亲属信息部分 - 其他亲属
  */
-@Embeddable
+@Entity
 @Data
-@JsonPropertyOrder({"name", "birthYear", "age", "info"})
+@JsonPropertyOrder({"id", "name", "birthYear", "age", "info"})
 public class Relative {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // ID(由数据库自增)
 
     @Nullable
     @JsonTitle("姓名")

@@ -13,7 +13,6 @@ import org.example.gezhiplatform.entity.archive.personal_part.PersonalPart;
 import org.example.gezhiplatform.entity.enums.AdmissionPath;
 import org.example.gezhiplatform.entity.enums.District;
 import org.example.gezhiplatform.entity.enums.Gender;
-import org.example.gezhiplatform.entity.enums.HealthStatus;
 import org.example.gezhiplatform.utils.RandomUtils;
 
 import java.util.List;
@@ -114,10 +113,11 @@ public class ArchiveFaker {
         var physicianCondition = RandomUtils.pickOneFrom(physicianHealthConditionSamples);
         return new HealthCondition(
             null,
-            HealthStatus.ATTENTION,
             physicianCondition.healthIssue(),
             physicianCondition.medicationUse(),
-            physicianCondition.ongoingTreatment()
+            physicianCondition.ongoingTreatment(),
+            null,
+            null
         );
     }
 
@@ -125,28 +125,19 @@ public class ArchiveFaker {
         var mentalCondition = RandomUtils.pickOneFrom(mentalHealthConditionSamples);
         return new HealthCondition(
             null,
-            HealthStatus.ATTENTION,
             mentalCondition.healthIssue(),
             mentalCondition.medicationUse(),
-            mentalCondition.ongoingTreatment()
+            mentalCondition.ongoingTreatment(),
+            null,
+            null
         );
     }
 
     public static HealthPart healthPart() {
         var healthPart = new HealthPart();
-        if (RandomUtils.roll(15)) {
-            healthPart.setMentalCondition(mentalHealthCondition());
-        } else {
-            healthPart.setMentalCondition(
-                new HealthCondition(null, HealthStatus.HEALTHY, null, null, null)
-            );
-        }
-        if (RandomUtils.roll(15)) {
-            healthPart.setPhysicalCondition(physicalHealthCondition());
-        } else {
-            healthPart.setPhysicalCondition(
-                new HealthCondition(null, HealthStatus.HEALTHY, null, null, null)
-            );
+        for (int i = 0; i < 3; i++) {
+            if (RandomUtils.roll(10)) healthPart.getMentalCondition().add(mentalHealthCondition());
+            if (RandomUtils.roll(10)) healthPart.getPhysicalCondition().add(physicalHealthCondition());
         }
         return healthPart;
     }

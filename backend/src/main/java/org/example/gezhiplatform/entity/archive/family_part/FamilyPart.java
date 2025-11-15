@@ -41,7 +41,7 @@ public class FamilyPart {
     @JsonTitle("母亲")
     private Parent mother; // 母亲
 
-    @ElementCollection
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     @Valid
     @JsonTitle("直系亲属")

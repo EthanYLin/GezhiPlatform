@@ -62,8 +62,6 @@ public record ArchiveExportResponse(
     @Nullable String rel1Info, // 其他直系亲属（一）工作/就学信息
     @Nullable String rel2Info, // 其他直系亲属（二）工作/就学信息
     @Nullable String remainRelativeTips, // 其他直系亲属提示
-    @Nullable String physicalHealthStatus, // 身体健康状况
-    @Nullable String mentalHealthStatus, // 心理健康状况
     @Nullable String physicalHealthIssue, // 身体关注问题
     @Nullable String mentalHealthIssue, // 心理关注问题
     @Nullable String physicalMedicationUse, // 身体服药状况
@@ -127,14 +125,12 @@ public record ArchiveExportResponse(
             document.read("$.familyPart.otherRelatives[0].info", String.class),
             document.read("$.familyPart.otherRelatives[1].info", String.class),
             remainRelativeTips,
-            document.read("$.healthPart.physicalCondition.healthStatus", String.class),
-            document.read("$.healthPart.mentalCondition.healthStatus", String.class),
-            document.read("$.healthPart.physicalCondition.healthIssue", String.class),
-            document.read("$.healthPart.mentalCondition.healthIssue", String.class),
-            document.read("$.healthPart.physicalCondition.medicationUse", String.class),
-            document.read("$.healthPart.mentalCondition.medicationUse", String.class),
-            document.read("$.healthPart.physicalCondition.ongoingTreatment", String.class),
-            document.read("$.healthPart.mentalCondition.ongoingTreatment", String.class)
+            document.read("$.healthPart.physicalCondition[0].healthIssue", String.class),
+            document.read("$.healthPart.mentalCondition[0].healthIssue", String.class),
+            document.read("$.healthPart.physicalCondition[0].medicationUse", String.class),
+            document.read("$.healthPart.mentalCondition[0].medicationUse", String.class),
+            document.read("$.healthPart.physicalCondition[0].ongoingTreatment", String.class),
+            document.read("$.healthPart.mentalCondition[0].ongoingTreatment", String.class)
         );
     }
 
@@ -159,8 +155,10 @@ public record ArchiveExportResponse(
         List<Relative> relatives = Optional.ofNullable(familyPart).map(FamilyPart::getOtherRelatives).orElse(List.of());
         
         // 获取健康信息
-        HealthCondition physicalCondition = Optional.ofNullable(healthPart).map(HealthPart::getPhysicalCondition).orElse(null);
-        HealthCondition mentalCondition = Optional.ofNullable(healthPart).map(HealthPart::getMentalCondition).orElse(null);
+        List<HealthCondition> physicalConditions = Optional.ofNullable(healthPart).map(HealthPart::getPhysicalCondition).orElse(List.of());
+        List<HealthCondition> mentalConditions = Optional.ofNullable(healthPart).map(HealthPart::getMentalCondition).orElse(List.of());
+        HealthCondition physicalCondition = !physicalConditions.isEmpty() ? physicalConditions.getFirst() : null;
+        HealthCondition mentalCondition = !mentalConditions.isEmpty() ? mentalConditions.getFirst() : null;
 
         // 获取其他直系亲属信息
         String remainRelativeTips = relatives.size() > 2
@@ -200,8 +198,6 @@ public record ArchiveExportResponse(
             !relatives.isEmpty() ? relatives.get(0).getInfo() : null,
             relatives.size() > 1 ? relatives.get(1).getInfo() : null,
             remainRelativeTips,
-            Optional.ofNullable(physicalCondition).map(HealthCondition::getHealthStatus).map(HealthStatus::getName).orElse(null),
-            Optional.ofNullable(mentalCondition).map(HealthCondition::getHealthStatus).map(HealthStatus::getName).orElse(null),
             Optional.ofNullable(physicalCondition).map(HealthCondition::getHealthIssue).orElse(null),
             Optional.ofNullable(mentalCondition).map(HealthCondition::getHealthIssue).orElse(null),
             Optional.ofNullable(physicalCondition).map(HealthCondition::getMedicationUse).orElse(null),
