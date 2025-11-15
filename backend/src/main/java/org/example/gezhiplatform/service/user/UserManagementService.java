@@ -19,12 +19,12 @@ import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.UserRepository;
 import org.example.gezhiplatform.service.auth.AuthService;
 import org.example.gezhiplatform.utils.PasswordEncryptUtils;
-import org.example.gezhiplatform.utils.RandomUtils;
 import org.example.gezhiplatform.utils.ReflectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -32,10 +32,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -50,9 +47,11 @@ public class UserManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(UserManagementService.class);
     private final UserRepository userRepository;
+    private final Environment environment;
 
-    public UserManagementService(UserRepository userRepository) {
+    public UserManagementService(UserRepository userRepository, Environment environment) {
         this.userRepository = userRepository;
+        this.environment = environment;
     }
 
     @PostConstruct
@@ -84,12 +83,17 @@ public class UserManagementService {
     }
 
     private void initAdminUser() {
-        // 如果在启动时仓库内没有任何用户，则创建一个管理员用户。用户名为admin，密码随机生成并打印到控制台。
+        // 只在生产环境下初始化管理员用户
+        boolean isProd = Arrays.stream(environment.getActiveProfiles()).anyMatch(
+            profile -> profile.equalsIgnoreCase("prod") || profile.equalsIgnoreCase("production")
+        );
+        if (!isProd) return;
+        
+        // 如果在启动时仓库内没有任何用户，则创建一个管理员用户。用户名为admin，密码为123456，但不启用账户。
         if (userRepository.count() != 0) return;
-        String password = String.format("%06d", RandomUtils.randInt(0, 999999));
+        String password = "123456";
         User admin = new User("admin", "admin", password, List.of(new SuperAdmin()));
         log.warn("初始化管理员用户成功，用户名为admin，密码为{}", password);
-        admin.setEnabled(true);
         userRepository.save(admin);
     }
 
