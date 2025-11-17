@@ -20,7 +20,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * 学生档案
- * 包括个人信息、入学信息、地址信息、家庭成员、健康申明部分
+ * 包括个人信息、入学信息、地址信息、家庭成员、健康声明部分
  */
 @Entity
 @Data
@@ -71,7 +71,7 @@ public class Archive {
     @OneToOne(cascade = CascadeType.ALL)
     @Valid
     @JsonMerge
-    @JsonTitle("健康申明")
-    private HealthPart healthPart; // 健康申明
+    @JsonTitle("健康声明")
+    private HealthPart healthPart; // 健康声明
 
 }

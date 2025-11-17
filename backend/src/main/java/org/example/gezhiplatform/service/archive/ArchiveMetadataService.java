@@ -18,8 +18,7 @@ import java.util.Set;
  *
  * <p><b>职责：</b></p>
  * <ul>
- *   <li>该服务负责管理学生档案(Archive)类的JSON Schema元数据信息</li>
- *   <li>主要用于支持前端表单的自动生成和字段权限控制</li>
+ *   <li>该服务负责管理学生档案(Archive)类的JSON Schema元数据信息，用于支持前端表单的自动生成和字段权限控制。</li>
  *   <li>在应用启动时自动生成Archive类的JSON Schema</li>
  *   <li>为Schema中的每个字段添加JSONPath路径标识</li>
  * </ul>
@@ -29,13 +28,18 @@ import java.util.Set;
  *
  * <p><b>架构说明：</b></p>
  * <p>
- * 档案查询服务（{@link ArchiveQueryService}）与档案更新服务（{@link ArchiveUpdateService}）
- * 在处理请求时，会调用访问控制服务（{@link ArchiveAccessControlService}）获取用户对于该学生的读写权限。<br/>
- * 访问控制服务在进行权限判断时，需要依赖：<br/>
- * - 档案元字段服务（{@link ArchiveMetadataService}），提供档案字段及类型信息；<br/>
- * - 权限组配置服务（{@link ArchivePermissionGroupService}），提供用户角色所在的权限组及其读写权限。<br/>
- * 最终，{@link ArchiveQueryService} 与 {@link ArchiveUpdateService}
- * 会根据 {@link ArchiveAccessControlService} 返回的权限信息，过滤或限制数据访问。
+ * 访问控制服务（{@link ArchiveAccessControlService}）将根据用户的权限过滤档案数据：
+ * <ul>
+ *   <li>在<b>读取操作</b>中，只返回档案中用户有权限访问的字段。</li>
+ *   <li>在<b>更新操作</b>中，去除请求体中用户不可写的字段数据。</li>
+ * </ul>
+ * </p>
+ * <p>
+ * 在进行权限判断时，依赖以下服务：
+ * <ul>
+ *   <li>档案元字段服务（{@link ArchiveMetadataService}）- 提供档案字段及类型信息。</li>
+ *   <li>权限组配置服务（{@link ArchivePermissionGroupService}）- 提供用户角色所在的权限组及其读写权限。</li>
+ * </ul>
  * </p>
  */
 @Service

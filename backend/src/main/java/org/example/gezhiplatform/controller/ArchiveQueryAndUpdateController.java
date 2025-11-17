@@ -11,6 +11,7 @@ import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.service.archive.ArchiveAccessControlService;
+import org.example.gezhiplatform.service.archive.ArchiveExportService;
 import org.example.gezhiplatform.service.archive.ArchiveQueryService;
 import org.example.gezhiplatform.service.archive.ArchiveUpdateService;
 import org.jetbrains.annotations.NotNull;
@@ -22,17 +23,23 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 档案查询控制器
+ * 档案查询与更新控制器
  * <p>
- * 该控制器面向所有已登录用户，提供学生档案信息的查询功能。
- * 返回的档案数据会根据当前用户的权限进行字段级别的过滤，只显示用户有权查看的字段。
+ * 该控制器面向所有已登录用户，提供学生档案信息的查询、导出和更新功能。
+ * 所有操作都会根据当前用户的权限进行字段级别的过滤：
+ * <ul>
+ *   <li><b>查询操作</b>：只返回用户有权查看的字段</li>
+ *   <li><b>导出操作</b>：只导出用户有权查看的字段到Excel文件</li>
+ *   <li><b>更新操作</b>：只允许修改用户有权写入的字段</li>
+ * </ul>
  * </p>
  * <p>
  * <b>权限控制</b>：
  * <ul>
- *   <li>用户必须已登录才能访问档案查询接口</li>
- *   <li>查询结果受到当前用户的权限控制，只返回用户有权访问的字段</li>
- *   <li>查询操作会在审计日志中留下记录</li>
+ *   <li>用户必须已登录才能访问档案接口</li>
+ *   <li>用户只能访问其角色范围内的学生档案</li>
+ *   <li>所有操作结果受到当前用户权限的限制</li>
+ *   <li>查询和导出操作会在审计日志中留下记录</li>
  * </ul>
  * </p>
  */
@@ -44,15 +51,18 @@ public class ArchiveQueryAndUpdateController {
 
     private final ArchiveQueryService archiveQueryService;
     private final ArchiveUpdateService archiveUpdateService;
+    private final ArchiveExportService archiveExportService;
     private final ArchiveAccessControlService archiveAccessControlService;
 
     public ArchiveQueryAndUpdateController(
         ArchiveQueryService archiveQueryService,
         ArchiveUpdateService archiveUpdateService,
+        ArchiveExportService archiveExportService,
         ArchiveAccessControlService archiveAccessControlService
     ) {
         this.archiveQueryService = archiveQueryService;
         this.archiveUpdateService = archiveUpdateService;
+        this.archiveExportService = archiveExportService;
         this.archiveAccessControlService = archiveAccessControlService;
     }
 
@@ -142,7 +152,7 @@ public class ArchiveQueryAndUpdateController {
         HttpServletResponse response
     ) throws BadRequestException {
         Long currentUserId = StpUtil.getLoginIdAsLong();
-        String fileName = archiveQueryService.getExportFileName(currentUserId, stuNo);
+        String fileName = archiveExportService.getExportFileName(currentUserId, stuNo);
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + encodedFileName + ".xlsx");
@@ -152,7 +162,7 @@ public class ArchiveQueryAndUpdateController {
         } catch (IOException e) {
             throw new BadRequestException("在导出时发生错误(追踪点:AQC01):" + e.getMessage());
         }
-        archiveQueryService.exportByStuNo(currentUserId, stuNo, outputStream);
+        archiveExportService.exportByStuNo(currentUserId, stuNo, outputStream);
     }
 
     /**

@@ -1,6 +1,14 @@
 package org.example.gezhiplatform.service.archive;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ParseContext;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.gezhiplatform.DTO.archive.AllowedJsonPathsResponse;
 import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
 import org.example.gezhiplatform.entity.Student;
@@ -19,6 +27,9 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.jayway.jsonpath.Configuration.defaultConfiguration;
+import static com.jayway.jsonpath.Option.SUPPRESS_EXCEPTIONS;
 
 /**
  * 档案访问控制服务
@@ -40,6 +51,7 @@ import java.util.stream.Collectors;
  * 会根据 {@link ArchiveAccessControlService} 返回的权限信息，过滤或限制数据访问。
  * </p>
  */
+@RequiredArgsConstructor
 @Service
 public class ArchiveAccessControlService {
 
@@ -48,17 +60,13 @@ public class ArchiveAccessControlService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
 
-    public ArchiveAccessControlService(
-        ArchivePermissionGroupService archivePermissionGroupService,
-        ArchiveMetadataService archiveMetadataService,
-        UserRepository userRepository,
-        StudentRepository studentRepository
-    ) {
-        this.archivePermissionGroupService = archivePermissionGroupService;
-        this.archiveMetadataService = archiveMetadataService;
-        this.userRepository = userRepository;
-        this.studentRepository = studentRepository;
-    }
+    private static final ParseContext jsonParser = JsonPath.using(
+        defaultConfiguration()
+            .jsonProvider(new JacksonJsonProvider())
+            .mappingProvider(new JacksonMappingProvider())
+            .setOptions(SUPPRESS_EXCEPTIONS)
+    );
+    private final ObjectMapper objectMapper;
 
     /**
      * 用户-学生-档案 上下文
@@ -142,7 +150,8 @@ public class ArchiveAccessControlService {
          * 计算上下文中的用户对学生的权限详情
          * 包括：拥有的且可访问该学生的角色范围、拥有的且可访问该学生的权限组 以及 允许访问可读/可写的JSON Path。
          * <p>
-         * 该方法在返回权限时会合并用户具有的所有角色以及权限组。
+         * 该方法在返回权限时会合并用户具有的所有角色以及权限组。<br/>
+         * <b>该方法会在构造函数中被调用，计算结果将存储。</b>
          * </p>
          * <p>
          * 权限计算流程：
@@ -156,7 +165,7 @@ public class ArchiveAccessControlService {
          *
          * @return 档案权限详情，包含角色范围、权限组和允许访问的JSON Path
          */
-        public ArchivePermissionDetails calculatePermissions() throws NotFoundException {
+        private ArchivePermissionDetails calculatePermissions() throws NotFoundException {
             // 获取该用户中, 能访问该学生的所有角色&角色类型
             // 例如用户(2027届年级组长、2027届1班班主任)访问270201, 只拥有年级组长的权限
             var grantedRoles = user.getRoles().stream()
@@ -180,6 +189,72 @@ public class ArchiveAccessControlService {
                 ownedPermissionGroups.stream().map(PermissionGroup::getName).toList(),
                 new AllowedJsonPathsResponse(allReadablePaths, allWritablePaths)
             );
+        }
+
+
+        /**
+         * 获取上下文中用户对学生的可读档案数据
+         * <p>
+         * 过滤流程：
+         * <ol>
+         *   <li>将Archive对象序列化为JSON字符串</li>
+         *   <li>解析JSON为DocumentContext对象以便进行JsonPath操作</li>
+         *   <li>获取用户对该学生的可读权限路径</li>
+         *   <li>计算不允许访问的路径（补集）</li>
+         *   <li>从DocumentContext中删除不允许访问的路径</li>
+         *   <li>返回过滤后的DocumentContext对象</li>
+         * </ol>
+         * </p>
+         *
+         * @return 经过权限过滤的DocumentContext对象，可调用jsonString()方法获取JSON字符串
+         * @throws RuntimeException 当档案序列化失败时抛出
+         */
+        public @NotNull DocumentContext getReadableArchive() throws RuntimeException{
+
+            // 将档案数据经由String转换为JaywayDocument
+            String archiveJson;
+            try {
+                archiveJson = objectMapper.writeValueAsString(this.archive());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("无法序列化档案数据(AACS01) :" + e.getMessage());
+            }
+            var archiveJayway = jsonParser.parse(archiveJson);
+
+            // 根据用户的不可读路径裁剪档案数据并返回
+            this.deniedReadableJsonPaths().forEach(archiveJayway::delete);
+            return archiveJayway;
+
+        }
+
+        /**
+         * 获取上下文中用户对学生的可写更新数据
+         * <p>
+         * 根据当前用户对指定学生的访问权限来过滤档案更新数据，只保留用户有权修改的字段。
+         * 该方法与 {@link #getReadableArchive()} 相对应，前者用于读取操作的权限过滤，本方法用于更新操作的权限过滤。
+         * </p>
+         * <p>
+         * 过滤流程：
+         * <ol>
+         *   <li>解析原始更新数据JSON字符串为DocumentContext对象</li>
+         *   <li>获取用户对该学生的可写权限路径</li>
+         *   <li>计算不允许修改的路径（补集）</li>
+         *   <li>从DocumentContext中删除不允许修改的路径对应的数据</li>
+         *   <li>返回过滤后的DocumentContext对象</li>
+         * </ol>
+         * </p>
+         *
+         * @param json 原始的更新数据JSON字符串
+         * @return 经过权限过滤的DocumentContext对象，只包含用户有权修改的字段
+         * @throws BadRequestException 当JSON解析失败时抛出
+         */
+        public @NotNull DocumentContext getWritableUpdateData(@NotNull String json) throws BadRequestException {
+            try {
+                var jaywayUpdateData = jsonParser.parse(json);
+                this.deniedWritableJsonPaths().forEach(jaywayUpdateData::delete);
+                return jaywayUpdateData;
+            } catch (Exception e) {
+                throw new BadRequestException("无法解析档案更新数据(AACS02): " + e.getMessage());
+            }
         }
 
     }
