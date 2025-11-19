@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.gezhiplatform.annotation.JsonIncludeMethod;
@@ -34,11 +36,13 @@ public class Relative {
 
     @Nullable
     @JsonTitle("出生年份")
+    @Min(value = 1900, message = "亲属出生年份必须大于1900年")
+    @Max(value = 2100, message = "亲属出生年份必须小于2100年")
     private Integer birthYear; // 出生年份
 
     @Nullable
     @JsonTitle("工作/就学信息")
-    @Size(max = 100, message = "工作/就学信息长度不能超过100个字符")
+    @Size(max = 100, message = "亲属工作/就学信息长度不能超过100个字符")
     private String info; // 工作/就学信息
 
     @JsonProperty(value = "age", access = JsonProperty.Access.READ_ONLY)

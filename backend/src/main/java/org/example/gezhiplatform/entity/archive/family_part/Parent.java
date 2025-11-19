@@ -29,17 +29,17 @@ public class Parent {
 
     @Nullable
     @JsonTitle("姓名")
-    @Size(max = 20, message = "姓名长度不能超过20个字符")
+    @Size(max = 20, message = "父/母亲姓名长度不能超过20个字符")
     private String name; // 姓名
 
     @Nullable
     @JsonTitle("手机号码")
-    @Pattern(regexp = "^1\\d{10}$", message = "手机号格式不正确(仅支持中国大陆手机号)")
+    @Pattern(regexp = "^1\\d{10}$", message = "父/母亲手机号格式不正确(仅支持中国大陆手机号)")
     private String mobile; // 手机号码
 
     @Nullable
     @JsonTitle("工作单位")
-    @Size(max = 100, message = "工作单位长度不能超过100个字符")
+    @Size(max = 100, message = "父/母亲工作单位长度不能超过100个字符")
     private String workUnit; // 工作单位
 
 }

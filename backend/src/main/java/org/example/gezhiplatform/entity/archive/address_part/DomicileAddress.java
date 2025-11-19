@@ -31,22 +31,22 @@ public class DomicileAddress {
 
     @Nullable
     @JsonTitle("省")
-    @Size(max = 20, message = "省名称长度不能超过20个字符")
+    @Size(max = 20, message = "户籍地址的省名称长度不能超过20个字符")
     private String province; // 省
 
     @Nullable
     @JsonTitle("市")
-    @Size(max = 20, message = "市名称长度不能超过20个字符")
+    @Size(max = 20, message = "户籍地址的市名称长度不能超过20个字符")
     private String city; // 市
 
     @Nullable
     @JsonTitle("区")
-    @Size(max = 20, message = "区名称长度不能超过20个字符")
+    @Size(max = 20, message = "户籍地址的区名称长度不能超过20个字符")
     private String district; // 区
 
     @Nullable
     @JsonTitle("详细地址")
-    @Size(max = 100, message = "详细地址长度不能超过100个字符")
+    @Size(max = 100, message = "户籍地址的详细地址长度不能超过100个字符")
     private String detail; // 详细地址
 
 }
