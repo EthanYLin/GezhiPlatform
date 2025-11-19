@@ -3,8 +3,6 @@ package org.example.gezhiplatform.service.archive;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.Predicate;
 import org.example.gezhiplatform.DTO.PageResult;
-import org.example.gezhiplatform.DTO.archive.AllowedJsonPathsResponse;
-import org.example.gezhiplatform.DTO.archive.PermissionGroupRequest;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.exception.BadRequestException;
@@ -92,36 +90,36 @@ public class ArchivePermissionGroupService {
     }
 
     /**
-     * 合法化JsonPath路径
-     * 根据档案元数据服务验证和标准化JsonPath权限
+     * 合法化权限组中的JsonPath权限配置
+     * <p>
+     * <b>注意</b>：该方法会直接修改传入的权限组对象的权限配置。
+     * </p>
      *
-     * @param allowedReadableJsonPaths 允许读取的JsonPath集合
-     * @param allowedWritableJsonPaths 允许写入的JsonPath集合
-     * @return 合法化后的JsonPath权限集合
+     * @param request 需要合法化的权限组实体，方法会直接修改其权限字段
      */
-    public AllowedJsonPathsResponse legalizeJsonPaths(
-        Set<String> allowedReadableJsonPaths, Set<String> allowedWritableJsonPaths) {
-        // 去除所有不在档案(Archive)类中的JsonPath
-        var readableJsonPaths = new HashSet<>(archiveMetadataService.getIntersectSet(allowedReadableJsonPaths));
-        var writableJsonPaths = new HashSet<>(archiveMetadataService.getIntersectSet(allowedWritableJsonPaths));
+    public void legalizeJsonPaths(PermissionGroup request) {
 
-        // 所有在数组中的JsonPath没有单独的编辑权限, 其权限与其数组入口权限一致
-        // 先移除所有在数组中的JsonPath
-        writableJsonPaths.removeIf(path -> archiveMetadataService.getFieldMetadata().get(path).insideArray());
-        // 然后将所有在数组中的JsonPath的权限与其数组入口权限一致
-        for (var entry : archiveMetadataService.getFieldMetadata().entrySet()) {
-            if (!entry.getValue().insideArray()) continue;
-            if (writableJsonPaths.contains(entry.getValue().arrayEntryJsonPath()))
-                writableJsonPaths.add(entry.getKey());
-        }
+        // 去除所有不在档案(Archive)类中的JsonPath
+        request.setAllowedReadableJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedReadableJsonPaths()));
+        request.setAllowedWritableJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedWritableJsonPaths()));
+        request.setAllowedAddArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedAddArrayJsonPaths()));
+        request.setAllowedEditArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedEditArrayJsonPaths()));
+        request.setAllowedDeleteArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedDeleteArrayJsonPaths()));
+
+        // 现在数组中字段的单独编辑权限可以与数组的整体编辑权限不一致
+        // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须是数组类型
+        // TODO: implement array type check
+
+        // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须在 WritableJsonPaths 中
+        request.getAllowedWritableJsonPaths().addAll(request.getAllowedAddArrayJsonPaths());
+        request.getAllowedWritableJsonPaths().addAll(request.getAllowedEditArrayJsonPaths());
+        request.getAllowedWritableJsonPaths().addAll(request.getAllowedDeleteArrayJsonPaths());
 
         // 去除所有在可编辑组里的ReadOnly字段
-        writableJsonPaths.removeIf(path -> !archiveMetadataService.getFieldMetadata().get(path).allowEdit());
+        request.getAllowedReadableJsonPaths().removeIf(path -> !archiveMetadataService.getFieldMetadata().get(path).allowEdit());
 
         // 可编辑的JsonPath必须使其可见
-        readableJsonPaths.addAll(writableJsonPaths);
-
-        return new AllowedJsonPathsResponse(readableJsonPaths, writableJsonPaths);
+        request.getAllowedReadableJsonPaths().addAll(request.getAllowedWritableJsonPaths());
     }
 
 
@@ -222,26 +220,19 @@ public class ArchivePermissionGroupService {
     /**
      * 向数据库添加一个权限组
      *
-     * @param request 新增权限组请求
+     * @param permissionGroup 新增权限组实体
      * @return 新增的权限组实体
      * @throws BadRequestException 当权限组名称重复时
      */
     @Transactional
-    public PermissionGroup addPermissionGroup(@NotNull PermissionGroupRequest request) throws BadRequestException {
-        if (permissionGroupRepository.existsByName(request.name())) {
-            throw new BadRequestException("名称为: " + request.name() + " 的权限组已存在");
+    public PermissionGroup addPermissionGroup(@NotNull PermissionGroup permissionGroup) throws BadRequestException {
+        if (permissionGroupRepository.existsByName(permissionGroup.getName())) {
+            throw new BadRequestException("名称为: " + permissionGroup.getName() + " 的权限组已存在");
         }
-
-        // 合法化JsonPath权限
-        AllowedJsonPathsResponse legalizedPaths = legalizeJsonPaths(
-            request.allowedReadableJsonPaths(),
-            request.allowedWritableJsonPaths()
-        );
-
-        PermissionGroup permissionGroup = request.toPermissionGroup();
-        permissionGroup.setAllowedReadableJsonPaths(legalizedPaths.readableJsonPaths());
-        permissionGroup.setAllowedWritableJsonPaths(legalizedPaths.writableJsonPaths());
-
+        // 强制清空ID，确保是新建而非更新
+        permissionGroup.setId(null);
+        // 合法化 JsonPath 权限
+        this.legalizeJsonPaths(permissionGroup);
         return permissionGroupRepository.save(permissionGroup);
     }
 
@@ -250,7 +241,7 @@ public class ArchivePermissionGroupService {
      * 根据权限组ID更新权限组信息
      *
      * @param id      要修改的权限组ID
-     * @param request 新权限组信息请求(可以修改名称)
+     * @param permissionGroup 新权限组信息实体(可以修改名称)
      * @return 更新后的权限组实体
      * @throws NotFoundException   当原权限组不存在时
      * @throws BadRequestException 当新名称与已有权限组重复时
@@ -258,31 +249,24 @@ public class ArchivePermissionGroupService {
     @Transactional
     public PermissionGroup updatePermissionGroup(
         @NotNull Long id,
-        @NotNull PermissionGroupRequest request
+        @NotNull PermissionGroup permissionGroup
     ) throws BadRequestException {
         PermissionGroup oldPermissionGroup = permissionGroupRepository.findById(id).orElseThrow(
             () -> new NotFoundException("ID为: " + id + " 的权限组不存在")
         );
 
-        if (permissionGroupRepository.existsByName(request.name()) &&
-            !request.name().equals(oldPermissionGroup.getName())) {
+        if (permissionGroupRepository.existsByName(permissionGroup.getName()) &&
+            !permissionGroup.getName().equals(oldPermissionGroup.getName())) {
             throw new BadRequestException(
-                "不能将权限组的名称从 " + oldPermissionGroup.getName() + " 改为: " + request.name() +
+                "不能将权限组的名称从 " + oldPermissionGroup.getName() + " 改为: " + permissionGroup.getName() +
                 " , 因为该名称的权限组已存在。");
         }
 
-        // 合法化JsonPath权限
-        AllowedJsonPathsResponse legalizedPaths = legalizeJsonPaths(
-            request.allowedReadableJsonPaths(),
-            request.allowedWritableJsonPaths()
-        );
-
-        PermissionGroup newPermissionGroup = request.toPermissionGroup();
-        newPermissionGroup.setId(oldPermissionGroup.getId());
-        newPermissionGroup.setAllowedReadableJsonPaths(legalizedPaths.readableJsonPaths());
-        newPermissionGroup.setAllowedWritableJsonPaths(legalizedPaths.writableJsonPaths());
-
-        return permissionGroupRepository.save(newPermissionGroup);
+        // 强制使用路径参数中的ID，忽略请求体中的ID
+        permissionGroup.setId(id);
+        // 合法化 JsonPath 权限
+        this.legalizeJsonPaths(permissionGroup);
+        return permissionGroupRepository.save(permissionGroup);
     }
 
 

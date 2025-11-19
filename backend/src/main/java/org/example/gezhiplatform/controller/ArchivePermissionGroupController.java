@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.example.gezhiplatform.DTO.PageResult;
-import org.example.gezhiplatform.DTO.archive.PermissionGroupRequest;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.exception.BadRequestException;
@@ -155,7 +154,7 @@ public class ArchivePermissionGroupController {
      * </ul>
      * </p>
      *
-     * @param request 新增权限组请求体，包含权限组的完整配置信息
+     * @param permissionGroup 新增权限组请求体，包含权限组的完整配置信息
      * @return 新创建的权限组详细信息
      * @throws BadRequestException 当权限组名称重复或配置无效时
      * @apiNote POST /archive/permission-groups
@@ -166,9 +165,9 @@ public class ArchivePermissionGroupController {
     @Operation(summary = "新增权限组")
     public PermissionGroup addPermissionGroup(
         @Parameter(description = "权限组配置信息", required = true)
-        @RequestBody @Valid PermissionGroupRequest request
+        @RequestBody @Valid PermissionGroup permissionGroup
     ) throws BadRequestException {
-        return archivePermissionGroupService.addPermissionGroup(request);
+        return archivePermissionGroupService.addPermissionGroup(permissionGroup);
     }
 
     // ========================= PUT 更新 =========================
@@ -190,7 +189,7 @@ public class ArchivePermissionGroupController {
      * </p>
      *
      * @param id      要更新的权限组ID
-     * @param request 更新权限组请求体，包含权限组的完整配置信息
+     * @param permissionGroup 更新权限组请求体，包含权限组的完整配置信息
      * @return 更新后的权限组详细信息
      * @throws NotFoundException   当指定ID的权限组不存在时
      * @throws BadRequestException 当新名称重复或配置无效时
@@ -203,9 +202,9 @@ public class ArchivePermissionGroupController {
         @Parameter(description = "权限组ID", required = true)
         @PathVariable @NotNull Long id,
         @Parameter(description = "更新的权限组配置信息", required = true)
-        @RequestBody @Valid PermissionGroupRequest request
+        @RequestBody @Valid PermissionGroup permissionGroup
     ) throws NotFoundException, BadRequestException {
-        return archivePermissionGroupService.updatePermissionGroup(id, request);
+        return archivePermissionGroupService.updatePermissionGroup(id, permissionGroup);
     }
 
     // ========================= DELETE 删除 =========================

@@ -9,7 +9,6 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.gezhiplatform.DTO.archive.AllowedJsonPathsResponse;
 import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.User;
@@ -139,16 +138,19 @@ public class ArchiveAccessControlService {
         public ArchivePermissionDetails permissionDetails() {return permissionDetails;}
 
         public Set<String> deniedReadableJsonPaths() {
-            return archiveMetadataService.getComplementSet(permissionDetails.allowedJsonPaths().readableJsonPaths());
+            return archiveMetadataService.getComplementSet(permissionDetails.allowedReadableJsonPaths());
         }
 
         public Set<String> deniedWritableJsonPaths() {
-            return archiveMetadataService.getComplementSet(permissionDetails.allowedJsonPaths().writableJsonPaths());
+            return archiveMetadataService.getComplementSet(permissionDetails.allowedWritableJsonPaths());
         }
 
         /**
          * 计算上下文中的用户对学生的权限详情
-         * 包括：拥有的且可访问该学生的角色范围、拥有的且可访问该学生的权限组 以及 允许访问可读/可写的JSON Path。
+         * <p>
+         * 包括：拥有的且可访问该学生的角色范围、拥有的且可访问该学生的权限组 以及 允许访问的JSON Path
+         * （可读、可写、可添加数组元素、可修改数组元素、可删除数组元素）和校验SpEL表达式。
+         * </p>
          * <p>
          * 该方法在返回权限时会合并用户具有的所有角色以及权限组。<br/>
          * <b>该方法会在构造函数中被调用，计算结果将存储。</b>
@@ -157,37 +159,33 @@ public class ArchiveAccessControlService {
          * 权限计算流程：
          * <ol>
          *   <li>筛选用户所有角色中能够访问该学生的角色</li>
-         *   <li>获取这些角色对应的权限组</li>
-         *   <li>合并所有权限组的可读/可写JSON Path</li>
-         *   <li>返回完整的权限详情信息</li>
+         *   <li>提取这些角色对应的角色类型</li>
+         *   <li>获取包含这些角色类型的所有启用权限组</li>
+         *   <li>调用 {@link ArchivePermissionDetails#unionOf} 合并所有权限组的权限（并集操作）</li>
+         *   <li>返回完整的权限详情信息，包括所有JSON Path权限和校验表达式</li>
          * </ol>
          * </p>
          *
-         * @return 档案权限详情，包含角色范围、权限组和允许访问的JSON Path
+         * @return 档案权限详情，包含角色范围、权限组名称、各类JSON Path权限和校验SpEL表达式
          */
         private ArchivePermissionDetails calculatePermissions() throws NotFoundException {
+
             // 获取该用户中, 能访问该学生的所有角色&角色类型
             // 例如用户(2027届年级组长、2027届1班班主任)访问270201, 只拥有年级组长的权限
             var grantedRoles = user.getRoles().stream()
                                    .filter(role -> role.canAccessStudent(student))
                                    .collect(Collectors.toSet());
             var grantedRoleTypes = grantedRoles.stream().map(Role::getRoleType).collect(Collectors.toSet());
-            // 获取包含该角色类型的所有权限组
+
+            // 获取包含该角色类型的所有启用权限组
             var ownedPermissionGroups = grantedRoleTypes.stream().map(
                 archivePermissionGroupService::getPermissionGroupsByRoleType
-            ).flatMap(Set::stream).collect(Collectors.toSet());
-            // 合并所有权限组的可读可写路径
-            var allReadablePaths = ownedPermissionGroups.stream().map(
-                PermissionGroup::getAllowedReadableJsonPaths
-            ).flatMap(Set::stream).collect(Collectors.toSet());
-            var allWritablePaths = ownedPermissionGroups.stream().map(
-                PermissionGroup::getAllowedWritableJsonPaths
-            ).flatMap(Set::stream).collect(Collectors.toSet());
+            ).flatMap(Set::stream).filter(PermissionGroup::getEnabled).collect(Collectors.toSet());
 
-            return new ArchivePermissionDetails(
-                grantedRoles.stream().map(Role::getRoleAndScope).toList(),
-                ownedPermissionGroups.stream().map(PermissionGroup::getName).toList(),
-                new AllowedJsonPathsResponse(allReadablePaths, allWritablePaths)
+            // 合并所有权限组
+            return ArchivePermissionDetails.unionOf(
+                ownedPermissionGroups,
+                grantedRoles.stream().map(Role::getRoleAndScope).toList()
             );
         }
 

@@ -82,8 +82,8 @@ public class ArchiveMetadataService {
      * @param paths 输入的字段路径集合
      * @return 补集，即所有字段路径中不包含在输入集合中的路径
      */
-    public Set<String> getComplementSet(Set<String> paths) {
-        Set<String> complement = new HashSet<>(allFieldPaths);
+    public HashSet<String> getComplementSet(Set<String> paths) {
+        HashSet<String> complement = new HashSet<>(allFieldPaths);
         complement.removeAll(paths);
         return complement;
     }
@@ -95,8 +95,8 @@ public class ArchiveMetadataService {
      * @param paths 输入的字段路径集合
      * @return 交集，即所有已知字段路径中与输入集合共有的路径
      */
-    public Set<String> getIntersectSet(Set<String> paths) {
-        Set<String> intersect = new HashSet<>(allFieldPaths);
+    public HashSet<String> getIntersectSet(Set<String> paths) {
+        HashSet<String> intersect = new HashSet<>(allFieldPaths);
         intersect.retainAll(paths);
         return intersect;
     }
