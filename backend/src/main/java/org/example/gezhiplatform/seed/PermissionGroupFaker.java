@@ -1,7 +1,7 @@
 package org.example.gezhiplatform.seed;
 
+import org.example.gezhiplatform.DTO.archive.FieldMetadata;
 import org.example.gezhiplatform.entity.enums.RoleType;
-import org.example.gezhiplatform.utils.XJsonPathAugmentUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,9 +18,9 @@ public class PermissionGroupFaker {
     public static String FAMILY_PART = "$.familyPart";
     public static String HEALTH_PART = "$.healthPart";
 
-    private final Map<String, XJsonPathAugmentUtils.FieldMeta> fieldMetadata;
+    private final Map<String, FieldMetadata> fieldMetadata;
 
-    public PermissionGroupFaker(Map<String, XJsonPathAugmentUtils.FieldMeta> fieldMetadata) {
+    public PermissionGroupFaker(Map<String, FieldMetadata> fieldMetadata) {
         this.fieldMetadata = fieldMetadata;
     }
 

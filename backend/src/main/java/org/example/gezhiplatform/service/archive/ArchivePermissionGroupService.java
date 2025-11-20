@@ -108,7 +108,15 @@ public class ArchivePermissionGroupService {
 
         // 现在数组中字段的单独编辑权限可以与数组的整体编辑权限不一致
         // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须是数组类型
-        // TODO: implement array type check
+        request.getAllowedAddArrayJsonPaths().removeIf(
+            path -> !archiveMetadataService.getArrayFields().contains(path)
+        );
+        request.getAllowedEditArrayJsonPaths().removeIf(
+            path -> !archiveMetadataService.getArrayFields().contains(path)
+        );
+        request.getAllowedDeleteArrayJsonPaths().removeIf(
+            path -> !archiveMetadataService.getArrayFields().contains(path)
+        );
 
         // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须在 WritableJsonPaths 中
         request.getAllowedWritableJsonPaths().addAll(request.getAllowedAddArrayJsonPaths());
@@ -116,7 +124,7 @@ public class ArchivePermissionGroupService {
         request.getAllowedWritableJsonPaths().addAll(request.getAllowedDeleteArrayJsonPaths());
 
         // 去除所有在可编辑组里的ReadOnly字段
-        request.getAllowedReadableJsonPaths().removeIf(path -> !archiveMetadataService.getFieldMetadata().get(path).allowEdit());
+        request.getAllowedReadableJsonPaths().removeIf(path -> !archiveMetadataService.getFields().get(path).allowEdit());
 
         // 可编辑的JsonPath必须使其可见
         request.getAllowedReadableJsonPaths().addAll(request.getAllowedWritableJsonPaths());

@@ -137,7 +137,7 @@ public class SeedDataRunner implements ApplicationRunner {
 
     // ================ 模拟权限组数据 ================
     private List<PermissionGroup> makePermissionGroupRequests() {
-        var faker = new PermissionGroupFaker(archiveMetadataService.getFieldMetadata());
+        var faker = new PermissionGroupFaker(archiveMetadataService.getFields());
         return List.of(
             createPermissionGroup(
                 "个人信息(Level-0)", null, true, whichLevelGe(0),
