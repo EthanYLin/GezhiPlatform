@@ -8,9 +8,7 @@ import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
-import org.example.gezhiplatform.entity.archive.ValidationExpr;
 import org.example.gezhiplatform.entity.enums.Campus;
-import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.entity.role.*;
 import org.example.gezhiplatform.repository.PermissionGroupRepository;
 import org.example.gezhiplatform.repository.StudentRepository;
@@ -27,10 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.stream.IntStream;
-
-import static org.example.gezhiplatform.seed.PermissionGroupFaker.*;
 
 @Slf4j
 @Component
@@ -137,73 +132,7 @@ public class SeedDataRunner implements ApplicationRunner {
 
     // ================ 模拟权限组数据 ================
     private List<PermissionGroup> makePermissionGroupRequests() {
-        var faker = new PermissionGroupFaker(archiveMetadataService.getFields());
-        return List.of(
-            createPermissionGroup(
-                "个人信息(Level-0)", null, true, whichLevelGe(0),
-                faker.pathsBeginWith(PERSONAL_PART).except(PERSONAL_PART + ".rin").get(),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "入学信息(Level-5)", null, true, whichLevelGe(5),
-                faker.pathsBeginWith(ADMISSION_PART).get(),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "家庭信息(Level-5)", null, true, whichLevelGe(5),
-                Set.of(FAMILY_PART,
-                       FAMILY_PART + ".father", FAMILY_PART + ".mother",
-                       FAMILY_PART + ".father.name", FAMILY_PART + ".mother.name",
-                       FAMILY_PART + ".father.mobile", FAMILY_PART + ".mother.mobile"
-                ),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "地址信息(Level-9)", null, true, whichLevelGe(9),
-                faker.pathsBeginWith(ADDRESS_PART).get(),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "健康信息(Level-9)", null, true, whichLevelGe(9),
-                faker.pathsBeginWith(HEALTH_PART).get(),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "敏感信息(Level-9)", null, true, whichLevelGe(9),
-                faker.pathsBeginWith(FAMILY_PART + ".other")
-                     .and(PERSONAL_PART).and(FAMILY_PART)
-                     .and(PERSONAL_PART + ".rin")
-                     .and(FAMILY_PART + ".father").and(FAMILY_PART + ".mother")
-                     .and(FAMILY_PART + ".father.workUnit")
-                     .and(FAMILY_PART + ".mother.workUnit").get(),
-                Set.of(), Set.of(), Set.of(), Set.of(), Set.of()
-            ),
-            createPermissionGroup(
-                "管理员(AllAccess)", null, true, whichLevelGe(10),
-                faker.pathsBeginWith("$").get(),
-                faker.pathsBeginWith("$").get(), Set.of(), Set.of(), Set.of(), Set.of()
-            )
-        );
-    }
-
-    private PermissionGroup createPermissionGroup(
-        String name, String description, Boolean enabled, Set<RoleType> roleTypes,
-        Set<String> readableJsonPaths, Set<String> writableJsonPaths,
-        Set<String> addArrayJsonPaths, Set<String> editArrayJsonPaths,
-        Set<String> deleteArrayJsonPaths, Set<ValidationExpr> validationSpELs
-    ) {
-        PermissionGroup pg = new PermissionGroup();
-        pg.setName(name);
-        pg.setDescription(description);
-        pg.setEnabled(enabled);
-        pg.setRoleTypes(roleTypes);
-        pg.setAllowedReadableJsonPaths(readableJsonPaths);
-        pg.setAllowedWritableJsonPaths(writableJsonPaths);
-        pg.setAllowedAddArrayJsonPaths(addArrayJsonPaths);
-        pg.setAllowedEditArrayJsonPaths(editArrayJsonPaths);
-        pg.setAllowedDeleteArrayJsonPaths(deleteArrayJsonPaths);
-        pg.setValidations(validationSpELs);
-        return pg;
+        return new PermissionGroupFaker(archiveMetadataService.getFields()).defaultGroups();
     }
 
     private void generatePermissionGroups() {

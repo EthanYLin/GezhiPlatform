@@ -145,6 +145,7 @@ public class StudentQueryService {
                     Optional.ofNullable(su.getStuNo()).map(List::of).orElse(List.of())
                 ));
                 case ParentUser pu -> result.addAll(gradeClassService.getGradeClassesByStuNos(pu.getStuNos()));
+                case FreshmanParent fp -> result.addAll(gradeClassService.getGradeClassesByStuNos(fp.getStuNos()));
                 case null, default -> {}
             }
         });

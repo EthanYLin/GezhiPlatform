@@ -13,7 +13,7 @@ import java.util.List;
 @Accessors(chain = true)
 public class UserFaker {
 
-    public static String defaultPassword = "123456";
+    public static final String defaultPassword = "123456";
 
     @Setter @Nullable private Long id;
     @Setter @Nullable private String name;

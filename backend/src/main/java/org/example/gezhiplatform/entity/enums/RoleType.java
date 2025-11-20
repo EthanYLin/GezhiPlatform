@@ -32,6 +32,7 @@ public enum RoleType {
     MULTIPLE_CLASS_OBSERVER("多班级观察员", 5, MultipleClassObserver.class),
     COLLABORATIVE_USER("协作用户", 3, CollaborativeUser.class),
     PARENT_USER("家长用户", 1, ParentUser.class),
+    FRESHMAN_PARENT("新生家长", 1, FreshmanParent.class),
     STUDENT_USER("学生用户", 0, StudentUser.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
