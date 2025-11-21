@@ -13,8 +13,8 @@ import org.example.gezhiplatform.entity.role.*;
 import org.example.gezhiplatform.repository.PermissionGroupRepository;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.repository.UserRepository;
-import org.example.gezhiplatform.service.archive.ArchiveMetadataService;
-import org.example.gezhiplatform.service.archive.ArchivePermissionGroupService;
+import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
+import org.example.gezhiplatform.service.permission.ArchivePermissionGroupService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -76,20 +76,6 @@ public class SeedDataRunner implements ApplicationRunner {
     }
 
 
-    // ================ 模拟用户数据 ================
-    // 1. 超级管理员 admin
-    // 2. 校级领导 school-leader
-    // 3. 年级组长 dean-2027 (2027届)
-    // 4. 班主任 class-2701 (2027届1班)
-    // 5. 班主任 class-2702 (2027届2班)
-    // 6. 多角色用户 multi-role (2028届年级组长、2027届3班班主任、260101及260102的协作用户)
-    // 7. 多班级观察员 mco (2028届1班、2028届2班)
-    // 8. 协作用户 cu-28xx01 (280101、280201、280301)
-    // 9. 年级组长+班主任 dual-2026-1 (2026届年级组长+2026届1班班主任)
-    private record SeedUser(String name, List<Role> roles) {}
-
-    private final List<SeedUser> seedUsers = new ArrayList<>();
-
     @PostConstruct
     private void setSeedUsers() {
         seedUsers.add(new SeedUser("admin", List.of(new SuperAdmin())));
@@ -101,19 +87,39 @@ public class SeedDataRunner implements ApplicationRunner {
             new GradeDean(2028),
             new ClassAdviser(new GradeClass(2027, 3)),
             new CollaborativeUser(List.of("260101", "260102"))
-        )
-        ));
+        )));
         seedUsers.add(new SeedUser("mco", List.of(
             new MultipleClassObserver(List.of(new GradeClass(2028, 1), new GradeClass(2028, 2)))
-        )
-        ));
+        )));
         seedUsers.add(new SeedUser("cu-28xx01", List.of(new CollaborativeUser(List.of("280101", "280201", "280301")))));
         seedUsers.add(new SeedUser("dual-2026-1", List.of(
             new GradeDean(2026),
             new ClassAdviser(new GradeClass(2026, 1))
-        )
-        ));
+        )));
+        seedUsers.add(new SeedUser("260101", List.of(new StudentUser("260101"))));
+        seedUsers.add(new SeedUser("270101", List.of(new StudentUser("270101"))));
+        seedUsers.add(new SeedUser("p260101", List.of(new ParentUser(List.of("260101")))));
+        seedUsers.add(new SeedUser("p270101", List.of(new ParentUser(List.of("270101")))));
+        seedUsers.add(new SeedUser("f260101", List.of(new FreshmanParent(List.of("260101")))));
+        seedUsers.add(new SeedUser("f270101", List.of(new FreshmanParent(List.of("270101")))));
     }
+
+    private final List<SeedUser> seedUsers = new ArrayList<>();
+
+    // ================ 模拟用户数据 ================
+    // 1. 超级管理员 admin
+    // 2. 校级领导 school-leader
+    // 3. 年级组长 dean-2027 (2027届)
+    // 4. 班主任 class-2701 (2027届1班)
+    // 5. 班主任 class-2702 (2027届2班)
+    // 6. 多角色用户 multi-role (2028届年级组长、2027届3班班主任、260101及260102的协作用户)
+    // 7. 多班级观察员 mco (2028届1班、2028届2班)
+    // 8. 协作用户 cu-28xx01 (280101、280201、280301)
+    // 9. 年级组长+班主任 dual-2026-1 (2026届年级组长+2026届1班班主任)
+    // 10. 学生用户 260101, 270101
+    // 11. 家长用户 p260101, p270101
+    // 12. 新生家长用户 f260101, f270101
+    private record SeedUser(String name, List<Role> roles) {}
 
     private void generateUsers() {
         List<User> seedUsers = this.seedUsers.stream().map(

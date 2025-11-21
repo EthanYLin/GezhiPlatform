@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.service.archive;
+package org.example.gezhiplatform.service.permission;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.Predicate;
@@ -9,6 +9,7 @@ import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.PermissionGroupRepository;
+import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -118,10 +119,9 @@ public class ArchivePermissionGroupService {
             path -> !archiveMetadataService.getArrayFields().contains(path)
         );
 
-        // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须在 WritableJsonPaths 中
-        request.getAllowedWritableJsonPaths().addAll(request.getAllowedAddArrayJsonPaths());
-        request.getAllowedWritableJsonPaths().addAll(request.getAllowedEditArrayJsonPaths());
-        request.getAllowedWritableJsonPaths().addAll(request.getAllowedDeleteArrayJsonPaths());
+        // 去除所有在可编辑组里的数组字段
+        // 数组字段的编辑权限由 AllowedAdd/Edit/DeleteArrayJsonPaths 控制
+        request.getAllowedWritableJsonPaths().removeAll(archiveMetadataService.getArrayFields());
 
         // 去除所有在可编辑组里的ReadOnly字段
         request.getAllowedReadableJsonPaths().removeIf(path -> !archiveMetadataService.getFields().get(path).allowEdit());

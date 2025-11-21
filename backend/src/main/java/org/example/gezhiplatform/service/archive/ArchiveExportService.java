@@ -18,6 +18,9 @@ import org.example.gezhiplatform.entity.enums.Campus;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.service.audit.AuditService;
+import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
+import org.example.gezhiplatform.service.permission.ArchiveAccessControlService;
+import org.example.gezhiplatform.service.permission.ArchivePermissionGroupService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,11 +131,11 @@ public class ArchiveExportService {
         var context = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery);
         // 在审计日志中记录
         auditService.log(
-            context.user(), AuditOperationType.ARCHIVE_EXPORT,
-            String.format("导出学生档案(学号:%s, 姓名: %s )", context.student().getStuNo(), context.student().getStuName())
+            context.getUser(), AuditOperationType.ARCHIVE_EXPORT,
+            String.format("导出学生档案(学号:%s, 姓名: %s )", context.getStudent().getStuNo(), context.getStudent().getStuName())
         );
         // 调用 write() 进行导出
-        this.write(outputStream, context.getReadableArchive(), context.student(), context.user());
+        this.write(outputStream, context.getReadableArchive(), context.getStudent(), context.getUser());
     }
 
     /**
@@ -148,7 +151,7 @@ public class ArchiveExportService {
      * @throws NotFoundException 当学生不存在时抛出
      */
     public String getExportFileName(@NotNull Long currentUserId, @NotNull String stuNoForQuery) throws BadRequestException{
-        Student student = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery).student();
+        Student student = archiveAccessControlService.new UserStudentArchive(currentUserId, stuNoForQuery).getStudent();
         return String.format(
             "%s(%s)学生档案-%s",
             student.getStuName(),

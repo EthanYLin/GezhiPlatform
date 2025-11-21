@@ -1,4 +1,4 @@
-package org.example.gezhiplatform.service.archive;
+package org.example.gezhiplatform.service.permission;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,8 +8,10 @@ import com.jayway.jsonpath.ParseContext;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import jakarta.transaction.Transactional;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
+import org.example.gezhiplatform.DTO.archive.ArrayPermission;
 import org.example.gezhiplatform.entity.Student;
 import org.example.gezhiplatform.entity.User;
 import org.example.gezhiplatform.entity.archive.Archive;
@@ -19,6 +21,9 @@ import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.repository.UserRepository;
+import org.example.gezhiplatform.service.archive.ArchiveQueryService;
+import org.example.gezhiplatform.service.archive.ArchiveUpdateService;
+import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -78,9 +83,9 @@ public class ArchiveAccessControlService {
     @Transactional
     public class UserStudentArchive {
 
-        private final User user;
-        private final Student student;
-        private final Archive archive;
+        @Getter private final User user;
+        @Getter private final Student student;
+        @Getter private final Archive archive;
         private final ArchivePermissionDetails permissionDetails;
 
         /**
@@ -128,12 +133,6 @@ public class ArchiveAccessControlService {
             // 计算用户对该学生档案的权限详情
             this.permissionDetails = this.calculatePermissions();
         }
-
-        public User user() {return user;}
-
-        public Student student() {return student;}
-
-        public Archive archive() {return archive;}
 
         public ArchivePermissionDetails permissionDetails() {return permissionDetails;}
 
@@ -212,7 +211,7 @@ public class ArchiveAccessControlService {
             // 将档案数据经由String转换为JaywayDocument
             String archiveJson;
             try {
-                archiveJson = objectMapper.writeValueAsString(this.archive());
+                archiveJson = objectMapper.writeValueAsString(this.getArchive());
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("无法序列化档案数据(AACS01) :" + e.getMessage());
             }
@@ -253,6 +252,19 @@ public class ArchiveAccessControlService {
             } catch (Exception e) {
                 throw new BadRequestException("无法解析档案更新数据(AACS02): " + e.getMessage());
             }
+        }
+
+        /**
+         * 返回对指定数组字段的权限(增加、编辑、删除)
+         *
+         * @param jsonPath 数组字段的JSON Path
+         * @return 对指定数组字段的权限
+         */
+        public ArrayPermission testArrayPermission(String jsonPath) {
+            boolean canAdd = this.permissionDetails.allowedAddArrayJsonPaths().contains(jsonPath);
+            boolean canEdit = this.permissionDetails.allowedEditArrayJsonPaths().contains(jsonPath);
+            boolean canDelete = this.permissionDetails.allowedDeleteArrayJsonPaths().contains(jsonPath);
+            return new ArrayPermission(jsonPath, canAdd, canEdit, canDelete);
         }
 
     }

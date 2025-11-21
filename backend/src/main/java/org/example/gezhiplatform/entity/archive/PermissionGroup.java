@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.gezhiplatform.DTO.archive.ArrayPermission;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,19 +77,5 @@ public class PermissionGroup {
     @Valid
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<@NotNull ValidationExpr> validations = new HashSet<>(); // 该权限组提交时需要校验的表达式及错误消息
-
-    // TODO: 是否需要？
-    /**
-     * 返回该权限组对指定数组字段的权限(增加、编辑、删除)
-     *
-     * @param jsonPath 数组字段的JSON Path
-     * @return 该权限组对指定数组字段的权限
-     */
-    public ArrayPermission testArrayPermission(String jsonPath) {
-        boolean canAdd = allowedAddArrayJsonPaths.contains(jsonPath);
-        boolean canEdit = allowedEditArrayJsonPaths.contains(jsonPath);
-        boolean canDelete = allowedDeleteArrayJsonPaths.contains(jsonPath);
-        return new ArrayPermission(jsonPath, canAdd, canEdit, canDelete);
-    }
 
 }

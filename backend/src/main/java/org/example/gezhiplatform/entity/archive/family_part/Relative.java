@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.gezhiplatform.annotation.JsonIncludeMethod;
 import org.example.gezhiplatform.annotation.JsonTitle;
+import org.example.gezhiplatform.service.metadata.Identifiable;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Entity
 @Data
 @JsonPropertyOrder({"id", "name", "birthYear", "age", "info"})
-public class Relative {
+public class Relative implements Identifiable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

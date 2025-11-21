@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.example.gezhiplatform.annotation.JsonIncludeMethod;
 import org.example.gezhiplatform.annotation.JsonTitle;
+import org.example.gezhiplatform.service.metadata.Identifiable;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -27,7 +28,7 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @JsonPropertyOrder({"id", "healthIssue", "medicationUse", "ongoingTreatment", "createdAt", "updatedAt"})
-public class HealthCondition {
+public class HealthCondition implements Identifiable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

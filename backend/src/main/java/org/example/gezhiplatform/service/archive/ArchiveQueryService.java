@@ -6,6 +6,9 @@ import org.example.gezhiplatform.entity.enums.AuditOperationType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.service.audit.AuditService;
+import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
+import org.example.gezhiplatform.service.permission.ArchiveAccessControlService;
+import org.example.gezhiplatform.service.permission.ArchivePermissionGroupService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -80,8 +83,8 @@ public class ArchiveQueryService {
 
         // 在审计日志中记录
         auditService.log(
-            context.user(), AuditOperationType.ARCHIVE_QUERY,
-            String.format("查询学生档案(学号:%s, 姓名: %s)", context.student().getStuNo(), context.student().getStuName())
+            context.getUser(), AuditOperationType.ARCHIVE_QUERY,
+            String.format("查询学生档案(学号:%s, 姓名: %s)", context.getStudent().getStuNo(), context.getStudent().getStuName())
         );
 
         return archiveJayway.jsonString();

@@ -11,7 +11,7 @@ import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.NotFoundException;
-import org.example.gezhiplatform.service.archive.ArchivePermissionGroupService;
+import org.example.gezhiplatform.service.permission.ArchivePermissionGroupService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
