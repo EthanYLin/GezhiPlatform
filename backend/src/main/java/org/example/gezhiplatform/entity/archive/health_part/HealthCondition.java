@@ -2,6 +2,7 @@ package org.example.gezhiplatform.entity.archive.health_part;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -42,11 +43,13 @@ public class HealthCondition implements Identifiable {
     @Nullable
     @JsonTitle("服药情况")
     @Size(max = 1000, message = "服药情况长度不能超过1000个字符")
+    @JsonPropertyDescription("若没有请填写“无”。")
     private String medicationUse; // 服药情况
 
     @Nullable
     @JsonTitle("治疗情况")
     @Size(max = 1000, message = "治疗情况长度不能超过1000个字符")
+    @JsonPropertyDescription("若没有请填写“无”。")
     private String ongoingTreatment; // 治疗情况
 
     @CreatedDate

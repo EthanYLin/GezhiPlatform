@@ -2,6 +2,7 @@ package org.example.gezhiplatform.entity.archive;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -65,6 +66,7 @@ public class Archive {
     @Valid
     @JsonMerge
     @JsonTitle("家庭成员")
+    @JsonPropertyDescription("至少填写父亲、母亲或一位直系亲属信息")
     private FamilyPart familyPart; // 家庭成员
 
     @Nullable

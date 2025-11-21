@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.service.archive;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
@@ -8,6 +9,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.example.gezhiplatform.DTO.archive.ArrayPermission;
 import org.example.gezhiplatform.entity.archive.Archive;
+import org.example.gezhiplatform.entity.archive.ValidationExpr;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
@@ -16,6 +18,10 @@ import org.example.gezhiplatform.service.permission.ArchiveAccessControlService;
 import org.example.gezhiplatform.service.permission.ArchivePermissionGroupService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.context.expression.MapAccessor;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -91,6 +97,7 @@ public class ArchiveUpdateService {
     ) throws RuntimeException {
         // 获取用户、学生、档案
         var context = archiveAccessControlService.new UserStudentArchive(userId, stuNo);
+        Map<String, Object> prevArchiveSnapshot = snapshotArchive(context.getArchive());
 
         // 校验1: 对请求体进行权限过滤 (WriteableJsonPaths)并应用更新
         String filteredJson = context.getWritableUpdateData(jsonForUpdate).jsonString();
@@ -114,8 +121,8 @@ public class ArchiveUpdateService {
         }
 
         // 校验3: SpEL校验
-        // TODO: 实现基于SpEL的复杂校验规则
-
+        Map<String, Object> curArchiveSnapshot = snapshotArchive(context.getArchive());
+        validateWithSpel(prevArchiveSnapshot, curArchiveSnapshot, context.permissionDetails().validationSpELs());
 
         // 校验4: 通过 Bean Validation 进行数据校验
         var violations = validator
@@ -175,8 +182,8 @@ public class ArchiveUpdateService {
         boolean canAdd, boolean canEdit, boolean canDelete
     ) throws RuntimeException {
 
+        // 若原数据为空/新数据为空，说明没有更新，直接返回
         if (originalList == null || updateData == null) {
-            // 若原数据为空/新数据为空，说明没有更新，直接返回
             return;
         }
 
@@ -213,11 +220,64 @@ public class ArchiveUpdateService {
 
         // 4. 如果允许新增，将新元素(id 为 null)添加到最后
         if (canAdd) {
-            updateData.stream()
-                      .filter(item -> item.getId() == null)
-                      .forEach(originalList::add);
+            updateData.stream().filter(item -> item.getId() == null).forEach(originalList::add);
         }
 
+    }
+
+    /**
+     * 转换档案对象为 Map 结构，便于 SpEL 使用键访问数据快照。
+     */
+    private Map<String, Object> snapshotArchive(@NotNull Archive archive) throws RuntimeException {
+        try {
+            return objectMapper.convertValue(archive, new TypeReference<>() {});
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("无法生成档案快照(AUS03): " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 使用 SpEL 对提交前后的档案快照执行权限组自定义校验。
+     *
+     * @throws BadRequestException 如果有任意校验不通过则抛出异常, 包含所有失败的校验信息。
+     */
+    private void validateWithSpel(
+        @NotNull Map<String, Object> prevArchive,
+        @NotNull Map<String, Object> curArchive,
+        @NotNull Set<ValidationExpr> validations
+    ) throws BadRequestException{
+        if (validations.isEmpty()) return;
+
+        ExpressionParser parser = new SpelExpressionParser();
+        StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+        evaluationContext.addPropertyAccessor(new MapAccessor());
+        evaluationContext.setVariable("prev", prevArchive);
+        evaluationContext.setVariable("cur", curArchive);
+
+        List<String> failedMessages = validations.stream()
+            .filter(validation -> !evaluateSpel(validation.getSpelExpr(), parser, evaluationContext))
+            .map(ValidationExpr::getMessage)
+            .toList();
+
+        if (!failedMessages.isEmpty()) {
+            throw new BadRequestException("档案更新数据未通过规则校验: " + String.join("; ", failedMessages));
+        }
+    }
+
+    /**
+     * 评估单条 SpEL 表达式，异常时按返回 false 处理。
+     */
+    private boolean evaluateSpel(
+        @NotNull String expression,
+        ExpressionParser parser,
+        StandardEvaluationContext evaluationContext
+    ) {
+        try {
+            Boolean result = parser.parseExpression(expression).getValue(evaluationContext, Boolean.class);
+            return Boolean.TRUE.equals(result);
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
 

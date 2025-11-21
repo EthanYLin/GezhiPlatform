@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive.family_part;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +41,7 @@ public class Parent {
     @Nullable
     @JsonTitle("工作单位")
     @Size(max = 100, message = "父/母亲工作单位长度不能超过100个字符")
+    @JsonPropertyDescription("若没有请填写“无”。")
     private String workUnit; // 工作单位
 
 }

@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive.family_part;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,6 +45,7 @@ public class Relative implements Identifiable {
     @Nullable
     @JsonTitle("工作/就学信息")
     @Size(max = 100, message = "亲属工作/就学信息长度不能超过100个字符")
+    @JsonPropertyDescription("若没有请填写“无”。")
     private String info; // 工作/就学信息
 
     @JsonProperty(value = "age", access = JsonProperty.Access.READ_ONLY)

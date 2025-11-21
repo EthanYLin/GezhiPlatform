@@ -1,6 +1,7 @@
 package org.example.gezhiplatform.entity.archive.admission_part;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,11 +29,13 @@ public class AdmissionPart {
 
     @Nullable
     @JsonTitle("初中所在区")
+    @JsonPropertyDescription("必填")
     private District juniorHighSchoolDistrict; // 初中所在区
 
     @Nullable
     @JsonTitle("初中学校")
     @Size(max = 100, message = "初中名称长度不能超过100个字符")
+    @JsonPropertyDescription("必填")
     private String juniorHighSchoolName; // 初中名称
 
     @Nullable

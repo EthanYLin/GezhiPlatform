@@ -1,5 +1,6 @@
 package org.example.gezhiplatform.entity.archive;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ public class ValidationExpr {
      * </p>
      */
     @NotNull(message = "SpEL表达式不能为空")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String spelExpr;
 
     /**
@@ -43,6 +45,7 @@ public class ValidationExpr {
      * </p>
      */
     @NotNull(message = "JavaScript表达式不能为空")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String jsExpr;
 
     /**

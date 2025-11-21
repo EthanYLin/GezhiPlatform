@@ -45,10 +45,12 @@ public class PersonalPart {
     @JsonTitle("手机号码")
     @Pattern(regexp = "^1\\d{10}$", message = "手机号格式不正确(仅支持中国大陆手机号)")
     @Nullable
+    @JsonPropertyDescription("必填")
     private String mobile; // 手机号码
 
     @JsonTitle("民族")
     @Nullable
+    @JsonPropertyDescription("必填")
     private Nation nation; // 民族
 
     @JsonTitle("政治面貌")
