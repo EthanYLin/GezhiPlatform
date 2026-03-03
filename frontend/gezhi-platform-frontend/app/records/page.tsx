@@ -1,29 +1,16 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Navbar } from "@/components/navbar";
-import { get } from "@/lib/api-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import {Suspense, useEffect, useState} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {Navbar} from "@/components/navbar";
+import {get} from "@/lib/api-client";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Card} from "@/components/ui/card";
+import {ChevronLeft, ChevronRight, Loader2} from "lucide-react";
 
 interface GradeClass {
   gradeNo: number;
@@ -250,7 +237,7 @@ function RecordsContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto p-6 space-y-6">
           {/* 页面标题 */}
           <div>
