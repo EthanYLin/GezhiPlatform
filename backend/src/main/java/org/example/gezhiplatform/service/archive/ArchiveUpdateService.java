@@ -11,6 +11,7 @@ import org.example.gezhiplatform.DTO.archive.ArrayPermission;
 import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.archive.ValidationExpr;
 import org.example.gezhiplatform.exception.BadRequestException;
+import org.example.gezhiplatform.exception.GlobalExceptionHandler;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
 import org.example.gezhiplatform.service.metadata.Identifiable;
@@ -104,7 +105,8 @@ public class ArchiveUpdateService {
         try {
             objectMapper.readerForUpdating(context.getArchive()).readValue(filteredJson);
         } catch (JsonProcessingException e) {
-            throw new BadRequestException("无法应用档案更新数据(AUS02): " + e.getMessage());
+            var traceId = GlobalExceptionHandler.logError("无法应用档案更新数据(追踪点:AUS02):", e);
+            throw new BadRequestException("无法应用档案更新数据(追踪点:AUS02), 请持有追踪编号向管理员查询:" + traceId);
         }
 
         // 校验2: 处理数组的增加、删除、修改权限 (Add/Edit/DeleteArrayJsonPaths)
@@ -117,7 +119,8 @@ public class ArchiveUpdateService {
                 }
             );
         } catch (JsonProcessingException e) {
-            throw new BadRequestException("无法解析档案更新数据(AUS01): " + e.getMessage());
+            var traceId = GlobalExceptionHandler.logError("无法解析档案更新数据(追踪点:AUS01):", e);
+            throw new BadRequestException("无法解析档案更新数据(追踪点:AUS01), 请持有追踪编号向管理员查询:" + traceId);
         }
 
         // 校验3: SpEL校验

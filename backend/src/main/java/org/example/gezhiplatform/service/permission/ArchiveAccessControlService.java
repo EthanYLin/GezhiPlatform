@@ -18,6 +18,7 @@ import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.role.Role;
 import org.example.gezhiplatform.exception.BadRequestException;
+import org.example.gezhiplatform.exception.GlobalExceptionHandler;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.repository.StudentRepository;
 import org.example.gezhiplatform.repository.UserRepository;
@@ -250,7 +251,8 @@ public class ArchiveAccessControlService {
                 this.deniedWritableJsonPaths().forEach(jaywayUpdateData::delete);
                 return jaywayUpdateData;
             } catch (Exception e) {
-                throw new BadRequestException("无法解析档案更新数据(AACS02): " + e.getMessage());
+                var traceId = GlobalExceptionHandler.logError("无法解析档案更新数据(追踪点:AACS02):", e);
+                throw new BadRequestException("无法解析档案更新数据(追踪点:AACS02), 请持有追踪编号向管理员查询:" + traceId);
             }
         }
 

@@ -69,15 +69,7 @@ public class GlobalExceptionHandler {
 
     // =======================  全局异常处理  =============================
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        String traceId = logError("全局500异常捕获", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "服务器内部错误，追踪编号:" + traceId)
-        );
-    }
-
-    private static @NotNull String logError(@NotNull String logPrefix, Exception ex) {
+    public static @NotNull String logError(@NotNull String logPrefix, Exception ex) {
         // 生成异常编号
         String rand3digits = String.format("%03d", new Random().nextInt(1000));
         String traceId = "ERR-"
@@ -86,6 +78,14 @@ public class GlobalExceptionHandler {
         // 记录异常信息
         log.error("{}, 异常追踪编号: {}, 异常信息: {}", logPrefix, traceId, ex.getMessage(), ex);
         return traceId;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        String traceId = logError("全局500异常捕获", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+            new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "发生异常！请检查您的请求是否正确，或者持有该追踪编号向管理员查询:" + traceId)
+        );
     }
 
 }

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.example.gezhiplatform.DTO.archive.ArchivePermissionDetails;
 import org.example.gezhiplatform.exception.BadRequestException;
+import org.example.gezhiplatform.exception.GlobalExceptionHandler;
 import org.example.gezhiplatform.exception.NotFoundException;
 import org.example.gezhiplatform.service.archive.ArchiveExportService;
 import org.example.gezhiplatform.service.archive.ArchiveQueryService;
@@ -160,7 +161,8 @@ public class ArchiveQueryAndUpdateController {
         try {
             outputStream = response.getOutputStream();
         } catch (IOException e) {
-            throw new BadRequestException("在导出时发生错误(追踪点:AQC01):" + e.getMessage());
+            var traceId = GlobalExceptionHandler.logError("在导出时发生错误(追踪点:AQC01):", e);
+            throw new BadRequestException("在导出时发生错误(追踪点:AQC01), 请持有追踪编号向管理员查询:" + traceId);
         }
         archiveExportService.exportByStuNo(currentUserId, stuNo, outputStream);
     }
