@@ -1,22 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Navbar } from "@/components/navbar";
-import { get, put } from "@/lib/api-client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import {useEffect, useState} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {toast} from "sonner";
+import {Navbar} from "@/components/navbar";
+import {get, put} from "@/lib/api-client";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
+import {Button} from "@/components/ui/button";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, ArrowLeft, Download, Save, AlertCircle } from "lucide-react";
+import {AlertCircle, ArrowLeft, ChevronDown, ChevronUp, Download, Loader2, Plus, Save, Trash2} from "lucide-react";
 
 interface JsonSchemaProperty {
   type: string | string[];
@@ -1119,7 +1113,7 @@ export default function StudentArchivePage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto p-6 space-y-6">
           {/* 页面标题 */}
           <div>
