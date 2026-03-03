@@ -139,16 +139,25 @@ public class ArchivePermissionGroupService {
 
         // 若要可编辑下层元素, 则必须可编辑上层元素，例如要可编辑 $.A.B, 则必须可编辑 $.A
         // 该规则不对数组及数组内字段生效
-        List<String> addOns = new ArrayList<>();
+        List<String> writeAddOns = new ArrayList<>();
         request.getAllowedWritableJsonPaths().forEach(path -> {
             FieldMetadata field = archiveMetadataService.getFields().get(path);
             if (field == null || field.isArray() || field.insideArray()) return;
-            addOns.addAll(field.ancestorPaths());
+            writeAddOns.addAll(field.ancestorPaths());
         });
-        request.getAllowedWritableJsonPaths().addAll(addOns);
+        request.getAllowedWritableJsonPaths().addAll(writeAddOns);
 
         // 可编辑的JsonPath必须使其可见
         request.getAllowedReadableJsonPaths().addAll(request.getAllowedWritableJsonPaths());
+
+        // 若要可见下层元素, 则必须可见上层元素，例如要可见 $.A.B, 则必须可见 $.A
+        List<String> readAddOns = new ArrayList<>();
+        request.getAllowedReadableJsonPaths().forEach(path -> {
+            FieldMetadata field = archiveMetadataService.getFields().get(path);
+            if (field == null) return;
+            readAddOns.addAll(field.ancestorPaths());
+        });
+        request.getAllowedReadableJsonPaths().addAll(readAddOns);
 
     }
 

@@ -19,11 +19,19 @@ public class PermissionGroupFaker {
 
     public static final String RIN = "$.personalPart.rin";
     public static final String ADMISSION_PATH = "$.admissionPart.admissionPath";
+    public static final String CURRENT_ADDRESS = "$.addressPart.currentAddress";
 
     public static final String RELATIVES_ARRAY = "$.familyPart.otherRelatives";
     public static final String MENTAL_COND_ARRAY = "$.healthPart.mentalCondition";
     public static final String PHY_COND_ARRAY = "$.healthPart.physicalCondition";
     public static final Set<String> HEALTH_COND_ARRAYS = Set.of(MENTAL_COND_ARRAY, PHY_COND_ARRAY);
+
+    public static final Set<String> AUDIT_FIELDS = Set.of(
+      "$.healthPart.physicalCondition[*].createdAt",
+      "$.healthPart.physicalCondition[*].updatedAt",
+      "$.healthPart.mentalCondition[*].createdAt",
+      "$.healthPart.mentalCondition[*].updatedAt"
+    );
 
     public static final List<ValidationExpr> PERSONAL_PART_VALIDATIONS = List.of(
         new ValidationExpr(
@@ -166,7 +174,7 @@ public class PermissionGroupFaker {
                 .description("可查看基础个人信息、居住地址、父亲母亲姓名")
                 .roleType(RoleType.STUDENT_USER)
                 .readable(new Paths().beginsWith(PERSONAL_PART).except(RIN))
-                .readable("$.addressPart.currentAddress")
+                .readable(new Paths().beginsWith(CURRENT_ADDRESS))
                 .readable("$.familyPart.father.name")
                 .readable("$.familyPart.mother.name")
                 .build()
@@ -178,7 +186,7 @@ public class PermissionGroupFaker {
                 .nameOf("家长权限组")
                 .description("可查看除身份证号外的个人信息、除录取信息之外的其他信息、仅能添加健康声明")
                 .roleType(RoleType.PARENT_USER)
-                .readable(new Paths().all().except(RIN).exceptBeginWith(ADMISSION_PART))
+                .readable(new Paths().all().except(RIN).exceptBeginWith(ADMISSION_PART).except(AUDIT_FIELDS))
                 .writable(new Paths().beginsWith(HEALTH_PART))
                 .canArrayAdd(HEALTH_COND_ARRAYS)
                 .validations(HEALTH_PART_VALIDATIONS)
@@ -209,7 +217,7 @@ public class PermissionGroupFaker {
                 .nameOf("新生家长权限组")
                 .description("可查看并修改除录取方式之外的所有信息")
                 .roleType(RoleType.FRESHMAN_PARENT)
-                .readable(new Paths().all().except(ADMISSION_PATH))
+                .readable(new Paths().all().except(ADMISSION_PATH).except(AUDIT_FIELDS))
                 .writable(new Paths().all().except(ADMISSION_PATH))
                 .arrayFullControl(RELATIVES_ARRAY)
                 .arrayFullControl(HEALTH_COND_ARRAYS)
@@ -263,7 +271,7 @@ public class PermissionGroupFaker {
                 .readable("$.personalPart.gender")
                 .readable("$.personalPart.birthDate")
                 .readable("$.personalPart.mobile")
-                .readable("$.addressPart.currentAddress")
+                .readable(new Paths().beginsWith(ADDRESS_PART))
                 .readable("$.familyPart.father.name")
                 .readable("$.familyPart.father.mobile")
                 .readable("$.familyPart.mother.name")
@@ -429,6 +437,11 @@ public class PermissionGroupFaker {
 
         public Paths except(String path) {
             this.paths.remove(path);
+            return this;
+        }
+
+        public Paths except(Collection<String> paths) {
+            this.paths.removeAll(paths);
             return this;
         }
 
