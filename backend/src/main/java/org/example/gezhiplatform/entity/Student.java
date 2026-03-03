@@ -38,7 +38,7 @@ public class Student {
     private GradeClass gradeClass; // 年级-班级
 
     @Nullable
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private Archive archive; // 具体档案信息

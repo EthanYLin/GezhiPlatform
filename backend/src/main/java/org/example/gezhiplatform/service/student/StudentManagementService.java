@@ -5,6 +5,7 @@ import org.example.gezhiplatform.DTO.student.NewStudentRequest;
 import org.example.gezhiplatform.DTO.student.StudentCoverResponse;
 import org.example.gezhiplatform.entity.GradeClass;
 import org.example.gezhiplatform.entity.Student;
+import org.example.gezhiplatform.entity.archive.Archive;
 import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.example.gezhiplatform.exception.NotFoundException;
@@ -94,14 +95,25 @@ public class StudentManagementService {
      * @throws BadRequestException 当学号重复时
      */
     public List<StudentCoverResponse> addStudents(@NotNull List<NewStudentRequest> requests) throws BadRequestException {
+        if (requests.stream().map(NewStudentRequest::stuNo).distinct().count() < requests.size()) {
+            throw new BadRequestException("请求列表中存在重复的学号，请确保每个学生的学号唯一。");
+        }
+
         List<String> duplicateStuNos = studentRepository.findByStuNoIn(
             requests.stream().map(NewStudentRequest::stuNo).toList()
         ).stream().map(StudentRepository.StuNoOnly::getStuNo).toList();
-
         if (!duplicateStuNos.isEmpty()) {
             throw new BadRequestException("由于学号为: " + duplicateStuNos + " 的学生已存在，本次新增操作全部取消。");
         }
+
         List<Student> students = requests.stream().map(NewStudentRequest::toStudent).toList();
+        // 初始化学生档案数据
+        students.forEach(student -> {
+            Archive emptyArchive = new Archive();
+            emptyArchive.setStudent(student);
+            student.setArchive(emptyArchive);
+        });
+
         List<Student> results = studentRepository.saveAll(students);
         return results.stream().map(StudentCoverResponse::new).toList();
     }
