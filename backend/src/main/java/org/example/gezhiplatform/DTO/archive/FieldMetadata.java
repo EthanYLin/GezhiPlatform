@@ -14,6 +14,7 @@ import java.util.List;
  * @param allowEdit          是否允许编辑此字段，基于Schema中的readOnly属性判断
  * @param titles             字段所有层级的标题列表，从根到叶子节点。例如: ["家庭成员","父亲","手机号码"]
  * @param paths              字段所有层级的路径列表，从根到叶子节点。例如: ["familyPart","father","mobile"]
+ * @param ancestorPaths      字段所有祖先节点的路径列表，不包含自身路径。例如: ["$.familyPart","$.familyPart.father"]
  * @param isArray            是否为数组类型字段
  * @param insideArray        是否在数组中
  * @param arrayEntryJsonPath 如果该字段在数组中，标注入口数组元素的JSONPath路径。例如: $.familyPart.otherRelatives
@@ -22,6 +23,7 @@ public record FieldMetadata(
     boolean allowEdit,
     @NotNull List<String> titles,
     @NotNull List<String> paths,
+    @NotNull List<String> ancestorPaths,
     boolean isArray,
     boolean insideArray,
     @Nullable String arrayEntryJsonPath

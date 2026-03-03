@@ -1,13 +1,17 @@
 package org.example.gezhiplatform.controller;
 
 import cn.dev33.satoken.annotation.SaCheckDisable;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.example.gezhiplatform.DTO.archive.FieldMetadata;
 import org.example.gezhiplatform.service.metadata.ArchiveMetadataService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 
 /**
@@ -47,5 +51,22 @@ public class ArchiveMetadataController {
     @Operation(summary = "获取档案类的JSON Schema")
     public ObjectNode getArchiveMetadata() {
         return archiveMetadataService.getSchema();
+    }
+
+    /**
+    * 获取档案类字段的元数据映射表
+    * <p>
+    * 返回一个Map字典，键为字段的JSONPath路径，值为对应的FieldMetadata对象。
+    * FieldMetadata包含字段的编辑权限、显示标题链、JSONPath路径链等详细信息，
+    * 供管理员调试使用。
+    * </p>
+    *
+    * @return 字段JSONPath到FieldMetadata的映射表
+    */
+    @GetMapping("/fields")
+    @Operation(summary = "获取档案类字段的元数据映射表")
+    @SaCheckRole("SUPER_ADMIN")
+    public Map<String, FieldMetadata> getFieldMetadataMap() {
+        return archiveMetadataService.getFields();
     }
 }

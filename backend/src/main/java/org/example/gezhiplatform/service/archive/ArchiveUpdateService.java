@@ -101,6 +101,8 @@ public class ArchiveUpdateService {
         Map<String, Object> prevArchiveSnapshot = snapshotArchive(context.getArchive());
 
         // 校验1: 对请求体进行权限过滤 (WriteableJsonPaths)并应用更新
+        // 数组及数组中的字段一定不在 WriteableJsonPaths 中，它们的权限在校验2中由 allowedAdd/Edit/DeleteArrayJsonPaths 控制
+        // 在校验1中数组及数组中的字段会被当做不可写字段被过滤掉
         String filteredJson = context.getWritableUpdateData(jsonForUpdate).jsonString();
         try {
             objectMapper.readerForUpdating(context.getArchive()).readValue(filteredJson);
@@ -110,6 +112,8 @@ public class ArchiveUpdateService {
         }
 
         // 校验2: 处理数组的增加、删除、修改权限 (Add/Edit/DeleteArrayJsonPaths)
+        // 重新使用裁剪前的 jsonForUpdate 来处理数组更新
+        // 数组中的字段没有独立的编辑权限，其可编辑性与该数组的 allowedEditArrayJsonPaths 一致 (可见ArchivePermissionDetails)
         try {
             Archive updateArchive = objectMapper.readValue(jsonForUpdate, Archive.class);
             archiveMetadataService.arrayGetters.forEach(

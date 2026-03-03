@@ -52,7 +52,7 @@ public class FieldMetadataGenerateUtils {
     public static Map<String, FieldMetadata> generate(ObjectNode root) {
         if (root == null) return Map.of();
         Map<String, FieldMetadata> fieldMetadata = new HashMap<>();
-        annotateUnder(root, new RecursionContext("$", new ArrayList<>(), new ArrayList<>(), null, fieldMetadata));
+        annotateUnder(root, new RecursionContext("$", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null, fieldMetadata));
         return fieldMetadata;
     }
 
@@ -87,10 +87,15 @@ public class FieldMetadataGenerateUtils {
                     if (child == null) continue;
 
                     // 为子节点构造新的context
+                    // 当前节点是真实字段（非根"$"、非"[*]"中间层）时，才将其路径加入子节点的祖先链
+                    List<String> childAncestorPaths = new ArrayList<>(context.ancestorPaths);
+                    boolean parentIsRealField = !context.jsonPath.equals("$") && !context.jsonPath.endsWith("[*]");
+                    if (parentIsRealField) childAncestorPaths.add(context.jsonPath);
                     var childContext = new RecursionContext(
                         context.jsonPath + "." + key,
                         new ArrayList<>(context.titles),
                         new ArrayList<>(context.paths),
+                        childAncestorPaths,
                         context.arrayEntryJsonPath,
                         context.fieldMetadata
                     );
@@ -108,10 +113,16 @@ public class FieldMetadataGenerateUtils {
             checkArray(context.jsonPath, node);
             ObjectNode items = obj(node.get("items"));
             if (items != null) {
+                // 数组字段本身（context.jsonPath，如 $.A）是真实字段，需加入 [*] 层的祖先链
+                // 这样 $.A[*].field 的 ancestorPaths 中会包含 $.A，而不是 $.A[*]
+                List<String> itemsAncestorPaths = new ArrayList<>(context.ancestorPaths);
+                boolean arrayIsRealField = !context.jsonPath.equals("$") && !context.jsonPath.endsWith("[*]");
+                if (arrayIsRealField) itemsAncestorPaths.add(context.jsonPath);
                 var itemsContext = new RecursionContext(
                     context.jsonPath + "[*]",
                     new ArrayList<>(context.titles),
                     new ArrayList<>(context.paths),
+                    itemsAncestorPaths,
                     context.arrayEntryJsonPath != null ? context.arrayEntryJsonPath : context.jsonPath,
                     context.fieldMetadata
                 );
@@ -139,6 +150,7 @@ public class FieldMetadataGenerateUtils {
                 allowEdit,
                 new ArrayList<>(context.titles),
                 new ArrayList<>(context.paths),
+                new ArrayList<>(context.ancestorPaths),
                 hasType(node, "array"),
                 context.arrayEntryJsonPath != null,
                 context.arrayEntryJsonPath
@@ -177,6 +189,7 @@ public class FieldMetadataGenerateUtils {
         String jsonPath,
         List<String> titles,
         List<String> paths,
+        List<String> ancestorPaths,
         String arrayEntryJsonPath,
         Map<String, FieldMetadata> fieldMetadata
     ) {}

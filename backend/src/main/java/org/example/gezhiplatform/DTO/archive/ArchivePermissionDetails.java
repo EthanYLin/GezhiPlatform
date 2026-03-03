@@ -17,11 +17,22 @@ import java.util.stream.Collectors;
  * 用户可能拥有多个权限组，通过合并多个权限组的权限来确定用户的最终访问范围。
  * </p>
  *
+ * <p><strong>注意：在 {@code allowedWritableJsonPaths} 中</strong></p>
+ * <ul>
+ *   <li>数组字段本身（如 {@code $.array}）<strong>不能</strong>出现在 {@code allowedWritableJsonPaths} 中，
+ *       数组的可写权限由 {@link #allowedEditArrayJsonPaths} 控制。</li>
+ *   <li>数组内的子字段（如 {@code $.array[*].field}）<strong>不能</strong>出现在 {@code allowedWritableJsonPaths} 中，
+ *       数组中的字段没有单独编辑权限，其权限与数组的 {@code allowedEdit} 一致。</li>
+ *   <li>以上两条约束由
+ *       {@link org.example.gezhiplatform.service.permission.ArchivePermissionGroupService#legalizeJsonPaths(org.example.gezhiplatform.entity.archive.PermissionGroup)}
+ *       在持久化权限组时负责保障，调用方无需手动清理。</li>
+ * </ul>
+ *
  * @param grantedRoleAndScopes 用户拥有的且可访问该档案的角色范围列表
  * @param ownedPermissionGroups 用户拥有的且可访问该档案的权限组名称列表
  * @param displayCaption 要显示的公告(所有权限组的公告合并而成，若无公告则为null)
  * @param allowedReadableJsonPaths 允许读取的字段JSON Path集合
- * @param allowedWritableJsonPaths 允许写入的字段JSON Path集合
+ * @param allowedWritableJsonPaths 允许写入的字段JSON Path集合（不含数组字段本身及数组内子字段，见类Javadoc）
  * @param allowedAddArrayJsonPaths 允许添加数组元素的JSON Path集合
  * @param allowedEditArrayJsonPaths 允许编辑数组元素的JSON Path集合
  * @param allowedDeleteArrayJsonPaths 允许删除数组元素的JSON Path集合

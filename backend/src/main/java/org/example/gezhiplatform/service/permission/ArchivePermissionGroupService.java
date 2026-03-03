@@ -3,6 +3,7 @@ package org.example.gezhiplatform.service.permission;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.Predicate;
 import org.example.gezhiplatform.DTO.PageResult;
+import org.example.gezhiplatform.DTO.archive.FieldMetadata;
 import org.example.gezhiplatform.entity.archive.PermissionGroup;
 import org.example.gezhiplatform.entity.enums.RoleType;
 import org.example.gezhiplatform.exception.BadRequestException;
@@ -101,13 +102,17 @@ public class ArchivePermissionGroupService {
     public void legalizeJsonPaths(PermissionGroup request) {
 
         // 去除所有不在档案(Archive)类中的JsonPath
-        request.setAllowedReadableJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedReadableJsonPaths()));
-        request.setAllowedWritableJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedWritableJsonPaths()));
-        request.setAllowedAddArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedAddArrayJsonPaths()));
-        request.setAllowedEditArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedEditArrayJsonPaths()));
-        request.setAllowedDeleteArrayJsonPaths(archiveMetadataService.getIntersectSet(request.getAllowedDeleteArrayJsonPaths()));
+        request.setAllowedReadableJsonPaths(
+            archiveMetadataService.getIntersectSet(request.getAllowedReadableJsonPaths()));
+        request.setAllowedWritableJsonPaths(
+            archiveMetadataService.getIntersectSet(request.getAllowedWritableJsonPaths()));
+        request.setAllowedAddArrayJsonPaths(
+            archiveMetadataService.getIntersectSet(request.getAllowedAddArrayJsonPaths()));
+        request.setAllowedEditArrayJsonPaths(
+            archiveMetadataService.getIntersectSet(request.getAllowedEditArrayJsonPaths()));
+        request.setAllowedDeleteArrayJsonPaths(
+            archiveMetadataService.getIntersectSet(request.getAllowedDeleteArrayJsonPaths()));
 
-        // 现在数组中字段的单独编辑权限可以与数组的整体编辑权限不一致
         // AllowedAdd/Edit/DeleteArrayJsonPaths 中的元素必须是数组类型
         request.getAllowedAddArrayJsonPaths().removeIf(
             path -> !archiveMetadataService.getArrayFields().contains(path)
@@ -119,17 +124,33 @@ public class ArchivePermissionGroupService {
             path -> !archiveMetadataService.getArrayFields().contains(path)
         );
 
-        // 去除所有在可编辑组里的数组字段
+        // 去除所有在可编辑组里的数组字段本身, 例如 $.familyPart.otherRelatives
         // 数组字段的编辑权限由 AllowedAdd/Edit/DeleteArrayJsonPaths 控制
         request.getAllowedWritableJsonPaths().removeAll(archiveMetadataService.getArrayFields());
 
+        // 去除所有在可编辑组里的数组中的字段, 例如 $.familyPart.otherRelatives[*].birthYear
+        // 数组中的字段没有单独编辑权限, 其权限与数组的AllowEdit一致
+        request.getAllowedWritableJsonPaths().removeIf(
+            path -> archiveMetadataService.getFields().get(path).insideArray());
+
         // 去除所有在可编辑组里的ReadOnly字段
-        request.getAllowedReadableJsonPaths().removeIf(path -> !archiveMetadataService.getFields().get(path).allowEdit());
+        request.getAllowedWritableJsonPaths().removeIf(
+            path -> !archiveMetadataService.getFields().get(path).allowEdit());
+
+        // 若要可编辑下层元素, 则必须可编辑上层元素，例如要可编辑 $.A.B, 则必须可编辑 $.A
+        // 该规则不对数组及数组内字段生效
+        List<String> addOns = new ArrayList<>();
+        request.getAllowedWritableJsonPaths().forEach(path -> {
+            FieldMetadata field = archiveMetadataService.getFields().get(path);
+            if (field == null || field.isArray() || field.insideArray()) return;
+            addOns.addAll(field.ancestorPaths());
+        });
+        request.getAllowedWritableJsonPaths().addAll(addOns);
 
         // 可编辑的JsonPath必须使其可见
         request.getAllowedReadableJsonPaths().addAll(request.getAllowedWritableJsonPaths());
-    }
 
+    }
 
     /**
      * 搜索和筛选权限组列表
