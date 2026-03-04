@@ -314,7 +314,7 @@ function RecordsContent() {
           {/* 数据表格 */}
           <Card>
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6">
                 <TableHeader>
                   <TableRow>
                     <TableHead>学号</TableHead>
