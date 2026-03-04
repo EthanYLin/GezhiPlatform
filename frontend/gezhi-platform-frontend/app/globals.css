@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-sonner-toast][data-type='error'] {
+  background: color-mix(in oklch, var(--destructive) 8%, transparent) !important;
+  border-color: color-mix(in oklch, var(--destructive) 45%, transparent) !important;
+  color: var(--destructive) !important;
+}
+
+[data-sonner-toast][data-type='error'] [data-icon] {
+  color: var(--destructive) !important;
+}
