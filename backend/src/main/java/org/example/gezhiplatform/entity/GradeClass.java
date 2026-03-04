@@ -41,6 +41,16 @@ public class GradeClass implements Comparable<GradeClass> {
         this.classNo = classNo;
     }
 
+    @Nullable
+    public Integer getGradeNo() {
+        return gradeNo;
+    }
+
+    @Nullable
+    public Integer getClassNo() {
+        return classNo;
+    }
+
     /**
      * 返回绝对表达形式（入学届 + 班级）。
      * 当任一字段缺失时以 {@code ?} 占位。

@@ -155,15 +155,17 @@ public class StudentManagementService {
         @NotNull String stuNo,
         @NotNull NewStudentRequest request
     ) throws BadRequestException {
-        Student oldStudent = studentRepository.findByStuNo(stuNo).orElseThrow(
+        Student student = studentRepository.findByStuNo(stuNo).orElseThrow(
             () -> new NotFoundException("学号为: " + stuNo + " 的学生不存在")
         );
         if (studentRepository.existsByStuNo(request.stuNo()) && !request.stuNo().equals(stuNo)) {
             throw new BadRequestException("不能将学生的学号从 " + stuNo + " 改为: " + request.stuNo() + " , 因为该学号的学生已存在。");
         }
-        Student newStudent = request.toStudent();
-        newStudent.setId(oldStudent.getId());
-        Student result = studentRepository.save(newStudent);
+        student.setStuNo(request.stuNo());
+        student.setStuName(request.stuName());
+        student.setCampus(request.campus());
+        student.setGradeClass(new GradeClass(request.gradeNo(), request.classNo()));
+        Student result = studentRepository.save(student);
         return new StudentCoverResponse(result);
     }
 
