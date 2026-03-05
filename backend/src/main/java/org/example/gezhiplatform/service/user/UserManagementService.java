@@ -483,6 +483,8 @@ public class UserManagementService {
     @Transactional
     public void deleteUsers(@NotNull Collection<Long> userIds) {
         userIds.forEach(StpUtil::kickout);
+        auditRepository.deleteByUser_IdIn(userIds);
+        auditRepository.flush();
         userRepository.deleteAllByIdInBatch(userIds);
     }
 
