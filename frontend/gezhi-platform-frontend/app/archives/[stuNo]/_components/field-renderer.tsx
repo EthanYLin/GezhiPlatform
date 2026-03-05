@@ -49,9 +49,11 @@ function SimpleField({
   if (!isFieldReadable(fieldSchema, permissions)) return null;
 
   const fieldTitle = fieldSchema.title || fieldName;
-  const isReadOnly = forceEditable
+  const isReadOnly = fieldSchema.readOnly
+    ? true
+    : forceEditable
     ? false
-    : fieldSchema.readOnly || !isFieldWritable(fieldSchema, permissions);
+    : !isFieldWritable(fieldSchema, permissions);
   const fieldValue = getFieldValue(fieldPath);
 
   // 解析枚举值
