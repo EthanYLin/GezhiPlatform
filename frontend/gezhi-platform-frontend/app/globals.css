@@ -122,8 +122,9 @@
 }
 
 [data-sonner-toast][data-type='error'] {
-  background: color-mix(in oklch, var(--destructive) 8%, transparent) !important;
-  border-color: color-mix(in oklch, var(--destructive) 45%, transparent) !important;
+  background: var(--background) !important;
+  border-color: color-mix(in oklch, var(--destructive) 15%, transparent) !important;
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--destructive) 10%, transparent) !important;
   color: var(--destructive) !important;
 }
 
