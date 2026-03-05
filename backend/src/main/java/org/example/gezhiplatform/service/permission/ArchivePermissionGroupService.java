@@ -159,6 +159,14 @@ public class ArchivePermissionGroupService {
         });
         request.getAllowedReadableJsonPaths().addAll(readAddOns);
 
+        // 若某数组可见，其内部的id字段必须可见
+        List<String> idAddOns = new ArrayList<>();
+        request.getAllowedReadableJsonPaths().stream()
+            .filter(archiveMetadataService.getArrayFields()::contains)
+            .map(p -> p + "[*].id")
+            .filter(archiveMetadataService.getFields()::containsKey)
+            .forEach(idAddOns::add);
+        request.getAllowedReadableJsonPaths().addAll(idAddOns);
     }
 
     /**
