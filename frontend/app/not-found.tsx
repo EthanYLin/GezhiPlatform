@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,7 +17,7 @@ import { AlertCircle, Home } from "lucide-react";
 const DEFAULT_TITLE = "您访问的页面或数据不存在";
 const DEFAULT_DESCRIPTION = "404 该页面或数据可能已被删除";
 
-export default function NotFound() {
+function NotFoundContent() {
   const searchParams = useSearchParams();
   const [errorTitle, setErrorTitle] = useState(DEFAULT_TITLE);
   const [errorDescription, setErrorDescription] = useState(DEFAULT_DESCRIPTION);
@@ -66,6 +66,14 @@ export default function NotFound() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function NotFound() {
+  return (
+    <Suspense>
+      <NotFoundContent />
+    </Suspense>
   );
 }
 
