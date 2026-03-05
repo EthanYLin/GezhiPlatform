@@ -69,6 +69,10 @@ public record UserRoleDetailsDTO(
      *         或details字段的信息格式不符合构造该Role实例的要求。
      */
     public Role toRole() throws CustomInvalidArgException {
-        return RoleType.fromDesc(roleType).fromJson(details);
+        try {
+            return RoleType.fromDesc(roleType).fromJson(details);
+        } catch (CustomInvalidArgException e) {
+            throw new CustomInvalidArgException("在创建角色: " + roleType + " 时发生异常: "  + e.getMessage());
+        }
     }
 }

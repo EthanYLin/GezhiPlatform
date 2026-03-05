@@ -16,6 +16,7 @@ import org.example.gezhiplatform.exception.BadRequestException;
 import org.example.gezhiplatform.exception.CustomInvalidArgException;
 import org.example.gezhiplatform.exception.FieldNotFoundException;
 import org.example.gezhiplatform.exception.NotFoundException;
+import org.example.gezhiplatform.repository.AuditRepository;
 import org.example.gezhiplatform.repository.UserRepository;
 import org.example.gezhiplatform.service.auth.AuthService;
 import org.example.gezhiplatform.utils.PasswordEncryptUtils;
@@ -33,6 +34,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.example.gezhiplatform.utils.ReflectionUtils.getField;
 
@@ -48,10 +50,14 @@ public class UserManagementService {
     private static final Logger log = LoggerFactory.getLogger(UserManagementService.class);
     private final UserRepository userRepository;
     private final Environment environment;
+    private final AuditRepository auditRepository;
 
-    public UserManagementService(UserRepository userRepository, Environment environment) {
+    public UserManagementService(UserRepository userRepository, Environment environment,
+        AuditRepository auditRepository
+    ) {
         this.userRepository = userRepository;
         this.environment = environment;
+        this.auditRepository = auditRepository;
     }
 
     @PostConstruct
@@ -248,7 +254,57 @@ public class UserManagementService {
         return UserDetailResponse.of(user);
     }
 
-    // TODO new users - import from excel
+    /**
+     * 批量导入用户
+     * <p>
+     * 该方法一次性导入多个用户记录，适用于从Excel等文件批量导入用户数据的场景。方法会对每个用户记录进行验证，确保用户名的唯一性，并且所有用户记录必须满足基本的合法性要求。
+     * 如果请求中存在任何一个用户记录不合法（例如用户名重复、角色配置错误等），整个批量导入操作将会失败，并抛出 {@link BadRequestException}，异常信息中会包含所有不合法记录的详细错误描述。
+     * </p>
+     * @param requests 新用户请求DTO列表，每个DTO包含一个用户的基本信息
+     * @throws BadRequestException 当请求中存在任何一个用户记录不合法时抛出，异常信息中包含所有不合法记录的详细错误描述
+     * @see UserManagementService#addUser(NewUserRequest)
+     */
+    @Transactional
+    public void importUsers(@NotNull List<NewUserRequest> requests) throws BadRequestException {
+        // 检查请求中是否有重复的用户名
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicateUsernames = requests
+            .stream()
+            .map(NewUserRequest::name)
+            .filter(name -> !seen.add(name))
+            .collect(Collectors.toSet());
+        if (!duplicateUsernames.isEmpty()) {
+            throw new BadRequestException("请求中包含重复的用户名: " + duplicateUsernames);
+        }
+
+        // 检查请求中的用户名是否已存在于数据库中
+        Set<String> usernames = requests.stream()
+            .map(NewUserRequest::name)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        Set<String> existingUsernames = userRepository.findByUsernameIn(usernames).stream()
+            .map(User::getUsername)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        if (!existingUsernames.isEmpty()) {
+            throw new BadRequestException("以下用户名已存在: " + existingUsernames);
+        }
+
+        List<String> errors = new ArrayList<>();
+        List<User> users = new ArrayList<>();
+        for (NewUserRequest request : requests) {
+            try {
+                User user = request.toUser();
+                users.add(user);
+            } catch (CustomInvalidArgException e) {
+                errors.add(String.format("在创建用户 %s(%s) 时发生异常: %s", request.name(), request.username(), e.getMessage()));
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new BadRequestException("在导入用户时发生以下异常: " + String.join("; ", errors));
+        }
+        userRepository.saveAll(users);
+    }
 
 
     // ========================= PUT 更新 =========================

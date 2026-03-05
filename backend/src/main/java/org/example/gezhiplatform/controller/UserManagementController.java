@@ -176,6 +176,27 @@ public class UserManagementController {
         return userManagementService.addUser(request);
     }
 
+    /**
+     * 批量导入用户
+     * <p>
+     * 根据用户请求列表批量创建新用户，会自动检查用户名的唯一性。
+     * 每个用户的基本信息包括姓名、用户名、密码（均可为空），但角色列表不能为空。
+     * 如果请求列表中存在重复的用户名，或者某个用户名已被系统中其他用户使用，则整个批量导入操作将被取消，并抛出异常。
+     * </p>
+     * @param requests 新用户请求DTO列表，每个DTO包含一个用户的基本信息
+     * @apiNote POST /admin/users/import
+     * @throws BadRequestException 当用户名重复或者某请求不合法时抛出
+     */
+    @PostMapping("/import")
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "批量导入用户")
+    public void importUsers(
+        @RequestBody @Valid List<NewUserRequest> requests
+    ) throws BadRequestException {
+        userManagementService.importUsers(requests);
+    }
+
     // ========================= PUT 更新 =========================
 
     /**
