@@ -1,23 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense } from "react";
 import { Navbar } from "@/components/navbar";
+import { Loader2 } from "lucide-react";
+import { RolesContent } from "./_components/roles-content";
 
 export default function RolesPage() {
-  useEffect(() => {
-    document.title = "权限组维护 - 应急协同平台";
-  }, []);
-
   return (
-    <>
-      <Navbar />
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary">权限组维护</h1>
-          <p className="mt-4 text-muted-foreground">该功能正在开发中...</p>
-        </div>
-      </div>
-    </>
+    <Suspense
+      fallback={
+        <>
+          <Navbar />
+          <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </>
+      }
+    >
+      <RolesContent />
+    </Suspense>
   );
 }
-
