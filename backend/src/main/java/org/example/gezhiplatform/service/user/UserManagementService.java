@@ -270,7 +270,7 @@ public class UserManagementService {
         Set<String> seen = new HashSet<>();
         Set<String> duplicateUsernames = requests
             .stream()
-            .map(NewUserRequest::name)
+            .map(NewUserRequest::username)
             .filter(name -> !seen.add(name))
             .collect(Collectors.toSet());
         if (!duplicateUsernames.isEmpty()) {
@@ -279,7 +279,7 @@ public class UserManagementService {
 
         // 检查请求中的用户名是否已存在于数据库中
         Set<String> usernames = requests.stream()
-            .map(NewUserRequest::name)
+            .map(NewUserRequest::username)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         Set<String> existingUsernames = userRepository.findByUsernameIn(usernames).stream()
