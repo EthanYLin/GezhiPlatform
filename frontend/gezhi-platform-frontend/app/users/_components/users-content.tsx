@@ -10,8 +10,7 @@ import {UserToolbar} from "./user-toolbar";
 import {UserTable} from "./user-table";
 import {UserPagination} from "./user-pagination";
 import {UserDetailSheet} from "./user-detail-sheet";
-import {NewUserSheet} from "./new-user-sheet";
-import {DeleteConfirmDialog} from "./delete-confirm-dialog";
+import {NewUserSheet} from "./new-user-sheet";import { ImportUsersDialog } from "./import-users-dialog";import {DeleteConfirmDialog} from "./delete-confirm-dialog";
 
 export function UsersContent() {
   const {
@@ -41,8 +40,11 @@ export function UsersContent() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailUserId, setDetailUserId] = useState<number | null>(null);
 
-  // new user dialog
+  // new user sheet
   const [newUserOpen, setNewUserOpen] = useState(false);
+
+  // import dialog
+  const [importOpen, setImportOpen] = useState(false);
 
   // delete confirm dialog
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -57,6 +59,10 @@ export function UsersContent() {
 
   const handleAddUser = () => {
     setNewUserOpen(true);
+  };
+
+  const handleImport = () => {
+    setImportOpen(true);
   };
 
   const handleBatchDelete = () => {
@@ -106,6 +112,7 @@ export function UsersContent() {
               <UserToolbar
                 selectedCount={selectedArray.length}
                 onAdd={handleAddUser}
+                onImport={handleImport}
                 onBatchDelete={handleBatchDelete}
               />
             </div>
@@ -147,6 +154,12 @@ export function UsersContent() {
       <NewUserSheet
         open={newUserOpen}
         onOpenChange={setNewUserOpen}
+        onSuccess={handleMutationSuccess}
+      />
+
+      <ImportUsersDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
         onSuccess={handleMutationSuccess}
       />
 

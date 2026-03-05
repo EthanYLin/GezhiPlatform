@@ -1,19 +1,25 @@
 import {Button} from "@/components/ui/button";
-import {Trash2, UserPlus} from "lucide-react";
+import {Trash2, UserPlus, FileSpreadsheet} from "lucide-react";
 
 interface UserToolbarProps {
   selectedCount: number;
   onAdd: () => void;
+  onImport: () => void;
   onBatchDelete: () => void;
 }
 
 export function UserToolbar({
   selectedCount,
   onAdd,
+  onImport,
   onBatchDelete,
 }: UserToolbarProps) {
   return (
     <div className="flex items-center gap-2">
+      <Button variant="outline" onClick={onImport}>
+        <FileSpreadsheet className="h-4 w-4" />
+        从 Excel 导入
+      </Button>
       <Button onClick={onAdd}>
         <UserPlus className="h-4 w-4" />
         新增用户

@@ -2,9 +2,10 @@ import {useEffect, useState} from "react";
 import {Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle,} from "@/components/ui/sheet";
 import {Separator} from "@/components/ui/separator";
 import {Button} from "@/components/ui/button";
-import {Loader2} from "lucide-react";
+import {Loader2, Plus} from "lucide-react";
 import {toast} from "sonner";
 import type {UserRoleDetailsDTO} from "../_types";
+import {getRoleDetailDefaults} from "../_types";
 import {createUser} from "../_api";
 import {UserInfoSection} from "./user-info-section";
 import {RoleEditor} from "./role-editor";
@@ -77,14 +78,14 @@ export function NewUserSheet({ open, onOpenChange, onSuccess }: NewUserSheetProp
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl overflow-y-auto px-6">
+      <SheetContent className="sm:max-w-xl overflow-hidden px-6">
         <SheetHeader className="px-0">
           <SheetTitle>新增用户</SheetTitle>
           <SheetDescription>创建新用户并分配角色</SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-3">
+        <div className="flex-1 min-h-0 flex flex-col gap-4">
+          <div className="space-y-3 shrink-0">
             <h3 className="text-sm font-semibold">个人信息</h3>
             <UserInfoSection
               name={name}
@@ -98,12 +99,25 @@ export function NewUserSheet({ open, onOpenChange, onSuccess }: NewUserSheetProp
 
           <Separator />
 
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">角色配置</h3>
+          <div className="flex-1 min-h-0 flex flex-col gap-3">
+            <div className="flex items-center justify-between shrink-0">
+              <h3 className="text-sm font-semibold">角色配置</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setRoles([...roles, { roleType: "协作用户", details: getRoleDetailDefaults("协作用户") }])}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                添加角色
+              </Button>
+            </div>
             {errors.roles && (
               <p className="text-sm text-destructive">{errors.roles}</p>
             )}
-            <RoleEditor roles={roles} onChange={setRoles} />
+            <div className="flex-1 min-h-0">
+              <RoleEditor roles={roles} onChange={setRoles} />
+            </div>
           </div>
         </div>
 

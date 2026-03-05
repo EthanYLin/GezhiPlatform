@@ -4,9 +4,10 @@ import {Button} from "@/components/ui/button";
 import {Separator} from "@/components/ui/separator";
 import {Tooltip, TooltipContent, TooltipTrigger,} from "@/components/ui/tooltip";
 import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
-import {Check, Copy, KeyRound, Loader2, Lock, LockOpen, LogOut, Trash2} from "lucide-react";
+import {Check, Copy, KeyRound, Loader2, Lock, LockOpen, LogOut, Plus, Trash2} from "lucide-react";
 import {toast} from "sonner";
 import type {User, UserRoleDetailsDTO} from "../_types";
+import {getRoleDetailDefaults} from "../_types";
 import {
   deleteUsers,
   getUserDetail,
@@ -197,17 +198,17 @@ export function UserDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl overflow-y-auto px-6">
+      <SheetContent className="sm:max-w-xl overflow-hidden px-6">
         <SheetHeader className="px-0">
           <SheetTitle>用户详情</SheetTitle>
         </SheetHeader>
 
         {loadingDetail ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex-1 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : user ? (
-          <div className="space-y-4">
+          <div className="flex-1 min-h-0 flex flex-col gap-4">
             {/* Action Bar */}
             <div className="flex items-center gap-1">
               {/* Reset password */}
@@ -365,7 +366,7 @@ export function UserDetailSheet({
             <Separator />
 
             {/* Personal info */}
-            <div className="space-y-4">
+            <div className="space-y-4 shrink-0">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">个人信息</h3>
                 <Button
@@ -388,19 +389,32 @@ export function UserDetailSheet({
             <Separator />
 
             {/* Roles */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="flex-1 min-h-0 flex flex-col gap-3 pb-6">
+              <div className="flex items-center justify-between shrink-0">
                 <h3 className="text-sm font-semibold">角色配置</h3>
-                <Button
-                  size="sm"
-                  onClick={handleSaveRoles}
-                  disabled={savingRoles}
-                >
-                  {savingRoles && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                  保存角色
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRoles([...roles, { roleType: "协作用户", details: getRoleDetailDefaults("协作用户") }])}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    添加角色
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveRoles}
+                    disabled={savingRoles}
+                  >
+                    {savingRoles && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                    保存角色
+                  </Button>
+                </div>
               </div>
-              <RoleEditor roles={roles} onChange={setRoles} />
+              <div className="flex-1 min-h-0">
+                <RoleEditor roles={roles} onChange={setRoles} />
+              </div>
             </div>
           </div>
         ) : null}

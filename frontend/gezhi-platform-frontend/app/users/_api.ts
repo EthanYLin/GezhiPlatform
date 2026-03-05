@@ -34,6 +34,10 @@ export async function createUser(data: NewUserRequest) {
   return post<User>("/admin/users", data);
 }
 
+export async function importUsers(data: NewUserRequest[]) {
+  return post<User[]>("/admin/users/import", data);
+}
+
 export async function deleteUsers(userIds: number[]) {
   const query = userIds.map((id) => `userIds=${id}`).join("&");
   return del<void>(`/admin/users?${query}`);
