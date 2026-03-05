@@ -5,12 +5,12 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {AlertCircle, ArrowLeft, Download, Loader2, Save,} from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
@@ -35,6 +35,13 @@ export default function StudentArchivePage() {
     handleSave,
     formActions,
   } = useArchiveForm();
+
+  const hasWritePermission = permissions && (
+    permissions.allowedWritableJsonPaths.length > 0 ||
+    permissions.allowedAddArrayJsonPaths.length > 0 ||
+    permissions.allowedEditArrayJsonPaths.length > 0 ||
+    permissions.allowedDeleteArrayJsonPaths.length > 0
+  );
 
   if (loading) {
     return (
@@ -97,19 +104,21 @@ export default function StudentArchivePage() {
                 </>
               )}
             </Button>
-            <Button onClick={handleSave} disabled={saveLoading}>
-              {saveLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  保存中...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  保存修改
-                </>
-              )}
-            </Button>
+            {hasWritePermission && (
+              <Button onClick={handleSave} disabled={saveLoading}>
+                {saveLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    保存中...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    保存修改
+                  </>
+                )}
+              </Button>
+            )}
           </div>
 
           {/* 基本信息卡片 */}
@@ -172,21 +181,23 @@ export default function StudentArchivePage() {
           )}
 
           {/* 底部保存按钮 */}
-          <div className="flex justify-start pb-6">
-            <Button onClick={handleSave} disabled={saveLoading} size="lg">
-              {saveLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  保存中...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  保存修改
-                </>
-              )}
-            </Button>
-          </div>
+          {hasWritePermission && (
+            <div className="flex justify-start pb-6">
+              <Button onClick={handleSave} disabled={saveLoading} size="lg">
+                {saveLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    保存中...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    保存修改
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

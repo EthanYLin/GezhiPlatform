@@ -1,16 +1,16 @@
-import { useState } from "react";
+import {useState} from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { resetArchives } from "../_api";
+import {Button} from "@/components/ui/button";
+import {Loader2} from "lucide-react";
+import {toast} from "sonner";
+import {resetArchives} from "../_api";
 
 interface ResetConfirmDialogProps {
   open: boolean;
@@ -57,15 +57,17 @@ export function ResetConfirmDialog({
           <p className="text-sm text-muted-foreground mb-2">
             即将重置以下 {stuNos.length} 名学生的档案：
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {stuNos.map((no) => (
-              <span
-                key={no}
-                className="inline-block bg-muted px-2 py-0.5 rounded text-sm font-mono"
-              >
-                {no}
-              </span>
-            ))}
+          <div className="max-h-48 overflow-y-auto rounded border p-2">
+            <div className="flex flex-wrap gap-1.5">
+              {stuNos.map((no) => (
+                <span
+                  key={no}
+                  className="inline-block bg-muted px-2 py-0.5 rounded text-sm font-mono"
+                >
+                  {no}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

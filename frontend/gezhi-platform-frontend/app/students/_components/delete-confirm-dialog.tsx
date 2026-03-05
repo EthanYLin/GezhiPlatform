@@ -1,16 +1,16 @@
-import { useState } from "react";
+import {useState} from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { deleteStudents } from "../_api";
+import {Button} from "@/components/ui/button";
+import {Loader2} from "lucide-react";
+import {toast} from "sonner";
+import {deleteStudents} from "../_api";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -57,15 +57,17 @@ export function DeleteConfirmDialog({
           <p className="text-sm text-muted-foreground mb-2">
             即将删除以下 {stuNos.length} 名学生：
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {stuNos.map((no) => (
-              <span
-                key={no}
-                className="inline-block bg-muted px-2 py-0.5 rounded text-sm font-mono"
-              >
-                {no}
-              </span>
-            ))}
+          <div className="max-h-48 overflow-y-auto rounded border p-2">
+            <div className="flex flex-wrap gap-1.5">
+              {stuNos.map((no) => (
+                <span
+                  key={no}
+                  className="inline-block bg-muted px-2 py-0.5 rounded text-sm font-mono"
+                >
+                  {no}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
