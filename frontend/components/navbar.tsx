@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, User, LogOut } from "lucide-react";
+import { ChevronDown, User, LogOut, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { clearAuthToken } from "@/lib/auth";
 import { useUser } from "@/contexts/user-context";
 
@@ -27,10 +36,11 @@ export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { profile, loading, refreshProfile } = useUser();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     clearAuthToken();
-    await refreshProfile(); // 清除 Context 中的用户信息
+    await refreshProfile();
     router.push("/auth/login");
   };
 
@@ -38,21 +48,30 @@ export function Navbar() {
     router.push("/auth/me");
   };
 
-  // 检查用户是否有超级管理员角色
   const isSuperAdmin = profile?.roles.includes("超级管理员");
 
-  // 过滤导航项
   const visibleNavItems = navItems.filter((item) => {
-    if (item.roles.length === 0) return true; // 所有用户都可见
-    return isSuperAdmin; // 仅超级管理员可见
+    if (item.roles.length === 0) return true;
+    return isSuperAdmin;
   });
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-4 w-full">
+      <div className="flex h-14 sm:h-16 items-center px-3 sm:px-4 w-full">
+        {/* 移动端汉堡菜单按钮 */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden mr-1 flex-shrink-0"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="打开菜单"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
         {/* Logo + 标题 */}
-        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-shrink-0">
-          <div className="relative w-10 h-10">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity flex-shrink-0">
+          <div className="relative w-8 h-8 sm:w-10 sm:h-10">
             <Image
               src="/logo.png"
               alt="Logo"
@@ -61,18 +80,18 @@ export function Navbar() {
               priority
             />
           </div>
-          <span className="text-xl font-semibold hidden sm:inline-block">
+          <span className="text-lg sm:text-xl font-semibold hidden sm:inline-block">
             应急协同平台
           </span>
         </Link>
 
-        {/* 导航菜单（居中） */}
-        <div className="flex-1 flex items-center justify-center gap-1 md:gap-2">
+        {/* 桌面端导航菜单（居中） */}
+        <div className="hidden md:flex flex-1 items-center justify-center gap-1 lg:gap-2">
           {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+              className={`px-2 lg:px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground whitespace-nowrap ${
                 pathname === item.href
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground"
@@ -83,13 +102,16 @@ export function Navbar() {
           ))}
         </div>
 
+        {/* 移动端占位，让用户菜单靠右 */}
+        <div className="flex-1 md:hidden" />
+
         {/* 用户下拉菜单 */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent transition-colors outline-none flex-shrink-0">
+          <DropdownMenuTrigger className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-sm font-medium rounded-md hover:bg-accent transition-colors outline-none flex-shrink-0">
             {loading ? (
-              <span className="h-5 w-16 bg-muted animate-pulse rounded" />
+              <span className="h-5 w-12 sm:w-16 bg-muted animate-pulse rounded" />
             ) : (
-              <span className="max-w-[120px] truncate">
+              <span className="max-w-[80px] sm:max-w-[120px] truncate">
                 {profile?.name || "未登录"}
               </span>
             )}
@@ -108,6 +130,51 @@ export function Navbar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* 移动端侧边导航菜单 */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="px-4 py-4 border-b">
+            <SheetTitle className="flex items-center gap-2">
+              <div className="relative w-8 h-8">
+                <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+              </div>
+              应急协同平台
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col py-2">
+            {visibleNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors hover:bg-accent ${
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Separator className="my-2" />
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleProfile(); }}
+              className="flex items-center px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-accent transition-colors text-left"
+            >
+              <User className="mr-2 h-4 w-4" />
+              个人中心
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+              className="flex items-center px-4 py-3 text-sm font-medium text-destructive hover:bg-accent transition-colors text-left"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              退出登录
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </nav>
   );
 }

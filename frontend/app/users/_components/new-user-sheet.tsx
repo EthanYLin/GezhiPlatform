@@ -78,7 +78,7 @@ export function NewUserSheet({ open, onOpenChange, onSuccess }: NewUserSheetProp
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl overflow-hidden px-6">
+      <SheetContent className="w-full sm:max-w-xl overflow-hidden px-6">
         <SheetHeader className="px-0">
           <SheetTitle>新增用户</SheetTitle>
           <SheetDescription>创建新用户并分配角色</SheetDescription>

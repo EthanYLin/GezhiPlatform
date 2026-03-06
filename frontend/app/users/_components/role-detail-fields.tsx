@@ -33,8 +33,8 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
       return (
         <Input
           type="number"
-          placeholder="年级（届），如 2027"
-          className="w-32"
+          placeholder="年级，如 2027"
+          className="flex-1 min-w-0 w-24 sm:w-32 placeholder:text-xs"
           value={d.gradeNo ?? ""}
           onChange={(e) =>
             onChange({ gradeNo: e.target.value ? parseInt(e.target.value) : null })
@@ -47,11 +47,11 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
       const d = details as DetailsForClassAdvisor;
       const gc = d.gradeClass ?? { gradeNo: null, classNo: null };
       return (
-        <>
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
           <Input
             type="number"
             placeholder="年级，如 2027"
-            className="w-32"
+            className="flex-1 min-w-0 sm:w-32 placeholder:text-xs"
             value={gc.gradeNo ?? ""}
             onChange={(e) =>
               onChange({
@@ -65,7 +65,7 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
           <Input
             type="number"
             placeholder="班级，如 1"
-            className="w-24"
+            className="flex-1 min-w-0 sm:w-32 placeholder:text-xs"
             value={gc.classNo ?? ""}
             onChange={(e) =>
               onChange({
@@ -76,7 +76,7 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
               })
             }
           />
-        </>
+        </div>
       );
     }
 
@@ -107,7 +107,7 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
             size="sm"
             styleClasses={{
               inlineTagsContainer: "border-input rounded-md bg-background shadow-xs px-2 py-1.5",
-              input: "text-sm placeholder:text-muted-foreground",
+              input: "text-sm placeholder:text-xs placeholder:text-muted-foreground",
               tag: { body: "pl-2" },
             }}
           />
@@ -136,7 +136,7 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
             size="sm"
             styleClasses={{
               inlineTagsContainer: "border-input rounded-md bg-background shadow-xs px-2 py-1.5",
-              input: "text-sm placeholder:text-muted-foreground",
+              input: "text-sm placeholder:text-xs placeholder:text-muted-foreground",
               tag: { body: "pl-2" },
             }}
           />
@@ -149,7 +149,7 @@ export function RoleDetailFields({ roleType, details, onChange }: RoleDetailFiel
       return (
         <Input
           placeholder="学号，如 270101"
-          className="w-36"
+          className="flex-1 min-w-0 w-36 sm:w-48 placeholder:text-xs"
           value={d.stuNo ?? ""}
           onChange={(e) => onChange({ stuNo: e.target.value || null })}
         />

@@ -238,14 +238,14 @@ function RecordsContent() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto px-4 py-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* 页面标题 */}
           <div>
-            <h1 className="text-3xl font-bold text-foreground">学生查询</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">学生查询</h1>
           </div>
 
           {/* 查询表单 */}
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               {/* 年级选择 */}
               <div className="space-y-2">
@@ -294,6 +294,7 @@ function RecordsContent() {
                   <Input
                     id="keyword"
                     placeholder="支持通过学号、姓名、手机号、父母姓名、父母手机号搜索"
+                    className="placeholder:text-xs"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     onKeyDown={(e) => {
@@ -314,7 +315,7 @@ function RecordsContent() {
           {/* 数据表格 */}
           <Card>
             <div className="overflow-x-auto">
-              <Table className="[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6">
+              <Table className="min-w-[500px] [&_tr>*:first-child]:pl-4 sm:[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-4 sm:[&_tr>*:last-child]:pr-6">
                 <TableHeader>
                   <TableRow>
                     <TableHead>学号</TableHead>
@@ -362,7 +363,7 @@ function RecordsContent() {
 
             {/* 分页组件 */}
             {students && students.content.length > 0 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">每页显示</span>
                   <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>

@@ -96,32 +96,32 @@ export default function DashboardPage() {
   const WelcomeCard = ({ count, student }: { count: number; student: { stuNo: string; stuName: string } | null }) => (
     <Card
       className={
-        `row-span-2 bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl flex flex-col justify-center ` +
+        `row-span-1 sm:row-span-2 bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl flex flex-col justify-center ` +
         (count === 1
-          ? "col-span-2 lg:col-span-4"
-          : "col-span-2 lg:col-span-3")
+          ? "col-span-1 sm:col-span-2 lg:col-span-4"
+          : "col-span-1 sm:col-span-2 lg:col-span-3")
       }
     >
-      <CardHeader>
-        <CardTitle className="text-3xl">
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="text-xl sm:text-3xl">
           欢迎回来，{profile?.name || "用户"}
         </CardTitle>
-        <CardDescription className="text-blue-50/90">
+        <CardDescription className="text-blue-50/90 text-xs sm:text-sm">
           格致中学应急事件处置协同平台
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0 sm:pt-0">
         {count > 1 && (
-          <Button asChild variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+          <Button asChild variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-sm sm:text-base">
             <Link href="/records">
-              <span className="font-bold text-md">档案查询与更新</span>
+              <span className="font-bold">档案查询与更新</span>
             </Link>
           </Button>
         )}
         {count === 1 && student && (
-          <Button asChild variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+          <Button asChild variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-sm sm:text-base">
             <Link href={`/archives/${student.stuNo}`}>
-              <span className="font-bold text-md">维护我的档案({student.stuNo} {student.stuName})</span>
+              <span className="font-bold">维护我的档案({student.stuNo} {student.stuName})</span>
             </Link>
           </Button>
         )}
@@ -147,15 +147,15 @@ export default function DashboardPage() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-4 sm:p-6">
           
           {/* 档案数为 0 的布局 */}
           {studentCount === 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto sm:auto-rows-[140px]">
               <WelcomeCard count={0} student={null} />
               
               {/* 无权限提示卡片 */}
-              <Card className="col-span-2 lg:col-span-1 row-span-2 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow">
+              <Card className="col-span-1 sm:col-span-2 lg:col-span-1 sm:row-span-2 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow py-6 sm:py-0">
                 <CardContent className="pt-6">
                   <ShieldAlert className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <CardTitle className="text-xl mb-2">您无法查看学生档案</CardTitle>
@@ -169,14 +169,14 @@ export default function DashboardPage() {
 
           {/* 档案数为 1 的布局 */}
           {studentCount === 1 && singleStudent && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto sm:auto-rows-[140px]">
               <WelcomeCard count={1} student={singleStudent} />
             </div>
           )}
 
           {/* 档案数大于 1 的布局 */}
           {studentCount > 1 && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[140px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto sm:auto-rows-[140px]">
               <WelcomeCard count={studentCount} student={null} />
               
               {/* 可查看的班级数 */}
@@ -206,7 +206,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* 快速查询卡片 */}
-              <Card className={`row-span-1 hover:shadow-lg transition-shadow flex flex-col justify-center ${isSuperAdmin ? 'col-span-2' : 'col-span-2 lg:col-span-4'}`}>
+              <Card className={`row-span-1 hover:shadow-lg transition-shadow flex flex-col justify-center ${isSuperAdmin ? 'col-span-1 sm:col-span-2' : 'col-span-1 sm:col-span-2 lg:col-span-4'}`}>
                 <CardHeader className="pb-1">
                   <CardTitle className="text-base">快速查询</CardTitle>
                 </CardHeader>
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                       {/* 大屏幕显示完整文本 */}
                       <Input
                         placeholder="支持通过学号、姓名、手机号、父母姓名、父母手机号搜索"
-                        className="pl-9 hidden lg:block"
+                        className="pl-9 hidden lg:block placeholder:text-xs"
                         value={quickSearchKeyword}
                         onChange={(e) => setQuickSearchKeyword(e.target.value)}
                         onKeyDown={(e) => {
@@ -246,7 +246,7 @@ export default function DashboardPage() {
 
               {/* 数据维护卡片（仅超级管理员） */}
               {isSuperAdmin && (
-                <Card className="col-span-2 row-span-1 hover:shadow-lg transition-shadow flex flex-col justify-center">
+                <Card className="col-span-1 sm:col-span-2 row-span-1 hover:shadow-lg transition-shadow flex flex-col justify-center">
                   <CardHeader className="pb-1">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Settings className="h-4 w-4" />

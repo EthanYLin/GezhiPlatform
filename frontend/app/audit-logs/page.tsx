@@ -241,13 +241,13 @@ function AuditLogsContent() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto px-4 py-4 sm:p-6 space-y-4 sm:space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">审计日志</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">审计日志</h1>
           </div>
 
           {/* 筛选表单 */}
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
               <div className="space-y-2">
                 <Label htmlFor="startTime">开始时间</Label>
@@ -337,7 +337,7 @@ function AuditLogsContent() {
           {/* 数据表格 */}
           <Card>
             <div className="overflow-x-auto">
-              <Table className="[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6">
+              <Table className="min-w-[600px] [&_tr>*:first-child]:pl-4 sm:[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-4 sm:[&_tr>*:last-child]:pr-6">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">ID</TableHead>
@@ -400,7 +400,7 @@ function AuditLogsContent() {
 
             {/* 分页 */}
             {auditLogs && auditLogs.content.length > 0 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
                     每页显示

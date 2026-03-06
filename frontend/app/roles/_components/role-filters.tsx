@@ -31,7 +31,7 @@ export function RoleFilters({
   onReset,
 }: RoleFiltersProps) {
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
         <div className="flex-1 min-w-0">
           <Input

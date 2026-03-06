@@ -198,7 +198,7 @@ export function UserDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl overflow-hidden px-6">
+      <SheetContent className="w-full sm:max-w-xl overflow-hidden px-6">
         <SheetHeader className="px-0">
           <SheetTitle>用户详情</SheetTitle>
         </SheetHeader>
@@ -210,7 +210,7 @@ export function UserDetailSheet({
         ) : user ? (
           <div className="flex-1 min-h-0 flex flex-col gap-4">
             {/* Action Bar */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Reset password */}
               <Popover
                 open={resetPopoverOpen}
@@ -225,8 +225,9 @@ export function UserDetailSheet({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" size="icon">
+                      <Button variant="outline" size="icon" className="max-sm:w-auto max-sm:px-3 max-sm:gap-1.5">
                         <KeyRound className="h-4 w-4" />
+                        <span className="sm:hidden">重置密码</span>
                       </Button>
                     </PopoverTrigger>
                   </TooltipTrigger>
@@ -291,15 +292,16 @@ export function UserDetailSheet({
               {/* Lock/Unlock */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <div className="inline-flex">
                     <ConfirmPopover
                       trigger={
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" className="max-sm:w-auto max-sm:px-3 max-sm:gap-1.5">
                           {user.isLocked ? (
                             <LockOpen className="h-4 w-4" />
                           ) : (
                             <Lock className="h-4 w-4" />
                           )}
+                          <span className="sm:hidden">{user.isLocked ? "解锁" : "锁定"}</span>
                         </Button>
                       }
                       title={user.isLocked ? "解锁用户" : "锁定用户"}
@@ -320,11 +322,12 @@ export function UserDetailSheet({
               {/* Kickout */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <div className="inline-flex">
                     <ConfirmPopover
                       trigger={
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" className="max-sm:w-auto max-sm:px-3 max-sm:gap-1.5">
                           <LogOut className="h-4 w-4" />
+                          <span className="sm:hidden">强制下线</span>
                         </Button>
                       }
                       title="强制下线"
@@ -340,15 +343,16 @@ export function UserDetailSheet({
               {/* Delete */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <div className="inline-flex">
                     <ConfirmPopover
                       trigger={
                         <Button
                           variant="outline"
                           size="icon"
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive max-sm:w-auto max-sm:px-3 max-sm:gap-1.5"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span className="sm:hidden">删除用户</span>
                         </Button>
                       }
                       title="删除用户"

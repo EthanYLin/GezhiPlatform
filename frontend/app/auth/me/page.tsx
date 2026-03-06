@@ -210,8 +210,8 @@ export default function MePage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-4 sm:p-4">
+      <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
         {/* 账户状态提示 */}
         {profile.isLocked && (
           <Alert variant="destructive">
@@ -236,28 +236,28 @@ export default function MePage() {
         {/* 用户信息卡片 */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">个人信息</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">个人信息</CardTitle>
             <CardDescription>您的账户详细信息</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
             {/* 基本信息 */}
             <div className="grid gap-4">
-              <div className="grid grid-cols-[120px_1fr] items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] items-start sm:items-center gap-1 sm:gap-4">
                 <span className="text-sm font-medium text-muted-foreground">
                   姓名
                 </span>
                 <span className="text-base">{profile.name}</span>
               </div>
 
-              <div className="grid grid-cols-[120px_1fr] items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] items-start sm:items-center gap-1 sm:gap-4">
                 <span className="text-sm font-medium text-muted-foreground">
                   登录时用户名
                 </span>
                 <span className="text-base">{profile.username}</span>
               </div>
 
-              <div className="grid grid-cols-[120px_1fr] items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] items-start sm:items-center gap-1 sm:gap-4">
                 <span className="text-sm font-medium text-muted-foreground">
                   角色
                 </span>

@@ -82,7 +82,7 @@ export function UserTable({
 
   return (
     <div className="overflow-x-auto">
-      <Table className="[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6">
+      <Table className="min-w-[700px] [&_tr>*:first-child]:pl-4 sm:[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-4 sm:[&_tr>*:last-child]:pr-6">
         <TableHeader>
           <TableRow>
             <TableHead className="w-12">

@@ -39,7 +39,7 @@ export function RoleEditor({ roles, onChange }: RoleEditorProps) {
         <p className="text-sm text-muted-foreground py-2">暂无角色，请添加</p>
       )}
       {roles.map((role, index) => (
-        <div key={index} className="flex items-center gap-2">
+        <div key={index} className="flex flex-wrap items-center gap-2">
           <Select
             value={role.roleType}
             onValueChange={(v) => updateRoleType(index, v as RoleType)}
@@ -55,11 +55,13 @@ export function RoleEditor({ roles, onChange }: RoleEditorProps) {
               ))}
             </SelectContent>
           </Select>
-          <RoleDetailFields
-            roleType={role.roleType}
-            details={role.details}
-            onChange={(d) => updateRoleDetails(index, d)}
-          />
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+            <RoleDetailFields
+              roleType={role.roleType}
+              details={role.details}
+              onChange={(d) => updateRoleDetails(index, d)}
+            />
+          </div>
           <Button
             type="button"
             variant="ghost"

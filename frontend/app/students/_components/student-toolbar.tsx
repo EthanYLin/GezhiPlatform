@@ -19,7 +19,7 @@ export function StudentToolbar({
   onReset,
 }: StudentToolbarProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <Button variant="outline" onClick={onImport}>
         <FileSpreadsheet className="h-4 w-4" />
         从 Excel 导入

@@ -61,12 +61,12 @@ export default function StudentArchivePage() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto px-4 py-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* 页面标题 */}
           <div>
-            <h1 className="text-3xl font-bold text-foreground">学生档案</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">学生档案</h1>
             {studentInfo && (
-              <p className="text-lg text-muted-foreground mt-2">
+              <p className="text-base sm:text-lg text-muted-foreground mt-1 sm:mt-2">
                 {studentInfo.stuNo} {studentInfo.stuName}
               </p>
             )}
@@ -82,7 +82,7 @@ export default function StudentArchivePage() {
           )}
 
           {/* 操作按钮组 */}
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <Button variant="outline" onClick={handleGoBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               返回上一页
@@ -131,7 +131,7 @@ export default function StudentArchivePage() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                   <div className="space-y-1">
                     <Label className="text-sm text-muted-foreground">
                       学号

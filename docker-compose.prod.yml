@@ -20,6 +20,7 @@ services:
     ports:
       - "7012:8080"
     environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/db
       - SPRING_DATASOURCE_USERNAME=${DATABASE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD}

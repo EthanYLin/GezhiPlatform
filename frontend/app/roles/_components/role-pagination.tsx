@@ -30,7 +30,7 @@ export function RolePagination({
   onPageInputBlur,
 }: RolePaginationProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t gap-3">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-4 border-t gap-3">
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">每页显示</span>
         <Select value={pageSize.toString()} onValueChange={onPageSizeChange}>

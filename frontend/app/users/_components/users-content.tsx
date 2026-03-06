@@ -94,9 +94,9 @@ export function UsersContent() {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto px-4 py-4 sm:p-6 space-y-4 sm:space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">用户维护</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">用户维护</h1>
           </div>
 
           <UserFilters
@@ -108,7 +108,7 @@ export function UsersContent() {
           />
 
           <Card>
-            <div className="px-6 py-4 border-b">
+            <div className="px-4 sm:px-6 py-4 border-b">
               <UserToolbar
                 selectedCount={selectedArray.length}
                 onAdd={handleAddUser}
