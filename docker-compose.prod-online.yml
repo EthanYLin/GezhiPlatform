@@ -26,9 +26,33 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD}
       - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Shanghai
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - internal
+
+  # 种子数据产生方法：
+  # 只需要权限组: docker compose -f docker-compose.prod-online.yml --profile seed run --rm seed
+  # 其他需求: docker compose -f docker-compose.prod-online.yml --profile seed run --rm seed -- --option=100
+  # (001=权限组, 010=用户, 100=学生档案, 111=全部, 可自由组合)
+  seed:
+    profiles:
+      - seed
+    image: ghcr.io/ethanylin/gezhiplatform-backend:latest
+    container_name: gezhi-platform-seed
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,seed
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/db
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD}
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Shanghai
+    command: ["--option=001"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: "no"
 
   db:
     image: mysql:8
@@ -44,6 +68,12 @@ services:
       - "7013:3306"
     volumes:
       - database-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 25s
     networks:
       - internal
 

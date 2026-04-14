@@ -8,14 +8,16 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
-      - 'docker-compose.yml'
+      - 'docker-compose.prod-offline.yml'
+      - 'docker-compose.prod-online.yml'
       - '.github/workflows/build-and-push.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'backend/**'
       - 'frontend/**'
-      - 'docker-compose.yml'
+      - 'docker-compose.prod-offline.yml'
+      - 'docker-compose.prod-online.yml'
 
 permissions:
   contents: read
@@ -170,6 +172,6 @@ jobs:
           port: 22
           script: |
             cd /root/gezhi-platform
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod-online.yml down
+            docker compose -f docker-compose.prod-online.yml pull
+            docker compose -f docker-compose.prod-online.yml up -d

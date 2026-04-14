@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -32,6 +33,17 @@ import java.util.stream.IntStream;
 @Profile("seed")
 @RequiredArgsConstructor
 public class SeedDataRunner implements ApplicationRunner {
+
+    /**
+     * {@code --option=XYZ}，三位且每位为 0 或 1，依次表示：学生档案、用户、权限组。
+     * 1 表示该项在对应表为空时尝试生成；0 表示该项强制不生成。带合法本参数时不询问 Y/y。
+     * 例如 {@code 100}、{@code 111}、{@code 000}。
+     */
+    private static final String CLI_OPTION_NAME = "option";
+
+    private static final Pattern CLI_OPTION_BITS = Pattern.compile("[01]{3}");
+
+    private record SeedCliBits(boolean students, boolean users, boolean permissionGroups) {}
 
     private final ApplicationContext ctx;
     private final Scanner scanner = new Scanner(System.in);
@@ -150,27 +162,59 @@ public class SeedDataRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         log.warn("你正在准备进行模拟数据生成...");
 
-        boolean isGenerateStudents = studentRepository.count() == 0;
-        boolean isGenerateUsers = userRepository.count() == 0;
-        boolean isGeneratePermissionGroup = permissionGroupRepository.count() == 0;
+        boolean nonInteractive = false;
+        SeedCliBits cliBits = null;
+        if (args.containsOption(CLI_OPTION_NAME)) {
+            List<String> optionVals = args.getOptionValues(CLI_OPTION_NAME);
+            if (optionVals == null || optionVals.isEmpty()) {
+                log.error("--{} 需要三位参数，例如 --{}=100", CLI_OPTION_NAME, CLI_OPTION_NAME);
+                System.exit(SpringApplication.exit(ctx, () -> 1));
+                return;
+            }
+            String raw = optionVals.get(0).trim();
+            if (!CLI_OPTION_BITS.matcher(raw).matches()) {
+                log.error(
+                    "无效的 --{}={}：须为三位且每位为 0 或 1（学生档案、用户、权限组），例如 000、100、111",
+                    CLI_OPTION_NAME, raw
+                );
+                System.exit(SpringApplication.exit(ctx, () -> 1));
+                return;
+            }
+            cliBits = new SeedCliBits(raw.charAt(0) == '1', raw.charAt(1) == '1', raw.charAt(2) == '1');
+            nonInteractive = true;
+            log.warn(
+                "检测到 --{}={}：非交互模式；各位依次为 学生档案、用户、权限组（1=表空则生成，0=不生成）。",
+                CLI_OPTION_NAME, raw
+            );
+        }
+
+        boolean wantStudents = cliBits == null || cliBits.students();
+        boolean wantUsers = cliBits == null || cliBits.users();
+        boolean wantPermissionGroups = cliBits == null || cliBits.permissionGroups();
+
+        boolean isGenerateStudents = wantStudents && studentRepository.count() == 0;
+        boolean isGenerateUsers = wantUsers && userRepository.count() == 0;
+        boolean isGeneratePermissionGroup = wantPermissionGroups && permissionGroupRepository.count() == 0;
         log.warn("1. 生成以下学生及档案");
-        log.warn(isGenerateStudents ? seedStudents.toString() : "跳过(已存在学生数据)");
+        log.warn(isGenerateStudents ? seedStudents.toString() : skipReason(nonInteractive, wantStudents, "已存在学生数据"));
         log.warn("2. 生成以下用户(初始密码均为: {} )", UserFaker.defaultPassword);
         if (isGenerateUsers)
             seedUsers.forEach(
                 su -> log.warn("{} -> {}", su.name(), su.roles().stream().map(Role::getRoleAndScope).toList()));
         else
-            log.warn("跳过(已存在用户数据)");
+            log.warn(skipReason(nonInteractive, wantUsers, "已存在用户数据"));
         log.warn("3. 生成以下权限组");
         if (isGeneratePermissionGroup)
             makePermissionGroupRequests().forEach(pg -> log.warn(pg.toString()));
         else
-            log.warn("跳过(已存在权限组数据)");
+            log.warn(skipReason(nonInteractive, wantPermissionGroups, "已存在权限组数据"));
 
-        System.out.println("请确认要生成的数据是否正确, 并输入[Y/y]继续...");
-        if (!scanner.nextLine().matches("[Yy]")) {
-            log.warn("已取消数据生成。");
-            return;
+        if (!nonInteractive) {
+            System.out.println("请确认要生成的数据是否正确, 并输入[Y/y]继续...");
+            if (!scanner.nextLine().matches("[Yy]")) {
+                log.warn("已取消数据生成。");
+                return;
+            }
         }
 
         if (isGenerateStudents) generateStudentAndArchive();
@@ -178,6 +222,11 @@ public class SeedDataRunner implements ApplicationRunner {
         if (isGeneratePermissionGroup) generatePermissionGroups();
 
         System.exit(SpringApplication.exit(ctx));
+    }
+
+    private static String skipReason(boolean nonInteractive, boolean wanted, String emptyTableReason) {
+        if (!wanted && nonInteractive) return "跳过(由 --option 对应位为 0 指定)";
+        return "跳过(" + emptyTableReason + ")";
     }
 
 
